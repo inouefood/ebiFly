@@ -18,6 +18,7 @@ class CharactorMakeScene: SKScene {
     var bodyCount: Int = 3
     var taleCollectionCount = 1
 
+    var ebi: EbiModel?
     
     //ボタン
     let tailLeft = SKSpriteNode(imageNamed: "left")
@@ -29,21 +30,8 @@ class CharactorMakeScene: SKScene {
 
     var texture = "tale1"
     override func didMove(to view: SKView) {
-//        guard let width: CGFloat = self.view!.frame.width, let height: CGFloat = self.view!.frame.height else {
-//            return
-//        }
-//        setSelectButton(width: width, height: height)
-//        
-//        let taleX = width
-//        let taleY = height * 1.3
-//        tale.position = CGPoint(x: taleX, y: taleY)
-//        tale.size = CGSize(width: width/4, height: width/4)
-//        tale.physicsBody = SKPhysicsBody(circleOfRadius: 20)
-//        tale.physicsBody!.affectedByGravity = false
-//        tale.physicsBody!.isDynamic = false
-//        self.addChild(tale)
+
         addTail(taleImgStr: "tale1")
-        
         addBody(count: bodyCount)
     }
     func addBody(count: Int){
@@ -71,17 +59,18 @@ class CharactorMakeScene: SKScene {
         guard let width: CGFloat = self.view!.frame.width, let height: CGFloat = self.view!.frame.height else {
             return
         }
-        tale = SKSpriteNode(imageNamed: taleImgStr)
+        ebi = EbiModel(tale: SKSpriteNode(imageNamed: taleImgStr), body: [SKSpriteNode(imageNamed: "ebibody")])
+        //tale = SKSpriteNode(imageNamed: taleImgStr)
         setSelectButton(width: width, height: height)
         
         let taleX = width
         let taleY = height * 1.3
-        tale!.position = CGPoint(x: taleX, y: taleY)
-        tale!.size = CGSize(width: width/4, height: width/4)
-        tale!.physicsBody = SKPhysicsBody(circleOfRadius: 20)
-        tale!.physicsBody!.affectedByGravity = false
-        tale!.physicsBody!.isDynamic = false
-        self.addChild(tale!)
+        ebi!.tale.position = CGPoint(x: taleX, y: taleY)
+        ebi!.tale.size = CGSize(width: width/4, height: width/4)
+        ebi!.tale.physicsBody = SKPhysicsBody(circleOfRadius: 20)
+        ebi!.tale.physicsBody!.affectedByGravity = false
+        ebi!.tale.physicsBody!.isDynamic = false
+        self.addChild(ebi!.tale)
     }
     func setSelectButton(width: CGFloat, height: CGFloat){
         tailLeft.position = CGPoint(x: width/6 * 2, y: height * 1.3)
@@ -118,13 +107,13 @@ class CharactorMakeScene: SKScene {
                     taleCollectionCount = 1
                 }
                 if taleCollectionCount == 1 {
-                    tale?.texture = SKTexture(imageNamed: "tale1")
+                    ebi!.tale.texture = SKTexture(imageNamed: "tale1")
                     texture = "tale1"
                 } else if taleCollectionCount == 2 {
-                    tale?.texture = SKTexture(imageNamed: "tale2")
+                    ebi!.tale.texture = SKTexture(imageNamed: "tale2")
                      texture = "tale2"
                 } else if taleCollectionCount == 3 {
-                    tale?.texture = SKTexture(imageNamed: "tale3")
+                    ebi!.tale.texture = SKTexture(imageNamed: "tale3")
                      texture = "tale3"
                 }
                 
@@ -136,13 +125,13 @@ class CharactorMakeScene: SKScene {
                     taleCollectionCount = 3
                 }
                 if taleCollectionCount == 1 {
-                    tale?.texture = SKTexture(imageNamed: "tale1")
+                    ebi!.tale.texture = SKTexture(imageNamed: "tale1")
                      texture = "tale1"
                 } else if taleCollectionCount == 2 {
-                    tale?.texture = SKTexture(imageNamed: "tale2")
+                    ebi!.tale.texture = SKTexture(imageNamed: "tale2")
                      texture = "tale2"
                 } else if taleCollectionCount == 3 {
-                    tale?.texture = SKTexture(imageNamed: "tale3")
+                    ebi!.tale.texture = SKTexture(imageNamed: "tale3")
                      texture = "tale3"
                 }
             }
