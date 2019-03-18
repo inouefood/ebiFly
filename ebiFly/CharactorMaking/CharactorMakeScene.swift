@@ -11,14 +11,9 @@ import SpriteKit
 import GameplayKit
 
 class CharactorMakeScene: SKScene {
-    //胴体
-    var tale: SKSpriteNode?
-   // var ebiBodySprites:[SKSpriteNode] = []
     var aburaSprites:[SKSpriteNode] = []
-    var bodyCount: Int = 3
-    var taleCollectionCount = 1
-
     var ebi: EbiModel?
+    var texture = "tale1"
     
     //ボタン
     let tailLeft = SKSpriteNode(imageNamed: "left")
@@ -26,37 +21,21 @@ class CharactorMakeScene: SKScene {
     let bodyLeft = SKSpriteNode(imageNamed: "left")
     let bodyRight = SKSpriteNode(imageNamed: "right")
     let flyLabel = SKLabelNode(fontNamed: "Verdana-bold")
-
-
-    var texture = "tale1"
-    
-    
-    override init(size: CGSize) {
-        ebi = EbiModel(tale: SKSpriteNode(imageNamed: "tale1"), body: [SKSpriteNode(imageNamed: "ebibody")])
-        
-        super.init(size: size)
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
     
     override func didMove(to view: SKView) {
-        addCharactor()
-    }
-    func addCharactor(){
         guard let width: CGFloat = self.view!.frame.width, let height: CGFloat = self.view!.frame.height else {
             return
         }
+        setSelectButton(width: width, height: height)
+        addCharactor(width: width, height: height)
+    }
+    func addCharactor(width: CGFloat, height: CGFloat){
         
         let taleX = width
         let taleY = height * 1.3
         
-        
         ebi = EbiModel(tale: SKSpriteNode(imageNamed: "tale1"), body: addBody(count: 3))
-        setSelectButton(width: width, height: height)
         
-
         ebi!.tale.position = CGPoint(x: taleX, y: taleY)
         ebi!.tale.size = CGSize(width: width/4, height: width/4)
         ebi!.tale.physicsBody = SKPhysicsBody(circleOfRadius: 20)
