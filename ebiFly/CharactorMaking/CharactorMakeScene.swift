@@ -13,7 +13,7 @@ import GameplayKit
 class CharactorMakeScene: SKScene {
     //胴体
     var tale: SKSpriteNode?
-    var ebiBodySprites:[SKSpriteNode] = []
+   // var ebiBodySprites:[SKSpriteNode] = []
     var aburaSprites:[SKSpriteNode] = []
     var bodyCount: Int = 3
     var taleCollectionCount = 1
@@ -29,16 +29,48 @@ class CharactorMakeScene: SKScene {
 
 
     var texture = "tale1"
-    override func didMove(to view: SKView) {
-
-        addTail(taleImgStr: "tale1")
-        addBody(count: bodyCount)
+    
+    
+    override init(size: CGSize) {
+        ebi = EbiModel(tale: SKSpriteNode(imageNamed: "tale1"), body: [SKSpriteNode(imageNamed: "ebibody")])
+        
+        super.init(size: size)
     }
-    func addBody(count: Int){
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func didMove(to view: SKView) {
+        addCharactor()
+    }
+    func addCharactor(){
         guard let width: CGFloat = self.view!.frame.width, let height: CGFloat = self.view!.frame.height else {
             return
         }
         
+        let taleX = width
+        let taleY = height * 1.3
+        
+        
+        ebi = EbiModel(tale: SKSpriteNode(imageNamed: "tale1"), body: addBody(count: 3))
+        setSelectButton(width: width, height: height)
+        
+
+        ebi!.tale.position = CGPoint(x: taleX, y: taleY)
+        ebi!.tale.size = CGSize(width: width/4, height: width/4)
+        ebi!.tale.physicsBody = SKPhysicsBody(circleOfRadius: 20)
+        ebi!.tale.physicsBody!.affectedByGravity = false
+        ebi!.tale.physicsBody!.isDynamic = false
+        self.addChild(ebi!.tale)
+    }
+    
+    func addBody(count: Int) -> [SKSpriteNode]{
+        guard let width: CGFloat = self.view!.frame.width, let height: CGFloat = self.view!.frame.height else {
+            return [SKSpriteNode()]
+        }
+        
+        var ebiBodySprites:[SKSpriteNode] = []
         let taleX = width
         let taleY = height * 1.3
         
@@ -54,31 +86,15 @@ class CharactorMakeScene: SKScene {
             self.addChild(ebiBody)
             ebiBodySprites.append(ebiBody)
         }
+        return ebiBodySprites
     }
-    func addTail(taleImgStr: String){
-        guard let width: CGFloat = self.view!.frame.width, let height: CGFloat = self.view!.frame.height else {
-            return
-        }
-        ebi = EbiModel(tale: SKSpriteNode(imageNamed: taleImgStr), body: [SKSpriteNode(imageNamed: "ebibody")])
-        //tale = SKSpriteNode(imageNamed: taleImgStr)
-        setSelectButton(width: width, height: height)
-        
-        let taleX = width
-        let taleY = height * 1.3
-        ebi!.tale.position = CGPoint(x: taleX, y: taleY)
-        ebi!.tale.size = CGSize(width: width/4, height: width/4)
-        ebi!.tale.physicsBody = SKPhysicsBody(circleOfRadius: 20)
-        ebi!.tale.physicsBody!.affectedByGravity = false
-        ebi!.tale.physicsBody!.isDynamic = false
-        self.addChild(ebi!.tale)
-    }
+
     func setSelectButton(width: CGFloat, height: CGFloat){
         tailLeft.position = CGPoint(x: width/6 * 2, y: height * 1.3)
         tailLeft.size = CGSize(width: width/3, height: width/3)
         
         tailRight.position = CGPoint(x: width * 2 - width/6 * 2, y: height * 1.3)
         tailRight.size = CGSize(width: width/3, height: width/3)
-        
         
         bodyLeft.position = CGPoint(x: width/6 * 2, y: height - height / 4 * 2)
         bodyLeft.size = CGSize(width: (self.view?.frame.width)!/3, height: (self.view?.frame.width)!/3)
@@ -99,60 +115,34 @@ class CharactorMakeScene: SKScene {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         if let location = touches.first?.location(in: self){
             let touchNode = self.atPoint(location)
+            //tale textureの変更
             if touchNode == tailLeft {
-                
-                taleCollectionCount += 1
-                 print(taleCollectionCount)
-                if taleCollectionCount == 4 {
-                    taleCollectionCount = 1
-                }
-                if taleCollectionCount == 1 {
-                    ebi!.tale.texture = SKTexture(imageNamed: "tale1")
-                    texture = "tale1"
-                } else if taleCollectionCount == 2 {
-                    ebi!.tale.texture = SKTexture(imageNamed: "tale2")
-                     texture = "tale2"
-                } else if taleCollectionCount == 3 {
-                    ebi!.tale.texture = SKTexture(imageNamed: "tale3")
-                     texture = "tale3"
-                }
-                
+                ebi?.taleImageCount += 1
+                texture = ebi!.setTaleTexture()
             }
             if touchNode == tailRight {
-                taleCollectionCount -= 1
-                 print(taleCollectionCount)
-                if taleCollectionCount == 0 {
-                    taleCollectionCount = 3
-                }
-                if taleCollectionCount == 1 {
-                    ebi!.tale.texture = SKTexture(imageNamed: "tale1")
-                     texture = "tale1"
-                } else if taleCollectionCount == 2 {
-                    ebi!.tale.texture = SKTexture(imageNamed: "tale2")
-                     texture = "tale2"
-                } else if taleCollectionCount == 3 {
-                    ebi!.tale.texture = SKTexture(imageNamed: "tale3")
-                     texture = "tale3"
-                }
+                ebi?.taleImageCount -= 1
+                texture = ebi!.setTaleTexture()
             }
+            //body countの変更
             if touchNode == bodyLeft {
-                if bodyCount <= 1 {
+                if ebi!.bodyCount <= 2 {
                     return
                 }
-                self.removeChildren(in: ebiBodySprites)
-                bodyCount -= 1
-                addBody(count: bodyCount)
+                self.removeChildren(in: ebi!.body)
+                ebi!.bodyCount -= 1
+                ebi!.body = addBody(count: ebi!.bodyCount)
             }
             if touchNode == bodyRight {
-                if bodyCount >= 5 {
+                if ebi!.bodyCount >= 5 {
                     return
                 }
-                self.removeChildren(in: ebiBodySprites)
-                bodyCount += 1
-                addBody(count: bodyCount)
+                self.removeChildren(in: ebi!.body)
+                ebi!.bodyCount += 1
+                ebi!.body = addBody(count: ebi!.bodyCount)
             }
             if touchNode == flyLabel {
-                let scene = FryScene(size: self.scene!.size, bodyCount: bodyCount, taleImageStr: texture)
+                let scene = FryScene(size: self.scene!.size, bodyCount: ebi!.bodyCount, taleImageStr: texture)
                 scene.scaleMode = SKSceneScaleMode.aspectFill
                 self.view!.presentScene(scene)
             }
