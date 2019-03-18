@@ -163,7 +163,7 @@ class CharactorMakeScene: SKScene {
                 addBody(count: bodyCount)
             }
             if touchNode == flyLabel {
-                let scene = FlyScene(size: self.scene!.size, bodyCount: bodyCount, taleImageStr: texture)
+                let scene = FryScene(size: self.scene!.size, bodyCount: bodyCount, taleImageStr: texture)
                 scene.scaleMode = SKSceneScaleMode.aspectFill
                 self.view!.presentScene(scene)
             }

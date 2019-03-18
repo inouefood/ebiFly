@@ -17,9 +17,10 @@
 		0DA6A19C223BD1180040133D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0DA6A19A223BD1180040133D /* LaunchScreen.storyboard */; };
 		0DA6A1A7223BD1180040133D /* ebiFlyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DA6A1A6223BD1180040133D /* ebiFlyTests.swift */; };
 		0DF70CAE223BE02C007105D8 /* CharactorMakeScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF70CAD223BE02C007105D8 /* CharactorMakeScene.swift */; };
-		0DF70CB6223BF905007105D8 /* FlyScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF70CB5223BF905007105D8 /* FlyScene.swift */; };
+		0DF70CB6223BF905007105D8 /* FryScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF70CB5223BF905007105D8 /* FryScene.swift */; };
 		0DF70CB8223BF988007105D8 /* SauceScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF70CB7223BF988007105D8 /* SauceScene.swift */; };
 		0DF70CBA223CBF79007105D8 /* GameClearScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF70CB9223CBF79007105D8 /* GameClearScene.swift */; };
+		0DF70D05223FC456007105D8 /* EbiModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF70D04223FC455007105D8 /* EbiModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,9 +48,10 @@
 		0DA6A1A6223BD1180040133D /* ebiFlyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ebiFlyTests.swift; sourceTree = "<group>"; };
 		0DA6A1A8223BD1180040133D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0DF70CAD223BE02C007105D8 /* CharactorMakeScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharactorMakeScene.swift; sourceTree = "<group>"; };
-		0DF70CB5223BF905007105D8 /* FlyScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlyScene.swift; sourceTree = "<group>"; };
+		0DF70CB5223BF905007105D8 /* FryScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FryScene.swift; sourceTree = "<group>"; };
 		0DF70CB7223BF988007105D8 /* SauceScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SauceScene.swift; sourceTree = "<group>"; };
 		0DF70CB9223CBF79007105D8 /* GameClearScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameClearScene.swift; sourceTree = "<group>"; };
+		0DF70D04223FC455007105D8 /* EbiModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EbiModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -95,10 +97,11 @@
 				0DA6A18D223BD1160040133D /* GameScene.sks */,
 				0DA6A18F223BD1160040133D /* Actions.sks */,
 				0DA6A193223BD1160040133D /* GameViewController.swift */,
-				0DA6A191223BD1160040133D /* GameScene.swift */,
-				0DF70CAD223BE02C007105D8 /* CharactorMakeScene.swift */,
-				0DF70CB5223BF905007105D8 /* FlyScene.swift */,
-				0DF70CB7223BF988007105D8 /* SauceScene.swift */,
+				0DF70D06223FC45B007105D8 /* Entity */,
+				0DF70D00223FC35B007105D8 /* Title */,
+				0DF70D01223FC396007105D8 /* CharactorMaking */,
+				0DF70D02223FC3A3007105D8 /* Fry */,
+				0DF70D03223FC3B3007105D8 /* Sauce */,
 				0DF70CB9223CBF79007105D8 /* GameClearScene.swift */,
 				0DA6A195223BD1160040133D /* Main.storyboard */,
 				0DA6A198223BD1180040133D /* Assets.xcassets */,
@@ -115,6 +118,46 @@
 				0DA6A1A8223BD1180040133D /* Info.plist */,
 			);
 			path = ebiFlyTests;
+			sourceTree = "<group>";
+		};
+		0DF70D00223FC35B007105D8 /* Title */ = {
+			isa = PBXGroup;
+			children = (
+				0DA6A191223BD1160040133D /* GameScene.swift */,
+			);
+			path = Title;
+			sourceTree = "<group>";
+		};
+		0DF70D01223FC396007105D8 /* CharactorMaking */ = {
+			isa = PBXGroup;
+			children = (
+				0DF70CAD223BE02C007105D8 /* CharactorMakeScene.swift */,
+			);
+			path = CharactorMaking;
+			sourceTree = "<group>";
+		};
+		0DF70D02223FC3A3007105D8 /* Fry */ = {
+			isa = PBXGroup;
+			children = (
+				0DF70CB5223BF905007105D8 /* FryScene.swift */,
+			);
+			path = Fry;
+			sourceTree = "<group>";
+		};
+		0DF70D03223FC3B3007105D8 /* Sauce */ = {
+			isa = PBXGroup;
+			children = (
+				0DF70CB7223BF988007105D8 /* SauceScene.swift */,
+			);
+			path = Sauce;
+			sourceTree = "<group>";
+		};
+		0DF70D06223FC45B007105D8 /* Entity */ = {
+			isa = PBXGroup;
+			children = (
+				0DF70D04223FC455007105D8 /* EbiModel.swift */,
+			);
+			path = Entity;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -222,11 +265,12 @@
 			files = (
 				0DA6A192223BD1160040133D /* GameScene.swift in Sources */,
 				0DA6A194223BD1160040133D /* GameViewController.swift in Sources */,
+				0DF70D05223FC456007105D8 /* EbiModel.swift in Sources */,
 				0DF70CB8223BF988007105D8 /* SauceScene.swift in Sources */,
 				0DA6A18C223BD1160040133D /* AppDelegate.swift in Sources */,
 				0DF70CBA223CBF79007105D8 /* GameClearScene.swift in Sources */,
 				0DF70CAE223BE02C007105D8 /* CharactorMakeScene.swift in Sources */,
-				0DF70CB6223BF905007105D8 /* FlyScene.swift in Sources */,
+				0DF70CB6223BF905007105D8 /* FryScene.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

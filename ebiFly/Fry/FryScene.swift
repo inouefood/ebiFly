@@ -9,7 +9,7 @@
 import UIKit
 import SpriteKit
 
-class FlyScene: SKScene {
+class FryScene: SKScene {
     // 定数
     let numAbura:Int = 300
     // 尻尾のスプライト
