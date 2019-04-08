@@ -6,7 +6,6 @@
 //  Copyright © 2019 佐川晴海. All rights reserved.
 //
 
-import Foundation
 import SpriteKit
 
 extension SKLabelNode {

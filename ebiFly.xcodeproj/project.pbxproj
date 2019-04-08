@@ -17,6 +17,7 @@
 		0DA6A19C223BD1180040133D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0DA6A19A223BD1180040133D /* LaunchScreen.storyboard */; };
 		0DA6A1A7223BD1180040133D /* ebiFlyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DA6A1A6223BD1180040133D /* ebiFlyTests.swift */; };
 		0DE54C29225B6F9300006ED4 /* SKLabelNode+Addition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DE54C28225B6F9300006ED4 /* SKLabelNode+Addition.swift */; };
+		0DE54C2B225B744F00006ED4 /* SKSpriteNode+Addition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DE54C2A225B744F00006ED4 /* SKSpriteNode+Addition.swift */; };
 		0DF70CAE223BE02C007105D8 /* CharactorMakeScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF70CAD223BE02C007105D8 /* CharactorMakeScene.swift */; };
 		0DF70CB6223BF905007105D8 /* FryScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF70CB5223BF905007105D8 /* FryScene.swift */; };
 		0DF70CB8223BF988007105D8 /* SauceScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF70CB7223BF988007105D8 /* SauceScene.swift */; };
@@ -49,6 +50,7 @@
 		0DA6A1A6223BD1180040133D /* ebiFlyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ebiFlyTests.swift; sourceTree = "<group>"; };
 		0DA6A1A8223BD1180040133D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0DE54C28225B6F9300006ED4 /* SKLabelNode+Addition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SKLabelNode+Addition.swift"; sourceTree = "<group>"; };
+		0DE54C2A225B744F00006ED4 /* SKSpriteNode+Addition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SKSpriteNode+Addition.swift"; sourceTree = "<group>"; };
 		0DF70CAD223BE02C007105D8 /* CharactorMakeScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharactorMakeScene.swift; sourceTree = "<group>"; };
 		0DF70CB5223BF905007105D8 /* FryScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FryScene.swift; sourceTree = "<group>"; };
 		0DF70CB7223BF988007105D8 /* SauceScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SauceScene.swift; sourceTree = "<group>"; };
@@ -105,7 +107,7 @@
 				0DF70D01223FC396007105D8 /* CharactorMaking */,
 				0DF70D02223FC3A3007105D8 /* Fry */,
 				0DF70D03223FC3B3007105D8 /* Sauce */,
-				0DF70CB9223CBF79007105D8 /* GameClearScene.swift */,
+				0DE54C2E225B74BF00006ED4 /* GameClear */,
 				0DA6A195223BD1160040133D /* Main.storyboard */,
 				0DA6A198223BD1180040133D /* Assets.xcassets */,
 				0DA6A19A223BD1180040133D /* LaunchScreen.storyboard */,
@@ -127,8 +129,17 @@
 			isa = PBXGroup;
 			children = (
 				0DE54C28225B6F9300006ED4 /* SKLabelNode+Addition.swift */,
+				0DE54C2A225B744F00006ED4 /* SKSpriteNode+Addition.swift */,
 			);
 			path = Extension;
+			sourceTree = "<group>";
+		};
+		0DE54C2E225B74BF00006ED4 /* GameClear */ = {
+			isa = PBXGroup;
+			children = (
+				0DF70CB9223CBF79007105D8 /* GameClearScene.swift */,
+			);
+			path = GameClear;
 			sourceTree = "<group>";
 		};
 		0DF70D00223FC35B007105D8 /* Title */ = {
@@ -276,6 +287,7 @@
 			files = (
 				0DA6A192223BD1160040133D /* GameScene.swift in Sources */,
 				0DA6A194223BD1160040133D /* GameViewController.swift in Sources */,
+				0DE54C2B225B744F00006ED4 /* SKSpriteNode+Addition.swift in Sources */,
 				0DF70D05223FC456007105D8 /* EbiModel.swift in Sources */,
 				0DF70CB8223BF988007105D8 /* SauceScene.swift in Sources */,
 				0DA6A18C223BD1160040133D /* AppDelegate.swift in Sources */,
