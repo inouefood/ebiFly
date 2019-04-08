@@ -16,6 +16,7 @@
 		0DA6A199223BD1180040133D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0DA6A198223BD1180040133D /* Assets.xcassets */; };
 		0DA6A19C223BD1180040133D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0DA6A19A223BD1180040133D /* LaunchScreen.storyboard */; };
 		0DA6A1A7223BD1180040133D /* ebiFlyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DA6A1A6223BD1180040133D /* ebiFlyTests.swift */; };
+		0DE54C29225B6F9300006ED4 /* SKLabelNode+Addition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DE54C28225B6F9300006ED4 /* SKLabelNode+Addition.swift */; };
 		0DF70CAE223BE02C007105D8 /* CharactorMakeScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF70CAD223BE02C007105D8 /* CharactorMakeScene.swift */; };
 		0DF70CB6223BF905007105D8 /* FryScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF70CB5223BF905007105D8 /* FryScene.swift */; };
 		0DF70CB8223BF988007105D8 /* SauceScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF70CB7223BF988007105D8 /* SauceScene.swift */; };
@@ -47,6 +48,7 @@
 		0DA6A1A2223BD1180040133D /* ebiFlyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ebiFlyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0DA6A1A6223BD1180040133D /* ebiFlyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ebiFlyTests.swift; sourceTree = "<group>"; };
 		0DA6A1A8223BD1180040133D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0DE54C28225B6F9300006ED4 /* SKLabelNode+Addition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SKLabelNode+Addition.swift"; sourceTree = "<group>"; };
 		0DF70CAD223BE02C007105D8 /* CharactorMakeScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharactorMakeScene.swift; sourceTree = "<group>"; };
 		0DF70CB5223BF905007105D8 /* FryScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FryScene.swift; sourceTree = "<group>"; };
 		0DF70CB7223BF988007105D8 /* SauceScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SauceScene.swift; sourceTree = "<group>"; };
@@ -97,6 +99,7 @@
 				0DA6A18D223BD1160040133D /* GameScene.sks */,
 				0DA6A18F223BD1160040133D /* Actions.sks */,
 				0DA6A193223BD1160040133D /* GameViewController.swift */,
+				0DE54C27225B6F5F00006ED4 /* Extension */,
 				0DF70D06223FC45B007105D8 /* Entity */,
 				0DF70D00223FC35B007105D8 /* Title */,
 				0DF70D01223FC396007105D8 /* CharactorMaking */,
@@ -118,6 +121,14 @@
 				0DA6A1A8223BD1180040133D /* Info.plist */,
 			);
 			path = ebiFlyTests;
+			sourceTree = "<group>";
+		};
+		0DE54C27225B6F5F00006ED4 /* Extension */ = {
+			isa = PBXGroup;
+			children = (
+				0DE54C28225B6F9300006ED4 /* SKLabelNode+Addition.swift */,
+			);
+			path = Extension;
 			sourceTree = "<group>";
 		};
 		0DF70D00223FC35B007105D8 /* Title */ = {
@@ -269,6 +280,7 @@
 				0DF70CB8223BF988007105D8 /* SauceScene.swift in Sources */,
 				0DA6A18C223BD1160040133D /* AppDelegate.swift in Sources */,
 				0DF70CBA223CBF79007105D8 /* GameClearScene.swift in Sources */,
+				0DE54C29225B6F9300006ED4 /* SKLabelNode+Addition.swift in Sources */,
 				0DF70CAE223BE02C007105D8 /* CharactorMakeScene.swift in Sources */,
 				0DF70CB6223BF905007105D8 /* FryScene.swift in Sources */,
 			);
