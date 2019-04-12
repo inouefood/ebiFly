@@ -10,7 +10,7 @@ import SpriteKit
 import GameplayKit
 import UIKit
 
-class GameScene: SKScene {
+class TitleScene: SKScene {
     lazy var startLabel = SKLabelNode(fontSize: 70, text: "START", pos: CGPoint(x: width/2, y: height/7))
     lazy var ebiSprite =  SKSpriteNode(image: "ebiAnimation01", pos: CGPoint(x: width/2, y: height/7), size: CGSize(width: width/3, height: width/9))
     lazy var ebiSprite2 = SKSpriteNode(image: "ebiAnimation04", pos: CGPoint(x: width/2, y: height/1.5), size: CGSize(width: width/2, height: width/5))
