@@ -36,16 +36,17 @@ class GameScene: SKScene {
     }
     
     override func update(_ currentTime: TimeInterval) {
-        if ebiSprite.position.x > (self.view?.frame.width)! + 100 {
-            ebiSprite.position.x = -self.view!.frame.width
+        if ebiSprite.position.x > width + 100 {
+            ebiSprite.position.x = 0
+            ebiSprite.position.y = CGFloat(Int.random(in: 100...Int(height-100)))
         }
-        if ebiSprite2.position.x < -self.view!.frame.width - 100 {
-            ebiSprite2.position.y = CGFloat(Int.random(in: 0...Int( self.view!.frame.height))) - 200
-            ebiSprite2.position.x = self.view!.frame.width
+        if ebiSprite2.position.x < -100 {
+            ebiSprite2.position.y = CGFloat(Int.random(in: 100...Int(height-100)))
+            ebiSprite2.position.x = width
         }
-        if ebiSprite3.position.x < -self.view!.frame.width - 100 {
-            ebiSprite3.position.y = CGFloat(Int.random(in: 0...Int( self.view!.frame.height))) - 200
-            ebiSprite3.position.x = self.view!.frame.width
+        if ebiSprite3.position.x < -100 {
+            ebiSprite3.position.y = CGFloat(Int.random(in: 100...Int(height-100)))
+            ebiSprite3.position.x = width
         }
     }
     
