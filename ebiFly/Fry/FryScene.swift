@@ -129,16 +129,7 @@ class FryScene: SKScene {
         // ノードすべてについて画面端で跳ね返るようにする
         self.physicsBody = SKPhysicsBody(edgeLoopFrom: self.frame)
     }
-    
-    func touchDown(atPoint pos : CGPoint) {
-    }
-    
-    func touchMoved(toPoint pos : CGPoint) {
-    }
-    
-    func touchUp(atPoint pos : CGPoint) {
-    }
-    
+
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         //タッチしたノードを取得する
         let location = touches.first!.location(in: self)
@@ -150,25 +141,12 @@ class FryScene: SKScene {
         } else {
             isTale = false
         }
-        
-        for t in touches { self.touchDown(atPoint: t.location(in: self)) }
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        
-            // タッチしたノードの座標を取得、移動
             let location = touches.first!.location(in: self)
             let action = SKAction.move(to: CGPoint(x:location.x, y:location.y), duration:0.1)
             if (isTale) { tale.run(action) }
-        for t in touches { self.touchMoved(toPoint: t.location(in: self)) }
-    }
-    
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchUp(atPoint: t.location(in: self)) }
-    }
-    
-    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchUp(atPoint: t.location(in: self)) }
     }
     
     override func update(_ currentTime: TimeInterval) {
