@@ -26,6 +26,8 @@ class FryScene: SKScene {
     var width: CGFloat!
     var height: CGFloat!
     
+    // MARK: - Initializer
+    
     init(size: CGSize, bodyCount: Int, taleImageStr: String) {
         self.bodyCount = bodyCount
         
@@ -37,6 +39,8 @@ class FryScene: SKScene {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    // MARK: - LifeCycle
     
     override func didMove(to view: SKView) {
         width = self.view!.frame.width
@@ -129,25 +133,6 @@ class FryScene: SKScene {
         // ノードすべてについて画面端で跳ね返るようにする
         self.physicsBody = SKPhysicsBody(edgeLoopFrom: self.frame)
     }
-
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        //タッチしたノードを取得する
-        let location = touches.first!.location(in: self)
-        guard let node = atPoint(location) as? SKSpriteNode else{
-            return
-        }
-        if(node == tale) {
-            isTale = true
-        } else {
-            isTale = false
-        }
-    }
-    
-    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-            let location = touches.first!.location(in: self)
-            let action = SKAction.move(to: CGPoint(x:location.x, y:location.y), duration:0.1)
-            if (isTale) { tale.run(action) }
-    }
     
     override func update(_ currentTime: TimeInterval) {
         // あぶらの更新
@@ -174,6 +159,27 @@ class FryScene: SKScene {
                 }
             }
         }
+    }
+    
+    // MARK: - Event
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        //タッチしたノードを取得する
+        let location = touches.first!.location(in: self)
+        guard let node = atPoint(location) as? SKSpriteNode else{
+            return
+        }
+        if(node == tale) {
+            isTale = true
+        } else {
+            isTale = false
+        }
+    }
+    
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        let location = touches.first!.location(in: self)
+        let action = SKAction.move(to: CGPoint(x:location.x, y:location.y), duration:0.1)
+        if (isTale) { tale.run(action) }
     }
 }
 

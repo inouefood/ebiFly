@@ -30,6 +30,9 @@ class CharactorMakeScene: SKScene {
     var height: CGFloat!
     
     var texture = "tale1"
+    
+    // MARK: - Initializer
+    
     override func didMove(to view: SKView) {
         width  = self.view!.frame.width
         height = self.view!.frame.height
@@ -37,7 +40,10 @@ class CharactorMakeScene: SKScene {
         addTail(taleImgStr: "tale1")
         addBody(count: bodyCount)
     }
-    func addBody(count: Int){
+    
+    // MARK: - PrivateMethod
+    
+    private func addBody(count: Int){
         
         
         let taleX = width
@@ -56,7 +62,7 @@ class CharactorMakeScene: SKScene {
             ebiBodySprites.append(ebiBody)
         }
     }
-    func addTail(taleImgStr: String){
+    private func addTail(taleImgStr: String){
         tale = SKSpriteNode(imageNamed: taleImgStr)
         setSelectButton(width: width, height: height)
         
@@ -69,7 +75,7 @@ class CharactorMakeScene: SKScene {
         tale!.physicsBody!.isDynamic = false
         self.addChild(tale!)
     }
-    func setSelectButton(width: CGFloat, height: CGFloat){
+    private func setSelectButton(width: CGFloat, height: CGFloat){
         tailLeft.position = CGPoint(x: width/6 * 2, y: height * 1.3)
         tailLeft.size = CGSize(width: width/3, height: width/3)
         
@@ -92,6 +98,8 @@ class CharactorMakeScene: SKScene {
         flyLabel.position = CGPoint(x:width, y:height/10)
         self.addChild(flyLabel)
     }
+    
+    // MARK: - Event
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         if let location = touches.first?.location(in: self){
