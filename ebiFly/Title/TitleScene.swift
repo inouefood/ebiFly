@@ -53,22 +53,15 @@ class TitleScene: SKScene {
     // MARK: - PrivateMethod
     
     private func ebiAnimation() {
-        let moveRightAnimation = SKAction.animate(
-            with: [SKTexture(imageNamed: "ebiAnimation02"),SKTexture(imageNamed: "ebiAnimation03"),SKTexture(imageNamed: "ebiAnimation02"), SKTexture(imageNamed: "ebiAnimation01")],
-            timePerFrame: 0.2)
-        let moveLeftAnimation = SKAction.animate(
-            with: [SKTexture(imageNamed: "ebiAnimation05"),SKTexture(imageNamed: "ebiAnimation06"),SKTexture(imageNamed: "ebiAnimation05"), SKTexture(imageNamed: "ebiAnimation04")],
-            timePerFrame: 0.2)
-        
-        ebiSprite.run(SKAction.repeatForever(moveRightAnimation))
+        ebiSprite.run(SKAction.repeatForever(Constant.EbiAnimation.right))
         let moveAction = SKAction.moveBy(x: 80.0, y: 0, duration: 1.0)
         ebiSprite.run(SKAction.repeatForever(moveAction))
         
-        ebiSprite2.run(SKAction.repeatForever(moveLeftAnimation))
+        ebiSprite2.run(SKAction.repeatForever(Constant.EbiAnimation.left))
         let moveAction2 = SKAction.moveBy(x: -40.0, y: 0, duration: 1.0)
         ebiSprite2.run(SKAction.repeatForever(moveAction2))
         
-        ebiSprite3.run(SKAction.repeatForever(moveLeftAnimation))
+        ebiSprite3.run(SKAction.repeatForever(Constant.EbiAnimation.left))
         let moveAction3 = SKAction.moveBy(x: -200.0, y: 0, duration: 1.0)
         ebiSprite3.run(SKAction.repeatForever(moveAction3))
     }
