@@ -34,6 +34,8 @@ class SauceScene: SKScene {
     let fallFlont = SKSpriteNode(imageNamed: "fallFront")
     let fallBack = SKSpriteNode(imageNamed: "fallBack")
     
+    var width: CGFloat!
+    var height: CGFloat!
     
     //背景
     var croundSprite: [SKSpriteNode] = [SKSpriteNode(imageNamed: "cround1"), SKSpriteNode(imageNamed: "cround1")]
@@ -47,21 +49,21 @@ class SauceScene: SKScene {
         self.ebiBodySprites = ebi
         self.aburaRandomSeed = seed
         super.init(size: size)
+        width = self.view!.frame.width
+        height = self.view!.frame.height
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     override func didMove(to view: SKView) {
-        self.backgroundColor = SKColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1)
-        guard let width: CGFloat = self.view!.frame.width, let height: CGFloat = self.view!.frame.height else {
-            return
-        }
+        self.backgroundColor = SKColor(appColor: .c2)
+        
+        
        
         //背景
         clearSky = SKShapeNode(rectOf: CGSize(width: self.frame.width * 2, height: self.frame.height))
         clearSky.position = CGPoint(x: 0, y: self.frame.height)
-//        clearSky.position = CGPoint(x: self.frame.width/3, y: 300)
         clearSky.fillColor = UIColor(red: 102/255, green: 204/255, blue: 255/255, alpha: 1.0)
         self.addChild(clearSky)
         
@@ -111,7 +113,7 @@ class SauceScene: SKScene {
         let taleX = width
         
         let taleY = self.frame.height - self.frame.height / 6.0
-        taleSprite.position = CGPoint(x: taleX, y: self.frame.height - self.frame.height / 6.0)
+        taleSprite.position = CGPoint(x: taleX!, y: self.frame.height - self.frame.height / 6.0)
         self.addChild(taleSprite)
         
         for i in 0..<ebiBodySprites.count {
@@ -128,15 +130,15 @@ class SauceScene: SKScene {
         for i in 0..<aburaSprites.count {
             switch aburaRandomSeed[i] {
             case 0:
-                aburaSprites[i].position = CGPoint(x: taleX, y: ebiBodySprites[0].position.y)
+                aburaSprites[i].position = CGPoint(x: taleX!, y: ebiBodySprites[0].position.y)
             case 1:
-                aburaSprites[i].position = CGPoint(x: taleX, y: ebiBodySprites[1].position.y)
+                aburaSprites[i].position = CGPoint(x: taleX!, y: ebiBodySprites[1].position.y)
             case 2:
-                aburaSprites[i].position = CGPoint(x: taleX, y: ebiBodySprites[2].position.y)
+                aburaSprites[i].position = CGPoint(x: taleX!, y: ebiBodySprites[2].position.y)
             case 3:
-                aburaSprites[i].position = CGPoint(x: taleX, y: ebiBodySprites[3].position.y)
+                aburaSprites[i].position = CGPoint(x: taleX!, y: ebiBodySprites[3].position.y)
             case 4:
-                aburaSprites[i].position = CGPoint(x: taleX, y: ebiBodySprites[4].position.y)
+                aburaSprites[i].position = CGPoint(x: taleX!, y: ebiBodySprites[4].position.y)
             default:
                 break
             }
@@ -169,9 +171,6 @@ class SauceScene: SKScene {
     }
     override func update(_ currentTime: TimeInterval) {
         if taleSprite.position != CGPoint(x: self.view!.frame.width, y: self.frame.height - self.frame.height / 6.0) && !isFirstPosition {
-            guard let width: CGFloat = self.view!.frame.width, let height: CGFloat = self.view!.frame.height else {
-                return
-            }
             
             self.removeChildren(in: [taleSprite])
             let taleY = self.frame.height - self.frame.height / 6.0

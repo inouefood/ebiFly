@@ -35,7 +35,7 @@ class GameClearScene: SKScene {
     
     override func didMove(to view: SKView) {
         self.anchorPoint = CGPoint(x: 0, y: 0)
-        self.backgroundColor = SKColor(red: 36/255, green: 139/255, blue: 255/255, alpha: 1)
+        self.backgroundColor = SKColor(appColor: .c1)
         
         self.addChild(scoreLabel)
         self.addChild(clearImage)
