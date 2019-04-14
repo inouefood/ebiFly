@@ -24,6 +24,9 @@ class FryScene: SKScene {
     
     var isTale:Bool = false
     
+    var width: CGFloat!
+    var height: CGFloat!
+    
     init(size: CGSize, bodyCount: Int, taleImageStr: String) {
         self.bodyCount = bodyCount
         
@@ -37,6 +40,9 @@ class FryScene: SKScene {
     }
     
     override func didMove(to view: SKView) {
+        width = self.view!.frame.width
+        height = self.view!.frame.height
+        
         Timer.scheduledTimer(withTimeInterval: 10, repeats: false){(_) in
             self.isTale = false
             self.removeChildren(in: self.aburaSprites)
@@ -45,7 +51,6 @@ class FryScene: SKScene {
             let t = self.tale
             self.removeChildren(in: self.ebiBodySprites)
             self.removeChildren(in: [self.tale])
-//             self.removeChildren(in: self.tale)
             let scene = SauceScene(size: self.scene!.size, count: 5, abura: self.koromoSprites,  tale: t, ebi: ebi, seed: self.koromoRandomSeed)
             scene.scaleMode = SKSceneScaleMode.aspectFill
             self.view!.presentScene(scene)
@@ -54,15 +59,13 @@ class FryScene: SKScene {
             self.isTale = false
         }
         
-        guard let width: CGFloat = self.view!.frame.width, let height: CGFloat = self.view!.frame.height else {
-            return
-        }
+        
         // えび --------------------------------------------------------------
         //// 尻尾の初期設定
         let taleX = width
         let taleY = height * 1.3
         tale.size = CGSize(width: width/6, height: width/6)
-        tale.position = CGPoint(x: taleX, y: taleY)
+        tale.position = CGPoint(x: taleX!, y: taleY)
         tale.physicsBody = SKPhysicsBody(circleOfRadius: 1)
         tale.zPosition = 1.2
         tale.physicsBody!.affectedByGravity = false
@@ -76,7 +79,7 @@ class FryScene: SKScene {
             let ebX = taleX
             let ebY = (taleY - width/6)  - (width/6 * CGFloat(i))
             ebiBody.size = CGSize(width: width/6, height: width/6)
-            ebiBody.position = CGPoint(x: ebX, y: ebY)
+            ebiBody.position = CGPoint(x: ebX!, y: ebY)
             ebiBody.physicsBody = SKPhysicsBody(circleOfRadius: 2)
             ebiBody.physicsBody!.affectedByGravity = true
             ebiBody.name = "ebiBody" + String(i)

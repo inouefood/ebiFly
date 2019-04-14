@@ -49,8 +49,6 @@ class SauceScene: SKScene {
         self.ebiBodySprites = ebi
         self.aburaRandomSeed = seed
         super.init(size: size)
-        width = self.view!.frame.width
-        height = self.view!.frame.height
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -59,7 +57,8 @@ class SauceScene: SKScene {
     override func didMove(to view: SKView) {
         self.backgroundColor = SKColor(appColor: .c2)
         
-        
+        width = self.view!.frame.width
+        height = self.view!.frame.height
        
         //背景
         clearSky = SKShapeNode(rectOf: CGSize(width: self.frame.width * 2, height: self.frame.height))
@@ -151,7 +150,7 @@ class SauceScene: SKScene {
     }
     func updateAccelerationData(data: CMAcceleration) {
         
-        var isShaken = self.x != Int(data.x) || self.y != Int(data.y) || self.z != Int(data.z)
+        let isShaken = self.x != Int(data.x) || self.y != Int(data.y) || self.z != Int(data.z)
         
         if isShaken {
             shakeCount += 1

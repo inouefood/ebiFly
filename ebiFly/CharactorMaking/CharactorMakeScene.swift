@@ -25,31 +25,20 @@ class CharactorMakeScene: SKScene {
     let bodyLeft = SKSpriteNode(imageNamed: "left")
     let bodyRight = SKSpriteNode(imageNamed: "right")
     let flyLabel = SKLabelNode(fontNamed: "Verdana-bold")
-
-
+    
+    var width: CGFloat!
+    var height: CGFloat!
+    
     var texture = "tale1"
     override func didMove(to view: SKView) {
-//        guard let width: CGFloat = self.view!.frame.width, let height: CGFloat = self.view!.frame.height else {
-//            return
-//        }
-//        setSelectButton(width: width, height: height)
-//        
-//        let taleX = width
-//        let taleY = height * 1.3
-//        tale.position = CGPoint(x: taleX, y: taleY)
-//        tale.size = CGSize(width: width/4, height: width/4)
-//        tale.physicsBody = SKPhysicsBody(circleOfRadius: 20)
-//        tale.physicsBody!.affectedByGravity = false
-//        tale.physicsBody!.isDynamic = false
-//        self.addChild(tale)
+        width  = self.view!.frame.width
+        height = self.view!.frame.height
+
         addTail(taleImgStr: "tale1")
-        
         addBody(count: bodyCount)
     }
     func addBody(count: Int){
-        guard let width: CGFloat = self.view!.frame.width, let height: CGFloat = self.view!.frame.height else {
-            return
-        }
+        
         
         let taleX = width
         let taleY = height * 1.3
@@ -59,7 +48,7 @@ class CharactorMakeScene: SKScene {
             let ebX = taleX
             let ebY = (taleY - width/4)  - (width/4 * CGFloat(i))
             ebiBody.size = CGSize(width: width/4 , height: width/4)
-            ebiBody.position = CGPoint(x: ebX, y: ebY)
+            ebiBody.position = CGPoint(x: ebX!, y: ebY)
             ebiBody.physicsBody = SKPhysicsBody(circleOfRadius: 20)
             ebiBody.physicsBody!.affectedByGravity = false
             ebiBody.name = "ebiBody" + String(i)
@@ -68,15 +57,12 @@ class CharactorMakeScene: SKScene {
         }
     }
     func addTail(taleImgStr: String){
-        guard let width: CGFloat = self.view!.frame.width, let height: CGFloat = self.view!.frame.height else {
-            return
-        }
         tale = SKSpriteNode(imageNamed: taleImgStr)
         setSelectButton(width: width, height: height)
         
         let taleX = width
         let taleY = height * 1.3
-        tale!.position = CGPoint(x: taleX, y: taleY)
+        tale!.position = CGPoint(x: taleX!, y: taleY)
         tale!.size = CGSize(width: width/4, height: width/4)
         tale!.physicsBody = SKPhysicsBody(circleOfRadius: 20)
         tale!.physicsBody!.affectedByGravity = false
