@@ -10,8 +10,7 @@ import UIKit
 import SpriteKit
 
 class FryScene: SKScene {
-    // 定数
-    let numAbura:Int = 300
+    let numAbura:Int = Constant.SpriteNum.abura
     // 尻尾のスプライト
     let tale: SKSpriteNode
     // スプライトの配列
