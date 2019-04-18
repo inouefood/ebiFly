@@ -21,10 +21,18 @@
 		0DF70CB8223BF988007105D8 /* SauceScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF70CB7223BF988007105D8 /* SauceScene.swift */; };
 		0DF70CBA223CBF79007105D8 /* GameClearScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF70CB9223CBF79007105D8 /* GameClearScene.swift */; };
 		0DF70D05223FC456007105D8 /* EbiModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF70D04223FC455007105D8 /* EbiModel.swift */; };
+		0DFEFA0C2268A16F0061167A /* ebiFlyUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFEFA0B2268A16F0061167A /* ebiFlyUITests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
 		0DA6A1A3223BD1180040133D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 0DA6A180223BD1160040133D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0DA6A187223BD1160040133D;
+			remoteInfo = ebiFly;
+		};
+		0DFEFA0E2268A16F0061167A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0DA6A180223BD1160040133D /* Project object */;
 			proxyType = 1;
@@ -52,6 +60,9 @@
 		0DF70CB7223BF988007105D8 /* SauceScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SauceScene.swift; sourceTree = "<group>"; };
 		0DF70CB9223CBF79007105D8 /* GameClearScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameClearScene.swift; sourceTree = "<group>"; };
 		0DF70D04223FC455007105D8 /* EbiModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EbiModel.swift; sourceTree = "<group>"; };
+		0DFEFA092268A16F0061167A /* ebiFlyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ebiFlyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		0DFEFA0B2268A16F0061167A /* ebiFlyUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ebiFlyUITests.swift; sourceTree = "<group>"; };
+		0DFEFA0D2268A16F0061167A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -69,6 +80,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		0DFEFA062268A16F0061167A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -77,6 +95,7 @@
 			children = (
 				0DA6A18A223BD1160040133D /* ebiFly */,
 				0DA6A1A5223BD1180040133D /* ebiFlyTests */,
+				0DFEFA0A2268A16F0061167A /* ebiFlyUITests */,
 				0DA6A189223BD1160040133D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -86,6 +105,7 @@
 			children = (
 				0DA6A188223BD1160040133D /* ebiFly.app */,
 				0DA6A1A2223BD1180040133D /* ebiFlyTests.xctest */,
+				0DFEFA092268A16F0061167A /* ebiFlyUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -176,6 +196,15 @@
 			path = Entity;
 			sourceTree = "<group>";
 		};
+		0DFEFA0A2268A16F0061167A /* ebiFlyUITests */ = {
+			isa = PBXGroup;
+			children = (
+				0DFEFA0B2268A16F0061167A /* ebiFlyUITests.swift */,
+				0DFEFA0D2268A16F0061167A /* Info.plist */,
+			);
+			path = ebiFlyUITests;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -214,13 +243,31 @@
 			productReference = 0DA6A1A2223BD1180040133D /* ebiFlyTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		0DFEFA082268A16F0061167A /* ebiFlyUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0DFEFA122268A16F0061167A /* Build configuration list for PBXNativeTarget "ebiFlyUITests" */;
+			buildPhases = (
+				0DFEFA052268A16F0061167A /* Sources */,
+				0DFEFA062268A16F0061167A /* Frameworks */,
+				0DFEFA072268A16F0061167A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				0DFEFA0F2268A16F0061167A /* PBXTargetDependency */,
+			);
+			name = ebiFlyUITests;
+			productName = ebiFlyUITests;
+			productReference = 0DFEFA092268A16F0061167A /* ebiFlyUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		0DA6A180223BD1160040133D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1010;
+				LastSwiftUpdateCheck = 1020;
 				LastUpgradeCheck = 1010;
 				ORGANIZATIONNAME = "佐川晴海";
 				TargetAttributes = {
@@ -229,6 +276,10 @@
 					};
 					0DA6A1A1223BD1180040133D = {
 						CreatedOnToolsVersion = 10.1;
+						TestTargetID = 0DA6A187223BD1160040133D;
+					};
+					0DFEFA082268A16F0061167A = {
+						CreatedOnToolsVersion = 10.2;
 						TestTargetID = 0DA6A187223BD1160040133D;
 					};
 				};
@@ -248,6 +299,7 @@
 			targets = (
 				0DA6A187223BD1160040133D /* ebiFly */,
 				0DA6A1A1223BD1180040133D /* ebiFlyTests */,
+				0DFEFA082268A16F0061167A /* ebiFlyUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -264,6 +316,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		0DA6A1A0223BD1180040133D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		0DFEFA072268A16F0061167A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -298,6 +357,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		0DFEFA052268A16F0061167A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0DFEFA0C2268A16F0061167A /* ebiFlyUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -305,6 +372,11 @@
 			isa = PBXTargetDependency;
 			target = 0DA6A187223BD1160040133D /* ebiFly */;
 			targetProxy = 0DA6A1A3223BD1180040133D /* PBXContainerItemProxy */;
+		};
+		0DFEFA0F2268A16F0061167A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0DA6A187223BD1160040133D /* ebiFly */;
+			targetProxy = 0DFEFA0E2268A16F0061167A /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -522,6 +594,46 @@
 			};
 			name = Release;
 		};
+		0DFEFA102268A16F0061167A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 24BSY9Z4H5;
+				INFOPLIST_FILE = ebiFlyUITests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = harumidiv.masala.ebiFlyUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = ebiFly;
+			};
+			name = Debug;
+		};
+		0DFEFA112268A16F0061167A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 24BSY9Z4H5;
+				INFOPLIST_FILE = ebiFlyUITests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = harumidiv.masala.ebiFlyUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = ebiFly;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -548,6 +660,15 @@
 			buildConfigurations = (
 				0DA6A1AF223BD1180040133D /* Debug */,
 				0DA6A1B0223BD1180040133D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		0DFEFA122268A16F0061167A /* Build configuration list for PBXNativeTarget "ebiFlyUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0DFEFA102268A16F0061167A /* Debug */,
+				0DFEFA112268A16F0061167A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
