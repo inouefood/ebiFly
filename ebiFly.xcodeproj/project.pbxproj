@@ -13,6 +13,7 @@
 		0DA6A199223BD1180040133D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0DA6A198223BD1180040133D /* Assets.xcassets */; };
 		0DA6A19C223BD1180040133D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0DA6A19A223BD1180040133D /* LaunchScreen.storyboard */; };
 		0DA6A1A7223BD1180040133D /* ebiFlyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DA6A1A6223BD1180040133D /* ebiFlyTests.swift */; };
+		0DBCB1F9226B3E2B00FBC6C5 /* ebiFlyUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DBCB1F8226B3E2B00FBC6C5 /* ebiFlyUITests.swift */; };
 		0DE54C29225B6F9300006ED4 /* SKLabelNode+Addition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DE54C28225B6F9300006ED4 /* SKLabelNode+Addition.swift */; };
 		0DE54C2B225B744F00006ED4 /* SKSpriteNode+Addition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DE54C2A225B744F00006ED4 /* SKSpriteNode+Addition.swift */; };
 		0DE54C672260A88600006ED4 /* EbiViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DE54C662260A88600006ED4 /* EbiViewController.swift */; };
@@ -21,7 +22,8 @@
 		0DF70CB8223BF988007105D8 /* SauceScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF70CB7223BF988007105D8 /* SauceScene.swift */; };
 		0DF70CBA223CBF79007105D8 /* GameClearScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF70CB9223CBF79007105D8 /* GameClearScene.swift */; };
 		0DF70D05223FC456007105D8 /* EbiModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF70D04223FC455007105D8 /* EbiModel.swift */; };
-		0DFEFA0C2268A16F0061167A /* ebiFlyUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFEFA0B2268A16F0061167A /* ebiFlyUITests.swift */; };
+		0DFEF9C32263544A0061167A /* SKColor+Addition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFEF9C22263544A0061167A /* SKColor+Addition.swift */; };
+		0DFEF9C8226359C60061167A /* Constant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFEF9C7226359C60061167A /* Constant.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -32,7 +34,7 @@
 			remoteGlobalIDString = 0DA6A187223BD1160040133D;
 			remoteInfo = ebiFly;
 		};
-		0DFEFA0E2268A16F0061167A /* PBXContainerItemProxy */ = {
+		0DBCB1FB226B3E2B00FBC6C5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 0DA6A180223BD1160040133D /* Project object */;
 			proxyType = 1;
@@ -52,6 +54,9 @@
 		0DA6A1A2223BD1180040133D /* ebiFlyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ebiFlyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0DA6A1A6223BD1180040133D /* ebiFlyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ebiFlyTests.swift; sourceTree = "<group>"; };
 		0DA6A1A8223BD1180040133D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0DBCB1F6226B3E2B00FBC6C5 /* ebiFlyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ebiFlyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		0DBCB1F8226B3E2B00FBC6C5 /* ebiFlyUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ebiFlyUITests.swift; sourceTree = "<group>"; };
+		0DBCB1FA226B3E2B00FBC6C5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0DE54C28225B6F9300006ED4 /* SKLabelNode+Addition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SKLabelNode+Addition.swift"; sourceTree = "<group>"; };
 		0DE54C2A225B744F00006ED4 /* SKSpriteNode+Addition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SKSpriteNode+Addition.swift"; sourceTree = "<group>"; };
 		0DE54C662260A88600006ED4 /* EbiViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EbiViewController.swift; sourceTree = "<group>"; };
@@ -60,9 +65,8 @@
 		0DF70CB7223BF988007105D8 /* SauceScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SauceScene.swift; sourceTree = "<group>"; };
 		0DF70CB9223CBF79007105D8 /* GameClearScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameClearScene.swift; sourceTree = "<group>"; };
 		0DF70D04223FC455007105D8 /* EbiModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EbiModel.swift; sourceTree = "<group>"; };
-		0DFEFA092268A16F0061167A /* ebiFlyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ebiFlyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		0DFEFA0B2268A16F0061167A /* ebiFlyUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ebiFlyUITests.swift; sourceTree = "<group>"; };
-		0DFEFA0D2268A16F0061167A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0DFEF9C22263544A0061167A /* SKColor+Addition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SKColor+Addition.swift"; sourceTree = "<group>"; };
+		0DFEF9C7226359C60061167A /* Constant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constant.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,7 +84,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		0DFEFA062268A16F0061167A /* Frameworks */ = {
+		0DBCB1F3226B3E2B00FBC6C5 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -95,7 +99,7 @@
 			children = (
 				0DA6A18A223BD1160040133D /* ebiFly */,
 				0DA6A1A5223BD1180040133D /* ebiFlyTests */,
-				0DFEFA0A2268A16F0061167A /* ebiFlyUITests */,
+				0DBCB1F7226B3E2B00FBC6C5 /* ebiFlyUITests */,
 				0DA6A189223BD1160040133D /* Products */,
 			);
 			sourceTree = "<group>";
@@ -105,7 +109,7 @@
 			children = (
 				0DA6A188223BD1160040133D /* ebiFly.app */,
 				0DA6A1A2223BD1180040133D /* ebiFlyTests.xctest */,
-				0DFEFA092268A16F0061167A /* ebiFlyUITests.xctest */,
+				0DBCB1F6226B3E2B00FBC6C5 /* ebiFlyUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -116,6 +120,7 @@
 				0DA6A18B223BD1160040133D /* AppDelegate.swift */,
 				0DE54C662260A88600006ED4 /* EbiViewController.swift */,
 				0DE54C27225B6F5F00006ED4 /* Extension */,
+				0DFEF9C4226359800061167A /* Common */,
 				0DF70D06223FC45B007105D8 /* Entity */,
 				0DF70D00223FC35B007105D8 /* Title */,
 				0DF70D01223FC396007105D8 /* CharactorMaking */,
@@ -139,11 +144,21 @@
 			path = ebiFlyTests;
 			sourceTree = "<group>";
 		};
+		0DBCB1F7226B3E2B00FBC6C5 /* ebiFlyUITests */ = {
+			isa = PBXGroup;
+			children = (
+				0DBCB1F8226B3E2B00FBC6C5 /* ebiFlyUITests.swift */,
+				0DBCB1FA226B3E2B00FBC6C5 /* Info.plist */,
+			);
+			path = ebiFlyUITests;
+			sourceTree = "<group>";
+		};
 		0DE54C27225B6F5F00006ED4 /* Extension */ = {
 			isa = PBXGroup;
 			children = (
 				0DE54C28225B6F9300006ED4 /* SKLabelNode+Addition.swift */,
 				0DE54C2A225B744F00006ED4 /* SKSpriteNode+Addition.swift */,
+				0DFEF9C22263544A0061167A /* SKColor+Addition.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -196,13 +211,12 @@
 			path = Entity;
 			sourceTree = "<group>";
 		};
-		0DFEFA0A2268A16F0061167A /* ebiFlyUITests */ = {
+		0DFEF9C4226359800061167A /* Common */ = {
 			isa = PBXGroup;
 			children = (
-				0DFEFA0B2268A16F0061167A /* ebiFlyUITests.swift */,
-				0DFEFA0D2268A16F0061167A /* Info.plist */,
+				0DFEF9C7226359C60061167A /* Constant.swift */,
 			);
-			path = ebiFlyUITests;
+			path = Common;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -243,22 +257,22 @@
 			productReference = 0DA6A1A2223BD1180040133D /* ebiFlyTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		0DFEFA082268A16F0061167A /* ebiFlyUITests */ = {
+		0DBCB1F5226B3E2B00FBC6C5 /* ebiFlyUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 0DFEFA122268A16F0061167A /* Build configuration list for PBXNativeTarget "ebiFlyUITests" */;
+			buildConfigurationList = 0DBCB1FF226B3E2B00FBC6C5 /* Build configuration list for PBXNativeTarget "ebiFlyUITests" */;
 			buildPhases = (
-				0DFEFA052268A16F0061167A /* Sources */,
-				0DFEFA062268A16F0061167A /* Frameworks */,
-				0DFEFA072268A16F0061167A /* Resources */,
+				0DBCB1F2226B3E2B00FBC6C5 /* Sources */,
+				0DBCB1F3226B3E2B00FBC6C5 /* Frameworks */,
+				0DBCB1F4226B3E2B00FBC6C5 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				0DFEFA0F2268A16F0061167A /* PBXTargetDependency */,
+				0DBCB1FC226B3E2B00FBC6C5 /* PBXTargetDependency */,
 			);
 			name = ebiFlyUITests;
 			productName = ebiFlyUITests;
-			productReference = 0DFEFA092268A16F0061167A /* ebiFlyUITests.xctest */;
+			productReference = 0DBCB1F6226B3E2B00FBC6C5 /* ebiFlyUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -278,7 +292,7 @@
 						CreatedOnToolsVersion = 10.1;
 						TestTargetID = 0DA6A187223BD1160040133D;
 					};
-					0DFEFA082268A16F0061167A = {
+					0DBCB1F5226B3E2B00FBC6C5 = {
 						CreatedOnToolsVersion = 10.2;
 						TestTargetID = 0DA6A187223BD1160040133D;
 					};
@@ -299,7 +313,7 @@
 			targets = (
 				0DA6A187223BD1160040133D /* ebiFly */,
 				0DA6A1A1223BD1180040133D /* ebiFlyTests */,
-				0DFEFA082268A16F0061167A /* ebiFlyUITests */,
+				0DBCB1F5226B3E2B00FBC6C5 /* ebiFlyUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -322,7 +336,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		0DFEFA072268A16F0061167A /* Resources */ = {
+		0DBCB1F4226B3E2B00FBC6C5 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -342,10 +356,12 @@
 				0DF70CB8223BF988007105D8 /* SauceScene.swift in Sources */,
 				0DE54C672260A88600006ED4 /* EbiViewController.swift in Sources */,
 				0DA6A18C223BD1160040133D /* AppDelegate.swift in Sources */,
+				0DFEF9C32263544A0061167A /* SKColor+Addition.swift in Sources */,
 				0DF70CBA223CBF79007105D8 /* GameClearScene.swift in Sources */,
 				0DE54C29225B6F9300006ED4 /* SKLabelNode+Addition.swift in Sources */,
 				0DF70CAE223BE02C007105D8 /* CharactorMakeScene.swift in Sources */,
 				0DF70CB6223BF905007105D8 /* FryScene.swift in Sources */,
+				0DFEF9C8226359C60061167A /* Constant.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -357,11 +373,11 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		0DFEFA052268A16F0061167A /* Sources */ = {
+		0DBCB1F2226B3E2B00FBC6C5 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0DFEFA0C2268A16F0061167A /* ebiFlyUITests.swift in Sources */,
+				0DBCB1F9226B3E2B00FBC6C5 /* ebiFlyUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -373,10 +389,10 @@
 			target = 0DA6A187223BD1160040133D /* ebiFly */;
 			targetProxy = 0DA6A1A3223BD1180040133D /* PBXContainerItemProxy */;
 		};
-		0DFEFA0F2268A16F0061167A /* PBXTargetDependency */ = {
+		0DBCB1FC226B3E2B00FBC6C5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 0DA6A187223BD1160040133D /* ebiFly */;
-			targetProxy = 0DFEFA0E2268A16F0061167A /* PBXContainerItemProxy */;
+			targetProxy = 0DBCB1FB226B3E2B00FBC6C5 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -594,7 +610,7 @@
 			};
 			name = Release;
 		};
-		0DFEFA102268A16F0061167A /* Debug */ = {
+		0DBCB1FD226B3E2B00FBC6C5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -614,7 +630,7 @@
 			};
 			name = Debug;
 		};
-		0DFEFA112268A16F0061167A /* Release */ = {
+		0DBCB1FE226B3E2B00FBC6C5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -664,11 +680,11 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		0DFEFA122268A16F0061167A /* Build configuration list for PBXNativeTarget "ebiFlyUITests" */ = {
+		0DBCB1FF226B3E2B00FBC6C5 /* Build configuration list for PBXNativeTarget "ebiFlyUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				0DFEFA102268A16F0061167A /* Debug */,
-				0DFEFA112268A16F0061167A /* Release */,
+				0DBCB1FD226B3E2B00FBC6C5 /* Debug */,
+				0DBCB1FE226B3E2B00FBC6C5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

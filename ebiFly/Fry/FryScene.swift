@@ -10,8 +10,7 @@ import UIKit
 import SpriteKit
 
 class FryScene: SKScene {
-    // 定数
-    let numAbura:Int = 300
+    let numAbura:Int = Constant.SpriteNum.abura
     // 尻尾のスプライト
     let tale: SKSpriteNode
     // スプライトの配列
@@ -23,6 +22,11 @@ class FryScene: SKScene {
     var bodyCount: Int
     
     var isTale:Bool = false
+    
+    var width: CGFloat!
+    var height: CGFloat!
+    
+    // MARK: - Initializer
     
     init(size: CGSize, bodyCount: Int, taleImageStr: String) {
         self.bodyCount = bodyCount
@@ -36,7 +40,12 @@ class FryScene: SKScene {
         fatalError("init(coder:) has not been implemented")
     }
     
+    // MARK: - LifeCycle
+    
     override func didMove(to view: SKView) {
+        width = self.view!.frame.width
+        height = self.view!.frame.height
+        
         Timer.scheduledTimer(withTimeInterval: 10, repeats: false){(_) in
             self.isTale = false
             self.removeChildren(in: self.aburaSprites)
@@ -45,7 +54,6 @@ class FryScene: SKScene {
             let t = self.tale
             self.removeChildren(in: self.ebiBodySprites)
             self.removeChildren(in: [self.tale])
-//             self.removeChildren(in: self.tale)
             let scene = SauceScene(size: self.scene!.size, count: 5, abura: self.koromoSprites,  tale: t, ebi: ebi, seed: self.koromoRandomSeed)
             scene.scaleMode = SKSceneScaleMode.aspectFill
             self.view!.presentScene(scene)
@@ -54,15 +62,13 @@ class FryScene: SKScene {
             self.isTale = false
         }
         
-        guard let width: CGFloat = self.view!.frame.width, let height: CGFloat = self.view!.frame.height else {
-            return
-        }
+        
         // えび --------------------------------------------------------------
         //// 尻尾の初期設定
         let taleX = width
         let taleY = height * 1.3
         tale.size = CGSize(width: width/6, height: width/6)
-        tale.position = CGPoint(x: taleX, y: taleY)
+        tale.position = CGPoint(x: taleX!, y: taleY)
         tale.physicsBody = SKPhysicsBody(circleOfRadius: 1)
         tale.zPosition = 1.2
         tale.physicsBody!.affectedByGravity = false
@@ -76,7 +82,7 @@ class FryScene: SKScene {
             let ebX = taleX
             let ebY = (taleY - width/6)  - (width/6 * CGFloat(i))
             ebiBody.size = CGSize(width: width/6, height: width/6)
-            ebiBody.position = CGPoint(x: ebX, y: ebY)
+            ebiBody.position = CGPoint(x: ebX!, y: ebY)
             ebiBody.physicsBody = SKPhysicsBody(circleOfRadius: 2)
             ebiBody.physicsBody!.affectedByGravity = true
             ebiBody.name = "ebiBody" + String(i)
@@ -128,47 +134,6 @@ class FryScene: SKScene {
         self.physicsBody = SKPhysicsBody(edgeLoopFrom: self.frame)
     }
     
-    func touchDown(atPoint pos : CGPoint) {
-    }
-    
-    func touchMoved(toPoint pos : CGPoint) {
-    }
-    
-    func touchUp(atPoint pos : CGPoint) {
-    }
-    
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        //タッチしたノードを取得する
-        let location = touches.first!.location(in: self)
-        guard let node = atPoint(location) as? SKSpriteNode else{
-            return
-        }
-        if(node == tale) {
-            isTale = true
-        } else {
-            isTale = false
-        }
-        
-        for t in touches { self.touchDown(atPoint: t.location(in: self)) }
-    }
-    
-    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        
-            // タッチしたノードの座標を取得、移動
-            let location = touches.first!.location(in: self)
-            let action = SKAction.move(to: CGPoint(x:location.x, y:location.y), duration:0.1)
-            if (isTale) { tale.run(action) }
-        for t in touches { self.touchMoved(toPoint: t.location(in: self)) }
-    }
-    
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchUp(atPoint: t.location(in: self)) }
-    }
-    
-    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        for t in touches { self.touchUp(atPoint: t.location(in: self)) }
-    }
-    
     override func update(_ currentTime: TimeInterval) {
         // あぶらの更新
         for i in 0..<numAbura {
@@ -194,6 +159,27 @@ class FryScene: SKScene {
                 }
             }
         }
+    }
+    
+    // MARK: - Event
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        //タッチしたノードを取得する
+        let location = touches.first!.location(in: self)
+        guard let node = atPoint(location) as? SKSpriteNode else{
+            return
+        }
+        if(node == tale) {
+            isTale = true
+        } else {
+            isTale = false
+        }
+    }
+    
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        let location = touches.first!.location(in: self)
+        let action = SKAction.move(to: CGPoint(x:location.x, y:location.y), duration:0.1)
+        if (isTale) { tale.run(action) }
     }
 }
 
