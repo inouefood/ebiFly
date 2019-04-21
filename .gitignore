@@ -1,30 +1,22 @@
-# Xcode (from gitignore.io)
+# hidden/temp files
+.DS_Store
+*.swp
+*~.nib
+*.bk
+temp.plist
+ 
+# Build dir
 build/
-*.pbxuser
-!default.pbxuser
-*.mode1v3
-!default.mode1v3
-*.mode2v3
-!default.mode2v3
-*.perspectivev3
-!default.perspectivev3
-*.xccheckout
-*.moved-aside
-DerivedData
-*.hmap
-*.ipa
-*.xcuserstate
-
+ 
 # Xcode project files except for the project file
 *.xcodeproj/*
 !*.xcodeproj/project.pbxproj
 !*.xcodeproj/xcshareddata
 xcuserdata
-
-# CocoaPod
-Pods/*
-
-# others
-*.swp
-!.gitkeep
-.DS_Store
+ 
+# Windows image thumbnail file
+Thumbs.db
+ 
+# User-specific project settings
+*.mode1v3
+*.mode2v3
