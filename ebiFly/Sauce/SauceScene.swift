@@ -28,7 +28,7 @@ class SauceScene: SKScene {
     var flyCirc = 0
     var countVal = 0
 
-    let shakeLabel = SKLabelNode(fontNamed: "Verdana-bold")
+    lazy var shakeLabel = SKLabelNode(fontSize: 50, text: "シェイクしろ！", pos: CGPoint(x: width/2, y: height - height / 6.0))
     let fallFlont = SKSpriteNode(imageNamed: "fallFront")
     let fallBack = SKSpriteNode(imageNamed: "fallBack")
     
@@ -193,12 +193,6 @@ class SauceScene: SKScene {
             if ebiBodySprites.last!.position.y < self.view!.frame.height/8 {
                 isEbiDonw = false
                 
-                //label追加
-                shakeLabel.position = CGPoint(x: self.view!.frame.width, y: self.frame.height - self.frame.height / 6.0)
-                shakeLabel.fontColor = .white
-                shakeLabel.text = "シェイクしろ！"
-                shakeLabel.fontSize = 70
-                
                 Timer.scheduledTimer(withTimeInterval: 3, repeats: false) {(_) in
                     //バイブ
                     AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
@@ -208,7 +202,6 @@ class SauceScene: SKScene {
                     self.flyCirc = self.shakeCount * self.aburaSprites.count
                     
                     self.isShakeEnd = true
-                    
                 }
                 
                 self.addChild(shakeLabel)
