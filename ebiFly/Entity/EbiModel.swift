@@ -10,10 +10,22 @@ import Foundation
 import SpriteKit
 
 struct EbiModel {
-    let tale: SKSpriteNode
-    let body: [SKSpriteNode]
+    var tale: SKSpriteNode
+    var body: [SKSpriteNode]
+    var bodyCount: Int = 3
+    
     init(tale:SKSpriteNode, body: [SKSpriteNode]) {
         self.tale = tale
         self.body = body
+    }
+    
+    func setTaleTexture(selectNum: Int){
+        if selectNum == 1 {
+            self.tale.texture = SKTexture(imageNamed: "tale1")
+        } else if selectNum == 2 {
+            self.tale.texture = SKTexture(imageNamed: "tale2")
+        } else if selectNum == 3 {
+            self.tale.texture = SKTexture(imageNamed: "tale3")
+        }
     }
 }
