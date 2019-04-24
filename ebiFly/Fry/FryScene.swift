@@ -11,8 +11,7 @@ import SpriteKit
 
 class FryScene: SKScene {
     let numAbura:Int = Constant.SpriteNum.abura
-    // 尻尾のスプライト
-    let tale: SKSpriteNode
+    var ebiModel: EbiModel
     // スプライトの配列
     var ebiBodySprites:[SKSpriteNode] = []
     var aburaSprites:[SKSpriteNode] = []
@@ -31,9 +30,8 @@ class FryScene: SKScene {
     init(size: CGSize, bodyCount: Int, taleImageStr: String) {
         self.bodyCount = bodyCount
         
-        tale = SKSpriteNode(imageNamed: taleImageStr)
+        ebiModel = EbiModel(tale: SKSpriteNode(imageNamed: taleImageStr), body: [SKSpriteNode(imageNamed: "ebibody")])
         super.init(size: size)
-        
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -51,9 +49,9 @@ class FryScene: SKScene {
             self.removeChildren(in: self.aburaSprites)
             
             let ebi = self.ebiBodySprites
-            let t = self.tale
+            let t = self.ebiModel.tale
             self.removeChildren(in: self.ebiBodySprites)
-            self.removeChildren(in: [self.tale])
+            self.removeChildren(in: [self.ebiModel.tale])
             let scene = SauceScene(size: self.scene!.size, count: 5, abura: self.koromoSprites,  tale: t, ebi: ebi, seed: self.koromoRandomSeed)
             scene.scaleMode = SKSceneScaleMode.aspectFill
             self.view!.presentScene(scene)
@@ -62,18 +60,17 @@ class FryScene: SKScene {
             self.isTale = false
         }
         
-        
         // えび --------------------------------------------------------------
         //// 尻尾の初期設定
-        let taleX = width
-        let taleY = height * 1.3
-        tale.size = CGSize(width: width/6, height: width/6)
-        tale.position = CGPoint(x: taleX!, y: taleY)
-        tale.physicsBody = SKPhysicsBody(circleOfRadius: 1)
-        tale.zPosition = 1.2
-        tale.physicsBody!.affectedByGravity = false
-        tale.physicsBody!.isDynamic = false
-        self.addChild(tale)
+        let taleX = width/2
+        let taleY = height - height/6
+        ebiModel.tale.size = CGSize(width: width/6, height: width/6)
+        ebiModel.tale.position = CGPoint(x: taleX, y: taleY)
+        ebiModel.tale.physicsBody = SKPhysicsBody(circleOfRadius: 1)
+        ebiModel.tale.zPosition = 1.2
+        ebiModel.tale.physicsBody!.affectedByGravity = false
+        ebiModel.tale.physicsBody!.isDynamic = false
+        self.addChild(ebiModel.tale)
         
         
         //// 身体の初期設定
@@ -82,7 +79,7 @@ class FryScene: SKScene {
             let ebX = taleX
             let ebY = (taleY - width/6)  - (width/6 * CGFloat(i))
             ebiBody.size = CGSize(width: width/6, height: width/6)
-            ebiBody.position = CGPoint(x: ebX!, y: ebY)
+            ebiBody.position = CGPoint(x: ebX, y: ebY)
             ebiBody.physicsBody = SKPhysicsBody(circleOfRadius: 2)
             ebiBody.physicsBody!.affectedByGravity = true
             ebiBody.name = "ebiBody" + String(i)
@@ -99,7 +96,7 @@ class FryScene: SKScene {
             self.physicsWorld.add(joint)
         }
         //// 尻尾のjoint
-        let joint = SKPhysicsJointFixed.joint(withBodyA: tale.physicsBody!, bodyB: ebiBodySprites[0].physicsBody!, anchor: CGPoint(x: tale.frame.midX, y: tale.frame.maxY))
+        let joint = SKPhysicsJointFixed.joint(withBodyA: ebiModel.tale.physicsBody!, bodyB: ebiBodySprites[0].physicsBody!, anchor: CGPoint(x: ebiModel.tale.frame.midX, y: ebiModel.tale.frame.maxY))
         self.physicsWorld.add(joint)
         
         // あぶら --------------------------------------------------------------
@@ -169,7 +166,7 @@ class FryScene: SKScene {
         guard let node = atPoint(location) as? SKSpriteNode else{
             return
         }
-        if(node == tale) {
+        if(node == ebiModel.tale) {
             isTale = true
         } else {
             isTale = false
@@ -179,7 +176,7 @@ class FryScene: SKScene {
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         let location = touches.first!.location(in: self)
         let action = SKAction.move(to: CGPoint(x:location.x, y:location.y), duration:0.1)
-        if (isTale) { tale.run(action) }
+        if (isTale) { ebiModel.tale.run(action) }
     }
 }
 
