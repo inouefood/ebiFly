@@ -6,18 +6,24 @@
 //  Copyright © 2019 佐川晴海. All rights reserved.
 //
 
-import SpriteKit
+import UIKit
 
-extension SKColor {
+extension UIColor {
     enum AppColor: String {
-        case c1
-        case c2
+        case thema
+        case white
+        case sky
+        case night
         var hex: String {
             switch self {
-            case .c1:
+            case .thema:
                 return "#248bff"
-            case .c2:
+            case .white:
                 return "#ffffff"
+            case .sky:
+                return "#66CCFF"
+            case .night:
+                return "#1D3455"
             }
         }
     }

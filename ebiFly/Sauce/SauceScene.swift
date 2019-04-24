@@ -53,7 +53,7 @@ class SauceScene: SKScene {
         fatalError("init(coder:) has not been implemented")
     }
     override func didMove(to view: SKView) {
-        self.backgroundColor = SKColor(appColor: .c2)
+        self.backgroundColor = UIColor(appColor: .white)
         
         width = self.view!.frame.width
         height = self.view!.frame.height
@@ -61,11 +61,11 @@ class SauceScene: SKScene {
         //背景
         clearSky = SKShapeNode(rectOf: CGSize(width: self.frame.width * 2, height: self.frame.height))
         clearSky.position = CGPoint(x: 0, y: self.frame.height)
-        clearSky.fillColor = UIColor(red: 102/255, green: 204/255, blue: 255/255, alpha: 1.0)
+        clearSky.fillColor = UIColor(appColor: .sky)
         self.addChild(clearSky)
         
         universeSky = SKShapeNode(rectOf: CGSize(width: self.frame.width * 2, height: self.frame.height + self.frame.height))
-        universeSky.fillColor = UIColor(red: 29/255, green: 52/255, blue: 85/255, alpha: 1.0)
+        universeSky.fillColor = UIColor(appColor: .night)
         universeSky.position = CGPoint(x: 0, y: self.frame.height + self.frame.height)
         self.addChild(universeSky)
         

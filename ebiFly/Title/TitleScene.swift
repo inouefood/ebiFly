@@ -22,7 +22,7 @@ class TitleScene: SKScene {
     
     override func didMove(to view: SKView) {
         self.anchorPoint = CGPoint(x: 0, y: 0)
-        self.backgroundColor = SKColor(appColor: .c1)
+        self.backgroundColor = UIColor(appColor: .thema)
         
         width = self.view!.frame.width
         height =  self.view!.frame.height
