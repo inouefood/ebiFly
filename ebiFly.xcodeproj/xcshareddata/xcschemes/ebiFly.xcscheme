@@ -38,6 +38,16 @@
                ReferencedContainer = "container:ebiFly.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "0DBCB1F5226B3E2B00FBC6C5"
+               BuildableName = "ebiFlyUITests.xctest"
+               BlueprintName = "ebiFlyUITests"
+               ReferencedContainer = "container:ebiFly.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
       <MacroExpansion>
          <BuildableReference

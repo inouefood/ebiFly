@@ -131,7 +131,7 @@ class CharactorMakeScene: SKScene {
                 addBody(count: ebiModel.bodyCount)
             }
             if touchNode == flyLabel {
-                // TODO 遷移先にさ渡すものをEbiModelだけに修正
+                // TODO 遷移先先に渡すものをEbiModelだけに修正,レイアウト修正は1画面ずつ行いたいので後で
                 let scene = FryScene(size: self.scene!.size, bodyCount: ebiModel.bodyCount, taleImageStr: "tale1")
                 scene.scaleMode = SKSceneScaleMode.aspectFill
                 self.view!.presentScene(scene)
