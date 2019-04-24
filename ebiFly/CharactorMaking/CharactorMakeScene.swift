@@ -28,6 +28,7 @@ class CharactorMakeScene: SKScene {
     
     var width: CGFloat!
     var height: CGFloat!
+    var taleY: CGFloat!
     
     var texture = "tale1"
     
@@ -36,6 +37,7 @@ class CharactorMakeScene: SKScene {
     override func didMove(to view: SKView) {
         width  = self.view!.frame.width
         height = self.view!.frame.height
+        taleY = height - height/6
 
         addTail(taleImgStr: "tale1")
         addBody(count: bodyCount)
@@ -46,15 +48,15 @@ class CharactorMakeScene: SKScene {
     private func addBody(count: Int){
         
         
-        let taleX = width
-        let taleY = height * 1.3
+        let taleX = width/2
         
         for i in 0..<count {
             let ebiBody = SKSpriteNode(imageNamed: "ebibody")
             let ebX = taleX
-            let ebY = (taleY - width/4)  - (width/4 * CGFloat(i))
+            let rootY = taleY - width/4
+            let ebY = rootY - (width/4 * CGFloat(i))
             ebiBody.size = CGSize(width: width/4 , height: width/4)
-            ebiBody.position = CGPoint(x: ebX!, y: ebY)
+            ebiBody.position = CGPoint(x: ebX, y: ebY)
             ebiBody.physicsBody = SKPhysicsBody(circleOfRadius: 20)
             ebiBody.physicsBody!.affectedByGravity = false
             ebiBody.name = "ebiBody" + String(i)
@@ -65,10 +67,8 @@ class CharactorMakeScene: SKScene {
     private func addTail(taleImgStr: String){
         tale = SKSpriteNode(imageNamed: taleImgStr)
         setSelectButton(width: width, height: height)
-        
-        let taleX = width
-        let taleY = height * 1.3
-        tale!.position = CGPoint(x: taleX!, y: taleY)
+    
+        tale!.position = CGPoint(x: width/2, y: taleY)
         tale!.size = CGSize(width: width/4, height: width/4)
         tale!.physicsBody = SKPhysicsBody(circleOfRadius: 20)
         tale!.physicsBody!.affectedByGravity = false
@@ -76,17 +76,18 @@ class CharactorMakeScene: SKScene {
         self.addChild(tale!)
     }
     private func setSelectButton(width: CGFloat, height: CGFloat){
-        tailLeft.position = CGPoint(x: width/6 * 2, y: height * 1.3)
-        tailLeft.size = CGSize(width: width/3, height: width/3)
+        let buttonSize = CGSize(width: width/6, height: width/6)
+        tailLeft.size = buttonSize
+        tailLeft.position = CGPoint(x: width/6, y: height - height/6)
         
-        tailRight.position = CGPoint(x: width * 2 - width/6 * 2, y: height * 1.3)
-        tailRight.size = CGSize(width: width/3, height: width/3)
+        tailRight.position = CGPoint(x: width - width/6, y: height - height/6)
+        tailRight.size = buttonSize
         
         
-        bodyLeft.position = CGPoint(x: width/6 * 2, y: height - height / 4 * 2)
-        bodyLeft.size = CGSize(width: (self.view?.frame.width)!/3, height: (self.view?.frame.width)!/3)
-        bodyRight.position = CGPoint(x: width * 2 - width/6 * 2, y: height - height / 4 * 2)
-        bodyRight.size = CGSize(width: (self.view?.frame.width)!/3, height: (self.view?.frame.width)!/3)
+        bodyLeft.position = CGPoint(x: width/6 , y: height/3)
+        bodyLeft.size = buttonSize
+        bodyRight.position = CGPoint(x: width - width/6, y: height/3)
+        bodyRight.size = buttonSize
         
         self.addChild(bodyLeft)
         self.addChild(tailRight)
@@ -94,8 +95,8 @@ class CharactorMakeScene: SKScene {
         self.addChild(bodyRight)
         
         flyLabel.text = "揚げる!!"
-        flyLabel.fontSize = 130
-        flyLabel.position = CGPoint(x:width, y:height/10)
+        flyLabel.fontSize = 70
+        flyLabel.position = CGPoint(x:width/2, y:height/10)
         self.addChild(flyLabel)
     }
     
