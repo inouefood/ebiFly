@@ -11,8 +11,6 @@ import SpriteKit
 import CoreMotion
 import AudioToolbox
 
-
-
 class SauceScene: SKScene {
     var aburaSprites: [SKSpriteNode]
     var taleSprite: SKSpriteNode
@@ -107,12 +105,12 @@ class SauceScene: SKScene {
             self.isFirstPosition = true
         }
         
-        setHall(wid: width, hgt: height)
+        setHall(wid: width/2, hgt: height)
         
-        let taleX = width
+        let taleX = width/2
         
         let taleY = self.frame.height - self.frame.height / 6.0
-        taleSprite.position = CGPoint(x: taleX!, y: self.frame.height - self.frame.height / 6.0)
+        taleSprite.position = CGPoint(x: width/2, y: self.frame.height - self.frame.height / 6.0)
         self.addChild(taleSprite)
         
         for i in 0..<ebiBodySprites.count {
@@ -129,15 +127,15 @@ class SauceScene: SKScene {
         for i in 0..<aburaSprites.count {
             switch aburaRandomSeed[i] {
             case 0:
-                aburaSprites[i].position = CGPoint(x: taleX!, y: ebiBodySprites[0].position.y)
+                aburaSprites[i].position = CGPoint(x: taleX, y: ebiBodySprites[0].position.y)
             case 1:
-                aburaSprites[i].position = CGPoint(x: taleX!, y: ebiBodySprites[1].position.y)
+                aburaSprites[i].position = CGPoint(x: taleX, y: ebiBodySprites[1].position.y)
             case 2:
-                aburaSprites[i].position = CGPoint(x: taleX!, y: ebiBodySprites[2].position.y)
+                aburaSprites[i].position = CGPoint(x: taleX, y: ebiBodySprites[2].position.y)
             case 3:
-                aburaSprites[i].position = CGPoint(x: taleX!, y: ebiBodySprites[3].position.y)
+                aburaSprites[i].position = CGPoint(x: taleX, y: ebiBodySprites[3].position.y)
             case 4:
-                aburaSprites[i].position = CGPoint(x: taleX!, y: ebiBodySprites[4].position.y)
+                aburaSprites[i].position = CGPoint(x: taleX, y: ebiBodySprites[4].position.y)
             default:
                 break
             }
@@ -172,14 +170,14 @@ class SauceScene: SKScene {
         if taleSprite.position != CGPoint(x: self.view!.frame.width, y: self.frame.height - self.frame.height / 6.0) && !isFirstPosition {
             
             self.removeChildren(in: [taleSprite])
-            let taleY = self.frame.height - self.frame.height / 6.0
-            taleSprite.position = CGPoint(x: self.view!.frame.width, y: self.frame.height - self.frame.height / 6.0)
+            let taleY = height - height / 6.0
+            taleSprite.position = CGPoint(x: width/2, y: taleY)
             self.addChild(taleSprite)
             
             self.removeChildren(in: ebiBodySprites)
             for i in 0..<ebiBodySprites.count {
                 let ebY = (taleY - width/6)  - (width/6 * CGFloat(i))
-                ebiBodySprites[i].position = CGPoint(x: width, y: ebY)
+                ebiBodySprites[i].position = CGPoint(x: width/2, y: ebY)
                 self.addChild(ebiBodySprites[i])
             }
             for i in 1..<ebiBodySprites.count {
