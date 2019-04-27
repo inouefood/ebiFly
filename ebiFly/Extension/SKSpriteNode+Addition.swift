@@ -9,9 +9,10 @@
 import SpriteKit
 
 extension SKSpriteNode {
-    convenience init(image: String, pos: CGPoint, size: CGSize){
+    convenience init(image: String, pos: CGPoint, size: CGSize, zPos: CGFloat = 1.0){
         self.init(imageNamed: image)
         self.position = pos
         self.size = size
+        self.zPosition = zPos
     }
 }

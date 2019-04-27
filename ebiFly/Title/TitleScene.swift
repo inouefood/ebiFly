@@ -24,6 +24,7 @@ class TitleScene: SKScene {
         self.anchorPoint = CGPoint(x: 0, y: 0)
         self.backgroundColor = UIColor(appColor: .thema)
         
+        
         width = self.view!.frame.width
         height =  self.view!.frame.height
         

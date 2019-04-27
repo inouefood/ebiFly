@@ -30,6 +30,7 @@ class CharactorMakeScene: SKScene {
     // MARK: - Initializer
     
     override func didMove(to view: SKView) {
+        
         width  = self.view!.frame.width
         height = self.view!.frame.height
         taleY = height - height/6
@@ -133,7 +134,6 @@ class CharactorMakeScene: SKScene {
             if touchNode == flyLabel {
                 // TODO 遷移先先に渡すものをEbiModelだけに修正,レイアウト修正は1画面ずつ行いたいので後で
                 let scene = FryScene(size: self.scene!.size, bodyCount: ebiModel.bodyCount, taleImageStr: "tale1")
-                scene.scaleMode = SKSceneScaleMode.aspectFill
                 self.view!.presentScene(scene)
             }
         }

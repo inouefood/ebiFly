@@ -29,8 +29,12 @@ class SauceScene: SKScene {
     var countVal = 0
 
     lazy var shakeLabel = SKLabelNode(fontSize: 50, text: "シェイクしろ！", pos: CGPoint(x: width/2, y: height - height / 6.0))
-    let fallFlont = SKSpriteNode(imageNamed: "fallFront")
-    let fallBack = SKSpriteNode(imageNamed: "fallBack")
+    lazy var fallSprite: [SKSpriteNode]! = {
+       return [
+            SKSpriteNode(image: "fallBack", pos: CGPoint(x: width/2, y: height/8), size: CGSize(width: width/2, height: width)),
+            SKSpriteNode(image: "fallFront", pos: CGPoint(x: width/2, y: height/8), size: CGSize(width: width/2, height: width), zPos: 1.3)
+        ]
+    }()
     
     fileprivate lazy var presenter: SaucePresenter! = {
         return SaucePresenterImpl(model: SauceModelImpl())
@@ -39,16 +43,22 @@ class SauceScene: SKScene {
     var width: CGFloat!
     var height: CGFloat!
     
-    //背景
     lazy var cloudSprite: [SKSpriteNode]! = {
         return [
-            SKSpriteNode(image: "cround1", pos: CGPoint(x: width/3, y: self.frame.height), size: CGSize(width: width/2, height: width/3)),
-            SKSpriteNode(image: "cround1", pos: CGPoint(x: width/2, y: height / 2 + 200), size: CGSize(width: width/2, height: width/3)),
+            SKSpriteNode(image: "cround1", pos: CGPoint(x: width/3, y: height), size: CGSize(width: width/2, height: width/3)),
+            SKSpriteNode(image: "cround1", pos: CGPoint(x: width/2, y: height / 2 + 200), size: CGSize(width: width/2, height: width/3))
          ]
         }()
-    var clearSky:SKShapeNode!
-    var universeSky: SKShapeNode!
+    lazy var backgroundSky: [SKShapeNode]! = {
+        return [
+            SKShapeNode(rect: CGRect(x: 0, y: height/1.5, width: width, height: height * 2),color: UIColor(appColor: .sky)),
+            SKShapeNode(rect: CGRect(x: 0, y: height*2, width: width, height: height * 4), color: UIColor(appColor: .night))
+        ]
+    }()
+    
     var stars: [SKSpriteNode] = [SKSpriteNode(imageNamed: "star"), SKSpriteNode(imageNamed: "star"), SKSpriteNode(imageNamed: "star"), SKSpriteNode(imageNamed: "star"), SKSpriteNode(imageNamed: "star"), SKSpriteNode(imageNamed: "star"), SKSpriteNode(imageNamed: "star"), SKSpriteNode(imageNamed: "star")]
+    
+    // MARK: - initializer
     
     init(size: CGSize, count: Int, abura: [SKSpriteNode], tale: SKSpriteNode, ebi: [SKSpriteNode], seed: [Int]){
         self.aburaSprites = abura
@@ -62,24 +72,23 @@ class SauceScene: SKScene {
         fatalError("init(coder:) has not been implemented")
     }
     override func didMove(to view: SKView) {
+        self.anchorPoint = CGPoint(x: 0, y: 0)
         self.backgroundColor = UIColor(appColor: .white)
         
         width = self.view!.frame.width
         height = self.view!.frame.height
-       
+        
         //背景
-        clearSky = SKShapeNode(rectOf: CGSize(width: self.frame.width * 2, height: self.frame.height))
-        clearSky.position = CGPoint(x: 0, y: self.frame.height)
-        clearSky.fillColor = UIColor(appColor: .sky)
-        self.addChild(clearSky)
+        backgroundSky.forEach{ sky in
+            self.addChild(sky)
+        }
         
-        universeSky = SKShapeNode(rectOf: CGSize(width: self.frame.width * 2, height: self.frame.height + self.frame.height))
-        universeSky.fillColor = UIColor(appColor: .night)
-        universeSky.position = CGPoint(x: 0, y: self.frame.height + self.frame.height)
-        self.addChild(universeSky)
-        
-        cloudSprite.forEach{cloud in
+        cloudSprite.forEach{ cloud in
             self.addChild(cloud)
+        }
+        
+        fallSprite.forEach{ fall in
+            self.addChild(fall)
         }
         
         stars[0].position = CGPoint(x: self.frame.width/3, y: self.frame.height + self.frame.height/2)
@@ -110,8 +119,6 @@ class SauceScene: SKScene {
         Timer.scheduledTimer(withTimeInterval: 1, repeats: false){(_) in
             self.isFirstPosition = true
         }
-        
-        setHall(wid: width/2, hgt: height)
         
         let taleX = width/2
         
@@ -165,13 +172,6 @@ class SauceScene: SKScene {
         self.y = Int(data.y)
         self.z = Int(data.z)
     }
-    func setHall(wid: CGFloat, hgt: CGFloat){
-        fallBack.position = CGPoint(x: wid, y: hgt/8)
-        fallFlont.position = CGPoint(x: wid, y: hgt/8)
-        fallFlont.zPosition = 1.3
-        self.addChild(fallBack)
-        self.addChild(fallFlont)
-    }
     override func update(_ currentTime: TimeInterval) {
         if taleSprite.position != CGPoint(x: self.view!.frame.width, y: self.frame.height - self.frame.height / 6.0) && !isFirstPosition {
             
@@ -202,7 +202,7 @@ class SauceScene: SKScene {
                 Timer.scheduledTimer(withTimeInterval: 3, repeats: false) {(_) in
                     //バイブ
                     AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
-//                    self.motionManager = nil
+                    self.motionManager = nil
                     self.shakeLabel.text = "0m"
                     self.shakeLabel.zPosition = 1.3
                     self.flyCirc = self.shakeCount * self.aburaSprites.count
@@ -241,16 +241,19 @@ class SauceScene: SKScene {
         if isShakeEnd {
             if flyCirc > countVal {
                 countVal += 1
-                fallFlont.position.y -= 1
-                fallBack.position.y -= 1
+                
+                fallSprite.forEach{ fall in
+                    fall.position.y -= 1
+                }
                 flyCount += 1
                 shakeLabel.text = "\(flyCount)m"
                 
                 cloudSprite.forEach{ cloud in
                     cloud.position.y -= 1
                 }
-                clearSky.position.y -= 1
-                universeSky.position.y -= 1
+                backgroundSky.forEach{ sky in
+                    sky.position.y -= 1
+                }
                 
                 stars.forEach{ star in
                     star.position.y -= 1
