@@ -32,11 +32,20 @@ class SauceScene: SKScene {
     let fallFlont = SKSpriteNode(imageNamed: "fallFront")
     let fallBack = SKSpriteNode(imageNamed: "fallBack")
     
+    fileprivate lazy var presenter: SaucePresenter! = {
+        return SaucePresenterImpl(model: SauceModelImpl())
+    }()
+    
     var width: CGFloat!
     var height: CGFloat!
     
     //背景
-    var croundSprite: [SKSpriteNode] = [SKSpriteNode(imageNamed: "cround1"), SKSpriteNode(imageNamed: "cround1")]
+    lazy var cloudSprite: [SKSpriteNode]! = {
+        return [
+            SKSpriteNode(image: "cround1", pos: CGPoint(x: width/3, y: self.frame.height), size: CGSize(width: width/2, height: width/3)),
+            SKSpriteNode(image: "cround1", pos: CGPoint(x: width/2, y: height / 2 + 200), size: CGSize(width: width/2, height: width/3)),
+         ]
+        }()
     var clearSky:SKShapeNode!
     var universeSky: SKShapeNode!
     var stars: [SKSpriteNode] = [SKSpriteNode(imageNamed: "star"), SKSpriteNode(imageNamed: "star"), SKSpriteNode(imageNamed: "star"), SKSpriteNode(imageNamed: "star"), SKSpriteNode(imageNamed: "star"), SKSpriteNode(imageNamed: "star"), SKSpriteNode(imageNamed: "star"), SKSpriteNode(imageNamed: "star")]
@@ -69,12 +78,9 @@ class SauceScene: SKScene {
         universeSky.position = CGPoint(x: 0, y: self.frame.height + self.frame.height)
         self.addChild(universeSky)
         
-        croundSprite[0].position = CGPoint(x: self.frame.width/3, y: self.frame.height )
-        croundSprite[0].zPosition = 0.8
-        self.addChild(croundSprite[0])
-        croundSprite[1].position = CGPoint(x: self.frame.width/2, y: self.frame.height / 2 + 200)
-        croundSprite[1].zPosition = 0.8
-        self.addChild(croundSprite[1])
+        cloudSprite.forEach{cloud in
+            self.addChild(cloud)
+        }
         
         stars[0].position = CGPoint(x: self.frame.width/3, y: self.frame.height + self.frame.height/2)
         stars[0].zPosition = 0.8
@@ -147,14 +153,14 @@ class SauceScene: SKScene {
         
     }
     func updateAccelerationData(data: CMAcceleration) {
-        
+
         let isShaken = self.x != Int(data.x) || self.y != Int(data.y) || self.z != Int(data.z)
-        
+
         if isShaken {
             shakeCount += 1
             print("シェイクされたよ\(shakeCount)")
         }
-        
+
         self.x = Int(data.x)
         self.y = Int(data.y)
         self.z = Int(data.z)
@@ -196,7 +202,7 @@ class SauceScene: SKScene {
                 Timer.scheduledTimer(withTimeInterval: 3, repeats: false) {(_) in
                     //バイブ
                     AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
-                    self.motionManager = nil
+//                    self.motionManager = nil
                     self.shakeLabel.text = "0m"
                     self.shakeLabel.zPosition = 1.3
                     self.flyCirc = self.shakeCount * self.aburaSprites.count
@@ -211,7 +217,10 @@ class SauceScene: SKScene {
                         aburaSprites[i].texture = SKTexture(imageNamed: "aburaBlack3")
                     }
                 }
-                
+                //TODO シェイクロジックをModelで行う、なぜか処理が戻ってこないので一旦保留
+//                if presenter.shakeDevice() {
+//                    shakeCount += 1
+//                }
                 //シェイクジェスチャー開始
                 self.motionManager!.accelerometerUpdateInterval = 0.2
                 self.motionManager!.startAccelerometerUpdates(to: OperationQueue()) {
@@ -237,19 +246,16 @@ class SauceScene: SKScene {
                 flyCount += 1
                 shakeLabel.text = "\(flyCount)m"
                 
-                croundSprite[0].position.y -= 1
-                croundSprite[1].position.y -= 1
+                cloudSprite.forEach{ cloud in
+                    cloud.position.y -= 1
+                }
                 clearSky.position.y -= 1
                 universeSky.position.y -= 1
-                stars[0].position.y -= 1
-                stars[1].position.y -= 1
-                stars[2].position.y -= 1
-                stars[3].position.y -= 1
-                stars[4].position.y -= 1
-                stars[5].position.y -= 1
-                stars[6].position.y -= 1
-                stars[7].position.y -= 1
                 
+                stars.forEach{ star in
+                    star.position.y -= 1
+                }
+
                 if taleSprite.position.y < self.frame.height / 2 {
                     taleSprite.position.y += 0.5
                     
