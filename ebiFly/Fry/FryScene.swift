@@ -41,6 +41,7 @@ class FryScene: SKScene {
     // MARK: - LifeCycle
     
     override func didMove(to view: SKView) {
+        
         width = self.view!.frame.width
         height = self.view!.frame.height
         
@@ -53,7 +54,6 @@ class FryScene: SKScene {
             self.removeChildren(in: self.ebiBodySprites)
             self.removeChildren(in: [self.ebiModel.tale])
             let scene = SauceScene(size: self.scene!.size, count: 5, abura: self.koromoSprites,  tale: t, ebi: ebi, seed: self.koromoRandomSeed)
-            scene.scaleMode = SKSceneScaleMode.aspectFill
             self.view!.presentScene(scene)
         }
         Timer.scheduledTimer(withTimeInterval: 2.9, repeats: false){(_) in

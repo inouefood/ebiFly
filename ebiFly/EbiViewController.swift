@@ -23,6 +23,7 @@ class EbiViewController: UIViewController {
         skView.ignoresSiblingOrder = true
         let size = CGSize(width: skView.bounds.size.width, height: skView.bounds.size.height)
         let scene = TitleScene(size: size)
+        scene.scaleMode = .aspectFill
         skView.presentScene(scene)
     }
 }
