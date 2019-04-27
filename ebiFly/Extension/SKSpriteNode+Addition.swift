@@ -15,4 +15,9 @@ extension SKSpriteNode {
         self.size = size
         self.zPosition = zPos
     }
+    convenience init(image: String, pos: CGPoint, zPos: CGFloat = 1.0){
+        self.init(imageNamed: image)
+        self.position = pos
+        self.zPosition = zPos
+    }
 }
