@@ -21,18 +21,13 @@ class CharactorMakeScene: SKScene {
     let bodyLeft = SKSpriteNode(imageNamed: "left")
     let bodyRight = SKSpriteNode(imageNamed: "right")
     let flyLabel = SKLabelNode(fontNamed: "Verdana-bold")
-    
-    var width: CGFloat!
-    var height: CGFloat!
+
     var taleY: CGFloat!
     
     
     // MARK: - Initializer
     
     override func didMove(to view: SKView) {
-        
-        width  = self.view!.frame.width
-        height = self.view!.frame.height
         taleY = height - height/6
 
         ebiModel = EbiModel(tale: SKSpriteNode(imageNamed: "tale1"), body: [SKSpriteNode(imageNamed: "ebibody")])

@@ -15,19 +15,12 @@ class TitleScene: SKScene {
     lazy var ebiSprite =  SKSpriteNode(image: "ebiAnimation01", pos: CGPoint(x: width/2, y: height/7), size: CGSize(width: width/3, height: width/9))
     lazy var ebiSprite2 = SKSpriteNode(image: "ebiAnimation04", pos: CGPoint(x: width/2, y: height/1.5), size: CGSize(width: width/2, height: width/5))
     lazy var ebiSprite3 = SKSpriteNode(image: "ebiAnimation04", pos: CGPoint(x: width/6, y: height/8), size: CGSize(width: width/3, height: width/9))
-    var width: CGFloat!
-    var height: CGFloat!
     
     // MARK: LifeCycle
     
     override func didMove(to view: SKView) {
         self.anchorPoint = CGPoint(x: 0, y: 0)
         self.backgroundColor = UIColor(appColor: .thema)
-        
-        
-        width = self.view!.frame.width
-        height =  self.view!.frame.height
-        
         self.addChild(startLabel, ebiSprite, ebiSprite2, ebiSprite3)
 
         ebiAnimation()

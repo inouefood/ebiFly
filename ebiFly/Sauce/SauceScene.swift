@@ -66,10 +66,7 @@ class SauceScene: SKScene {
     fileprivate lazy var presenter: SaucePresenter! = {
         return SaucePresenterImpl(model: SauceModelImpl())
     }()
-    
-    var width: CGFloat!
-    var height: CGFloat!
-    
+
     // MARK: - Initializer
     
     init(size: CGSize, count: Int, abura: [SKSpriteNode], tale: SKSpriteNode, ebi: [SKSpriteNode], seed: [Int]){
@@ -89,11 +86,6 @@ class SauceScene: SKScene {
     override func didMove(to view: SKView) {
         self.anchorPoint = CGPoint(x: 0, y: 0)
         self.backgroundColor = UIColor(appColor: .white)
-        
-        width = self.view!.frame.width
-        height = self.view!.frame.height
-    
-        
         self.addChild(backgroundSky, cloudSprite, fallSprite, stars)
         
         Timer.scheduledTimer(withTimeInterval: 1, repeats: false){(_) in

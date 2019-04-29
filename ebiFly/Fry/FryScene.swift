@@ -21,10 +21,7 @@ class FryScene: SKScene {
     var bodyCount: Int
     
     var isTale:Bool = false
-    
-    var width: CGFloat!
-    var height: CGFloat!
-    
+
     // MARK: - Initializer
     
     init(size: CGSize, bodyCount: Int, taleImageStr: String) {
@@ -41,10 +38,6 @@ class FryScene: SKScene {
     // MARK: - LifeCycle
     
     override func didMove(to view: SKView) {
-        
-        width = self.view!.frame.width
-        height = self.view!.frame.height
-        
         Timer.scheduledTimer(withTimeInterval: 10, repeats: false){(_) in
             self.isTale = false
             self.removeChildren(in: self.aburaSprites)
