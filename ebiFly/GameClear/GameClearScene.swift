@@ -11,13 +11,13 @@ import SpriteKit
 class GameClearScene: SKScene {
     let score: Int
     lazy var scoreLabel: SKLabelNode! = {
-        return SKLabelNode(font: "Verdana-bold", fontSize: 50, text: "\(score)m", pos: CGPoint(x:self.frame.width/2, y:self.frame.height - self.frame.height/5))
+        return SKLabelNode(font: "Verdana-bold", fontSize: 50, text: "\(score)m", pos: CGPoint(x:width/2, y:height - height/5))
     }()
     lazy var retrayLabel: SKLabelNode! = {
-       return SKLabelNode(fontSize: 50, text: "もう一度遊ぶ", pos: CGPoint(x: self.frame.width/2, y: self.frame.height/6))
+       return SKLabelNode(fontSize: 50, text: "もう一度遊ぶ", pos: CGPoint(x: width/2, y: height/6))
     }()
     lazy var clearImage:SKSpriteNode! = {
-        return SKSpriteNode(image: "clearimage", pos: CGPoint(x: self.frame.width/2, y: self.frame.height/2), size: CGSize(width: self.view!.frame.width/1.5, height: self.view!.frame.width/1.5))
+        return SKSpriteNode(image: "clearimage", pos: CGPoint(x: width/2, y: height/2), size: CGSize(width: width/1.5, height: width/1.5))
     }()
 
     // MARK: - Initializer
@@ -37,9 +37,7 @@ class GameClearScene: SKScene {
         self.anchorPoint = CGPoint(x: 0, y: 0)
         self.backgroundColor = UIColor(appColor: .thema)
         
-        self.addChild(scoreLabel)
-        self.addChild(clearImage)
-        self.addChild(retrayLabel)
+        self.addChild(scoreLabel, clearImage, retrayLabel)        
     }
     
     // MARK: - TouchEvent

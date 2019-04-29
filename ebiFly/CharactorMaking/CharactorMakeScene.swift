@@ -13,29 +13,31 @@ import GameplayKit
 class CharactorMakeScene: SKScene {
     //胴体
     var taleCollectionCount = 1
-    var ebiModel: EbiModel!
+    var ebiModel: EbiModel
 
     //ボタン
-    let tailLeft = SKSpriteNode(imageNamed: "left")
-    let tailRight = SKSpriteNode(imageNamed: "right")
-    let bodyLeft = SKSpriteNode(imageNamed: "left")
-    let bodyRight = SKSpriteNode(imageNamed: "right")
-    let flyLabel = SKLabelNode(fontNamed: "Verdana-bold")
-    
-    var width: CGFloat!
-    var height: CGFloat!
+    lazy var tailLeft = SKSpriteNode(image: "left", pos: CGPoint(x: width/6, y: height - height/6), size: CGSize(width: width/6, height: width/6))
+    lazy var tailRight = SKSpriteNode(image: "right", pos: CGPoint(x: width - width/6, y: height - height/6), size: CGSize(width: width/6, height: width/6))
+    lazy var bodyLeft = SKSpriteNode(image: "left", pos: CGPoint(x: width/6 , y: height/3), size: CGSize(width: width/6, height: width/6))
+    lazy var bodyRight = SKSpriteNode(image: "right", pos: CGPoint(x: width - width/6, y: height/3), size: CGSize(width: width/6, height: width/6))
+    lazy var flyLabel = SKLabelNode(fontSize: 70, text: "揚げる!!", pos: CGPoint(x:width/2, y:height/10))
+
     var taleY: CGFloat!
     
-    
     // MARK: - Initializer
+    override init(size: CGSize) {
+        ebiModel = EbiModel(tale: SKSpriteNode(imageNamed: "tale1"), body: [SKSpriteNode(imageNamed: "ebibody")])
+        super.init(size: size)
+    }
     
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    // MARK: - LifeCycle
     override func didMove(to view: SKView) {
-        
-        width  = self.view!.frame.width
-        height = self.view!.frame.height
         taleY = height - height/6
 
-        ebiModel = EbiModel(tale: SKSpriteNode(imageNamed: "tale1"), body: [SKSpriteNode(imageNamed: "ebibody")])
         addTail(taleImgStr: "tale1")
         addBody(count: ebiModel.bodyCount)
     }
@@ -61,7 +63,7 @@ class CharactorMakeScene: SKScene {
         }
     }
     private func addTail(taleImgStr: String){
-        setSelectButton(width: width, height: height)
+        self.addChild(bodyLeft, tailRight, tailLeft, bodyRight, flyLabel)
     
         ebiModel.tale.position = CGPoint(x: width/2, y: taleY)
         ebiModel.tale.size = CGSize(width: width/4, height: width/4)
@@ -70,31 +72,7 @@ class CharactorMakeScene: SKScene {
         ebiModel.tale.physicsBody!.isDynamic = false
         self.addChild(ebiModel.tale)
     }
-    private func setSelectButton(width: CGFloat, height: CGFloat){
-        let buttonSize = CGSize(width: width/6, height: width/6)
-        tailLeft.size = buttonSize
-        tailLeft.position = CGPoint(x: width/6, y: height - height/6)
-        
-        tailRight.position = CGPoint(x: width - width/6, y: height - height/6)
-        tailRight.size = buttonSize
-        
-        
-        bodyLeft.position = CGPoint(x: width/6 , y: height/3)
-        bodyLeft.size = buttonSize
-        bodyRight.position = CGPoint(x: width - width/6, y: height/3)
-        bodyRight.size = buttonSize
-        
-        self.addChild(bodyLeft)
-        self.addChild(tailRight)
-        self.addChild(tailLeft)
-        self.addChild(bodyRight)
-        
-        flyLabel.text = "揚げる!!"
-        flyLabel.fontSize = 70
-        flyLabel.position = CGPoint(x:width/2, y:height/10)
-        self.addChild(flyLabel)
-    }
-    
+ 
     // MARK: - Event
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {

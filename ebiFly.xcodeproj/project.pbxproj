@@ -25,6 +25,7 @@
 		0DF70CB8223BF988007105D8 /* SauceScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF70CB7223BF988007105D8 /* SauceScene.swift */; };
 		0DF70CBA223CBF79007105D8 /* GameClearScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF70CB9223CBF79007105D8 /* GameClearScene.swift */; };
 		0DF70D05223FC456007105D8 /* EbiModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF70D04223FC455007105D8 /* EbiModel.swift */; };
+		0DFD696C2276FD0C000DBD93 /* SKScene+Addition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFD696B2276FD0B000DBD93 /* SKScene+Addition.swift */; };
 		0DFEF9C32263544A0061167A /* UIColor+Addition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFEF9C22263544A0061167A /* UIColor+Addition.swift */; };
 		0DFEF9C8226359C60061167A /* Constant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DFEF9C7226359C60061167A /* Constant.swift */; };
 /* End PBXBuildFile section */
@@ -71,6 +72,7 @@
 		0DF70CB7223BF988007105D8 /* SauceScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SauceScene.swift; sourceTree = "<group>"; };
 		0DF70CB9223CBF79007105D8 /* GameClearScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameClearScene.swift; sourceTree = "<group>"; };
 		0DF70D04223FC455007105D8 /* EbiModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EbiModel.swift; sourceTree = "<group>"; };
+		0DFD696B2276FD0B000DBD93 /* SKScene+Addition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SKScene+Addition.swift"; sourceTree = "<group>"; };
 		0DFEF9C22263544A0061167A /* UIColor+Addition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+Addition.swift"; sourceTree = "<group>"; };
 		0DFEF9C7226359C60061167A /* Constant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constant.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -166,6 +168,7 @@
 				0DE54C2A225B744F00006ED4 /* SKSpriteNode+Addition.swift */,
 				0DFEF9C22263544A0061167A /* UIColor+Addition.swift */,
 				0DAD9A0422742B39004A2615 /* SKShapeNode+Addition.swift */,
+				0DFD696B2276FD0B000DBD93 /* SKScene+Addition.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -363,6 +366,7 @@
 				0DAD9A012273FB59004A2615 /* SaucePresenter.swift in Sources */,
 				0DE54C2B225B744F00006ED4 /* SKSpriteNode+Addition.swift in Sources */,
 				0DAD9A032273FC24004A2615 /* SauceModel.swift in Sources */,
+				0DFD696C2276FD0C000DBD93 /* SKScene+Addition.swift in Sources */,
 				0DF70D05223FC456007105D8 /* EbiModel.swift in Sources */,
 				0DF70CB8223BF988007105D8 /* SauceScene.swift in Sources */,
 				0DE54C672260A88600006ED4 /* EbiViewController.swift in Sources */,
