@@ -78,21 +78,16 @@ class CharactorMakeScene: SKScene {
         tailRight.position = CGPoint(x: width - width/6, y: height - height/6)
         tailRight.size = buttonSize
         
-        
         bodyLeft.position = CGPoint(x: width/6 , y: height/3)
         bodyLeft.size = buttonSize
         bodyRight.position = CGPoint(x: width - width/6, y: height/3)
         bodyRight.size = buttonSize
         
-        self.addChild(bodyLeft)
-        self.addChild(tailRight)
-        self.addChild(tailLeft)
-        self.addChild(bodyRight)
-        
         flyLabel.text = "揚げる!!"
         flyLabel.fontSize = 70
         flyLabel.position = CGPoint(x:width/2, y:height/10)
-        self.addChild(flyLabel)
+
+        self.addChild(bodyLeft, tailRight, tailLeft, bodyRight, flyLabel)
     }
     
     // MARK: - Event

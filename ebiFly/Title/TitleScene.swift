@@ -28,10 +28,7 @@ class TitleScene: SKScene {
         width = self.view!.frame.width
         height =  self.view!.frame.height
         
-        self.addChild(startLabel)
-        self.addChild(ebiSprite)
-        self.addChild(ebiSprite2)
-        self.addChild(ebiSprite3)
+        self.addChild(startLabel, ebiSprite, ebiSprite2, ebiSprite3)
 
         ebiAnimation()
     }

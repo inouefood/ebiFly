@@ -37,9 +37,7 @@ class GameClearScene: SKScene {
         self.anchorPoint = CGPoint(x: 0, y: 0)
         self.backgroundColor = UIColor(appColor: .thema)
         
-        self.addChild(scoreLabel)
-        self.addChild(clearImage)
-        self.addChild(retrayLabel)
+        self.addChild(scoreLabel, clearImage, retrayLabel)        
     }
     
     // MARK: - TouchEvent

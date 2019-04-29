@@ -93,18 +93,8 @@ class SauceScene: SKScene {
         width = self.view!.frame.width
         height = self.view!.frame.height
     
-        backgroundSky.forEach{ sky in
-            self.addChild(sky)
-        }
-        cloudSprite.forEach{ cloud in
-            self.addChild(cloud)
-        }
-        fallSprite.forEach{ fall in
-            self.addChild(fall)
-        }
-        stars.forEach {star in
-            self.addChild(star)
-        }
+        
+        self.addChild(backgroundSky, cloudSprite, fallSprite, stars)
         
         Timer.scheduledTimer(withTimeInterval: 1, repeats: false){(_) in
             self.isFirstPosition = true
