@@ -34,8 +34,8 @@ class SauceScene: SKScene {
     lazy var shakeLabel = SKLabelNode(fontSize: 50, text: "シェイクしろ！", pos: CGPoint(x: width/2, y: height - height / 6.0))
     lazy var fallSprite: [SKSpriteNode]! = {
        return [
-            SKSpriteNode(image: "fallBack", pos: CGPoint(x: width/2, y: height/8), size: CGSize(width: width/2, height: width)),
-            SKSpriteNode(image: "fallFront", pos: CGPoint(x: width/2, y: height/8), size: CGSize(width: width/2, height: width), zPos: 1.3)
+            SKSpriteNode(image: "fallBack", pos: CGPoint(x: width/2, y: height/8), size: CGSize(width: width/4, height: width/2), zPos: 0.1),
+            SKSpriteNode(image: "fallFront", pos: CGPoint(x: width/2, y: height/8), size: CGSize(width: width/4, height: width/2), zPos: 2.0)
         ]
     }()
 
