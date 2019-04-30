@@ -9,17 +9,35 @@
 import Foundation
 
 protocol SaucePresenter {
-    func shakeDevice() -> Bool
+    func shakeDevice(shake:@escaping(Bool) -> Void)
+    func fallEbifly()
+    func fallBackgroundItem()
+    func vibrate()
+}
+protocol SaucePresenterOutput {
+    func showUpdateEbiflyPos()
+    func showUpdateBackgroundItem()
 }
 
 class SaucePresenterImpl: SaucePresenter{
     private var model: SauceModel
+    private var output: SaucePresenterOutput
     
-    init(model: SauceModel) {
+    init(model: SauceModel, output: SaucePresenterOutput) {
         self.model = model
+        self.output = output
     }
-    
-    func shakeDevice() -> Bool {
-        return model.shakeDevice()
+
+    func shakeDevice(shake: @escaping (Bool) -> ()) {
+        model.shakeDevice(shaked: {shake($0)})
+    }
+    func vibrate() {
+        model.vibrate()
+    }
+    func fallEbifly() {
+        output.showUpdateEbiflyPos()
+    }
+    func fallBackgroundItem() {
+        output.showUpdateBackgroundItem()
     }
 }

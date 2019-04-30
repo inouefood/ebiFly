@@ -16,4 +16,12 @@ extension SKLabelNode {
         self.text = text
         self.position = pos
     }
+    convenience init(font:String = "Verdana-bold", fontSize: CGFloat, text: String, pos: CGPoint, zPos:CGFloat){
+        self.init()
+        self.fontName = font
+        self.fontSize = fontSize
+        self.text = text
+        self.position = pos
+        self.zPosition = zPos
+    }
 }
