@@ -10,11 +10,11 @@ import Foundation
 import CoreMotion
 
 protocol SauceModel {
-    func shakeDevice() -> Bool
+    func shakeDevice(shaked:@escaping(Bool)->())
 }
 
 class SauceModelImpl: SauceModel {
-    
+
     var motionManager:CMMotionManager
     private var x = 0
     private var y = 0
@@ -24,30 +24,23 @@ class SauceModelImpl: SauceModel {
         motionManager = CMMotionManager()
     }
     
-    func shakeDevice() -> Bool {
-        let semaphore = DispatchSemaphore(value: 0)
-        var isShaked = false
+    func shakeDevice(shaked: @escaping (Bool) ->()) {
         motionManager.accelerometerUpdateInterval = 0.2
         motionManager.startAccelerometerUpdates(to: OperationQueue()) {
             (data, error) in
-            if error != nil {
-                print(error)
-            }
             DispatchQueue.main.async {
                 let isShaken = self.x != Int(data!.acceleration.x) || self.y != Int(data!.acceleration.y) || self.z != Int(data!.acceleration.z)
                 
                 if isShaken {
-                   isShaked = true
+                    shaked(true)
+                } else {
+                    shaked(false)
                 }
                 
                 self.x = Int(data!.acceleration.x)
                 self.y = Int(data!.acceleration.y)
                 self.z = Int(data!.acceleration.z)
-                semaphore.signal()
             }
         }
-        semaphore.wait()
-        return isShaked
     }
-
 }

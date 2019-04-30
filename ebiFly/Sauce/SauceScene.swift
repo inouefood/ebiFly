@@ -22,10 +22,6 @@ class SauceScene: SKScene {
     var isFirstPosition:Bool = false
     var isEbiDonw = true
     var isShakeEnd = false
-    var motionManager:CMMotionManager? = CMMotionManager()
-    var x = 0
-    var y = 0
-    var z = 0
     var shakeCount = 0
     var flyCount = 0
     var flyCirc = 0
@@ -64,7 +60,7 @@ class SauceScene: SKScene {
     }()
     
     fileprivate lazy var presenter: SaucePresenter! = {
-        return SaucePresenterImpl(model: SauceModelImpl())
+        return SaucePresenterImpl(model: SauceModelImpl(), output: self)
     }()
 
     // MARK: - Initializer
@@ -164,7 +160,6 @@ class SauceScene: SKScene {
                 Timer.scheduledTimer(withTimeInterval: 3, repeats: false) {(_) in
                     //バイブ
                     AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
-                    self.motionManager = nil
                     self.shakeLabel.text = "0m"
                     self.shakeLabel.zPosition = 1.3
                     self.flyCirc = self.shakeCount * self.aburaSprites.count
@@ -179,34 +174,25 @@ class SauceScene: SKScene {
                         aburaSprites[i].texture = SKTexture(imageNamed: "aburaBlack3")
                     }
                 }
-                //TODO シェイクロジックをModelで行う、なぜか処理が戻ってこないので一旦保留
-//                if presenter.shakeDevice() {
-//                    shakeCount += 1
-//                }
-                //シェイクジェスチャー開始
-                self.motionManager!.accelerometerUpdateInterval = 0.2
-                self.motionManager!.startAccelerometerUpdates(to: OperationQueue()) {
-                    (data, error) in
-                    DispatchQueue.main.async {
-                        self.updateAccelerationData(data: data!.acceleration)
-                    }
+            }
+            
+            // shake handler
+            presenter.shakeDevice(shake: { shake in
+                if shake {
+                    self.shakeCount += 1
                 }
-            }
-            taleSprite.position.y -= 1
-            for i in 0..<ebiBodySprites.count {
-                ebiBodySprites[i].position.y -= 1
-            }
-            for i in 0..<aburaSprites.count {
-                aburaSprites[i].position.y -= 1
-            }
+            })
+
+            presenter.fallEbifly()
+            
         }
         if isShakeEnd {
             if flyCirc > countVal {
                 
                 for _ in 0...2 {
                     countVal += 1
-                    
-                    moveBackgroundItem()
+
+                    presenter.fallBackgroundItem()
 
                     if taleSprite.position.y < height / 2 {
                         taleSprite.position.y += 0.5
@@ -224,39 +210,34 @@ class SauceScene: SKScene {
             }
         }
     }
-    
-    // MARK: - PrivateMethod
-    
-    private func updateAccelerationData(data: CMAcceleration) {
-        
-        let isShaken = self.x != Int(data.x) || self.y != Int(data.y) || self.z != Int(data.z)
-        
-        if isShaken {
-            shakeCount += 1
-            print("シェイクされたよ\(shakeCount)")
-        }
-        
-        self.x = Int(data.x)
-        self.y = Int(data.y)
-        self.z = Int(data.z)
-    }
-    
-    private func moveBackgroundItem() {
-        fallSprite.forEach{ fall in
-            fall.position.y -= 1
-        }
+}
+
+extension SauceScene: SaucePresenterOutput {
+    func showUpdateBackgroundItem() {
         flyCount += 1
         shakeLabel.text = "\(flyCount)m"
         
-        cloudSprite.forEach{ cloud in
-            cloud.position.y -= 1
+        fallSprite.forEach{
+            $0.position.y -= 1
         }
-        backgroundSky.forEach{ sky in
-            sky.position.y -= 1
+        cloudSprite.forEach{
+            $0.position.y -= 1
         }
-        
-        stars.forEach{ star in
-            star.position.y -= 1
+        backgroundSky.forEach{
+            $0.position.y -= 1
+        }
+        stars.forEach{
+            $0.position.y -= 1
+        }
+    }
+    
+    func showUpdateEbiflyPos() {
+        taleSprite.position.y -= 1
+        ebiBodySprites.forEach({
+            $0.position.y -= 1
+        })
+        aburaSprites.forEach{
+            $0.position.y -= 1
         }
     }
 }
