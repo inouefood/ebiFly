@@ -9,7 +9,6 @@
 import UIKit
 import SpriteKit
 import CoreMotion
-//import AudioToolbox
 
 class SauceScene: SKScene {
     
@@ -87,9 +86,7 @@ class SauceScene: SKScene {
         Timer.scheduledTimer(withTimeInterval: 1, repeats: false){(_) in
             self.isFirstPosition = true
         }
-        
         let taleX = width/2
-        
         let taleY = height - height / 6.0
         taleSprite.position = CGPoint(x: width/2, y: height - height / 6.0)
         self.addChild(taleSprite)
@@ -105,7 +102,6 @@ class SauceScene: SKScene {
             joint.upperAngleLimit = CGFloat(Double.pi/4)
             self.physicsWorld.add(joint)
         }
-        
         
         for i in 0..<aburaSprites.count {
             switch aburaRandomSeed[i] {
@@ -127,7 +123,6 @@ class SauceScene: SKScene {
         //// 尻尾のjoint
         let joint = SKPhysicsJointFixed.joint(withBodyA: taleSprite.physicsBody!, bodyB: ebiBodySprites[0].physicsBody!, anchor: CGPoint(x: taleSprite.frame.midX, y: taleSprite.frame.maxY))
         self.physicsWorld.add(joint)
-        
     }
     
     override func update(_ currentTime: TimeInterval) {
@@ -207,6 +202,8 @@ class SauceScene: SKScene {
         }
     }
 }
+
+// MARK: - EXTENSON-SaucePresenterOutput
 
 extension SauceScene: SaucePresenterOutput {
     func showUpdateBackgroundItem() {
