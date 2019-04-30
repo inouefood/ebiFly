@@ -8,9 +8,11 @@
 
 import Foundation
 import CoreMotion
+import AudioToolbox
 
 protocol SauceModel {
     func shakeDevice(shaked:@escaping(Bool)->())
+    func vibrate()
 }
 
 class SauceModelImpl: SauceModel {
@@ -22,6 +24,10 @@ class SauceModelImpl: SauceModel {
     
     init() {
         motionManager = CMMotionManager()
+    }
+    
+    func vibrate() {
+        AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
     }
     
     func shakeDevice(shaked: @escaping (Bool) ->()) {

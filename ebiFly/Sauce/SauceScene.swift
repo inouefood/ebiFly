@@ -9,7 +9,7 @@
 import UIKit
 import SpriteKit
 import CoreMotion
-import AudioToolbox
+//import AudioToolbox
 
 class SauceScene: SKScene {
     
@@ -27,7 +27,7 @@ class SauceScene: SKScene {
     var flyCirc = 0
     var countVal = 0
 
-    lazy var shakeLabel = SKLabelNode(fontSize: 50, text: "シェイクしろ！", pos: CGPoint(x: width/2, y: height - height / 6.0))
+    lazy var shakeLabel = SKLabelNode(fontSize: 50, text: "シェイクしろ！", pos: CGPoint(x: width/2, y: height - height / 6.0), zPos: 1.3)
     lazy var fallSprite: [SKSpriteNode]! = {
        return [
             SKSpriteNode(image: "fallBack", pos: CGPoint(x: width/2, y: height/8), size: CGSize(width: width/2, height: width)),
@@ -158,15 +158,13 @@ class SauceScene: SKScene {
                 isEbiDonw = false
                 
                 Timer.scheduledTimer(withTimeInterval: 3, repeats: false) {(_) in
-                    //バイブ
-                    AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
+                    self.presenter.vibrate()
                     self.shakeLabel.text = "0m"
-                    self.shakeLabel.zPosition = 1.3
+                    // TODO 距離計算にアブラの大きさなどを含める
                     self.flyCirc = self.shakeCount * self.aburaSprites.count
                     
                     self.isShakeEnd = true
                 }
-                
                 self.addChild(shakeLabel)
                 
                 for (i, value) in aburaRandomSeed.enumerated() {
@@ -182,9 +180,7 @@ class SauceScene: SKScene {
                     self.shakeCount += 1
                 }
             })
-
             presenter.fallEbifly()
-            
         }
         if isShakeEnd {
             if flyCirc > countVal {

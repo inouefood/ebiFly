@@ -12,6 +12,7 @@ protocol SaucePresenter {
     func shakeDevice(shake:@escaping(Bool) -> Void)
     func fallEbifly()
     func fallBackgroundItem()
+    func vibrate()
 }
 protocol SaucePresenterOutput {
     func showUpdateEbiflyPos()
@@ -29,6 +30,9 @@ class SaucePresenterImpl: SaucePresenter{
 
     func shakeDevice(shake: @escaping (Bool) -> ()) {
         model.shakeDevice(shaked: {shake($0)})
+    }
+    func vibrate() {
+        model.vibrate()
     }
     func fallEbifly() {
         output.showUpdateEbiflyPos()
