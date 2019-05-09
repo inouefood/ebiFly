@@ -107,9 +107,10 @@ class FryScene: SKScene {
             abura.size = CGSize(width: abura.size.width*0.5, height: abura.size.height*0.5)
             abura.name = "abura" + String(i)
             abura.zPosition = 1.1
-            abura.physicsBody = SKPhysicsBody(circleOfRadius: 1)
-            abura.physicsBody!.affectedByGravity = false
-            abura.physicsBody!.linearDamping = 1.0
+            // TODO 応急処置、できれば当たり判定を制御してプルプルさせたい
+//            abura.physicsBody = SKPhysicsBody(circleOfRadius: 1)
+//            abura.physicsBody!.affectedByGravity = false
+//            abura.physicsBody!.linearDamping = 1.0
             self.addChild(abura)
             aburaSprites.append(abura)
         }
