@@ -110,8 +110,11 @@ class CharactorMakeScene: SKScene {
                 addBody(count: ebiModel.bodyCount)
             }
             if touchNode == flyLabel {
-                // TODO 遷移先先に渡すものをEbiModelだけに修正,レイアウト修正は1画面ずつ行いたいので後で
-                let scene = FryScene(size: self.scene!.size, bodyCount: ebiModel.bodyCount, taleImageStr: "tale1")
+                //SpriteKitでは親Nodeに追加済みのNodeを再度別親Nodeに追加しようとすると落ちる
+                self.removeChildren(in: ebiModel.body)
+                self.removeChildren(in: [ebiModel.tale])
+
+                let scene = FryScene(size: self.scene!.size, model: ebiModel)
                 self.view!.presentScene(scene)
             }
         }

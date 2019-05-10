@@ -11,46 +11,13 @@ import SpriteKit
 
 class FryScene: SKScene {
     let numAbura:Int = Constant.SpriteNum.abura
-    var ebiModel: EbiModel {
-        didSet {
-            let taleX = width/2
-            let taleY = height - height/6
-            ebiModel.tale.size = CGSize(width: width/6, height: width/6)
-            ebiModel.tale.position = CGPoint(x: taleX, y: taleY)
-            ebiModel.tale.physicsBody = SKPhysicsBody(circleOfRadius: 1)
-            ebiModel.tale.zPosition = 1.2
-            ebiModel.tale.physicsBody!.affectedByGravity = false
-            ebiModel.tale.physicsBody!.isDynamic = false
-            
-            for i in 0..<bodyCount {
-                let ebiBody = SKSpriteNode(imageNamed: "ebibody")
-                let ebX = taleX
-                let ebY = (taleY - width/6)  - (width/6 * CGFloat(i))
-                ebiBody.size = CGSize(width: width/6, height: width/6)
-                ebiBody.position = CGPoint(x: ebX, y: ebY)
-                ebiBody.physicsBody = SKPhysicsBody(circleOfRadius: 2)
-                ebiBody.physicsBody!.affectedByGravity = true
-                ebiBody.name = "ebiBody" + String(i)
-                ebiBodySprites.append(ebiBody)
-            }
-            for i in 1..<bodyCount {
-                let joint = SKPhysicsJointPin.joint(withBodyA:ebiBodySprites[i-1].physicsBody!, bodyB: ebiBodySprites[i].physicsBody!, anchor: CGPoint(x: ebiBodySprites[i-1].frame.midX, y: ebiBodySprites[i].frame.midY))
-                joint.frictionTorque = 0.2
-                joint.upperAngleLimit = CGFloat(Double.pi/4)
-                self.physicsWorld.add(joint)
-            }
-            //// 尻尾のjoint
-            let joint = SKPhysicsJointFixed.joint(withBodyA: ebiModel.tale.physicsBody!, bodyB: ebiBodySprites[0].physicsBody!, anchor: CGPoint(x: ebiModel.tale.frame.midX, y: ebiModel.tale.frame.maxY))
-            self.physicsWorld.add(joint)
-        }
-    }
+    var ebiModel: EbiModel 
     // スプライトの配列
     var ebiBodySprites:[SKSpriteNode] = []
     var aburaSprites:[SKSpriteNode] = []
     var aburaRandomSeed:[Int] = []
     var koromoSprites:[SKSpriteNode] = []
     var koromoRandomSeed:[Int] = []
-    var bodyCount: Int
     
     var isTale:Bool = false
     
@@ -60,10 +27,9 @@ class FryScene: SKScene {
 
     // MARK: - Initializer
     
-    init(size: CGSize, bodyCount: Int, taleImageStr: String) {
-        self.bodyCount = bodyCount
-        
-        ebiModel = EbiModel(tale: SKSpriteNode(imageNamed: taleImageStr), body: [SKSpriteNode(imageNamed: "ebibody")])
+    init(size: CGSize, model: EbiModel) {
+        self.ebiModel = model
+        ebiModel.body.removeLast()
         super.init(size: size)
     }
     
@@ -89,7 +55,6 @@ class FryScene: SKScene {
             self.isTale = false
         }
         
-        // えび --------------------------------------------------------------
         //// 尻尾の初期設定
         let taleX = width/2
         let taleY = height - height/6
@@ -103,7 +68,7 @@ class FryScene: SKScene {
 
         
         // 身体の初期設定
-        for i in 0..<bodyCount {
+        for i in 0..<ebiModel.bodyCount {
             let ebiBody = SKSpriteNode(imageNamed: "ebibody")
             let ebX = taleX
             let ebY = (taleY - width/6)  - (width/6 * CGFloat(i))
@@ -118,7 +83,7 @@ class FryScene: SKScene {
         
         // jointの設定
         //// 身体のjoint
-        for i in 1..<bodyCount {
+        for i in 1..<ebiModel.bodyCount {
             let joint = SKPhysicsJointPin.joint(withBodyA:ebiBodySprites[i-1].physicsBody!, bodyB: ebiBodySprites[i].physicsBody!, anchor: CGPoint(x: ebiBodySprites[i-1].frame.midX, y: ebiBodySprites[i].frame.midY))
             joint.frictionTorque = 0.2
             joint.upperAngleLimit = CGFloat(Double.pi/4)
@@ -131,7 +96,7 @@ class FryScene: SKScene {
         // あぶら --------------------------------------------------------------
         //// 配列の初期化
         for _ in 0..<numAbura {
-            aburaRandomSeed.append(Int.random(in: 0...bodyCount-1))
+            aburaRandomSeed.append(Int.random(in: 0...ebiModel.bodyCount-1))
         }
         
         //// あぶらたちの初期設定
@@ -157,7 +122,7 @@ class FryScene: SKScene {
         rect.fillColor = UIColor.init(red: 0.9, green: 0.8, blue: 0.5, alpha: 1.0)
         self.addChild(rect)
         
-        // ノードすべてについて画面端で跳ね返るようにする
+        // 画面端での跳ね返
         self.physicsBody = SKPhysicsBody(edgeLoopFrom: self.frame)
     }
     
