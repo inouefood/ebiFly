@@ -11,7 +11,39 @@ import SpriteKit
 
 class FryScene: SKScene {
     let numAbura:Int = Constant.SpriteNum.abura
-    var ebiModel: EbiModel
+    var ebiModel: EbiModel {
+        didSet {
+            let taleX = width/2
+            let taleY = height - height/6
+            ebiModel.tale.size = CGSize(width: width/6, height: width/6)
+            ebiModel.tale.position = CGPoint(x: taleX, y: taleY)
+            ebiModel.tale.physicsBody = SKPhysicsBody(circleOfRadius: 1)
+            ebiModel.tale.zPosition = 1.2
+            ebiModel.tale.physicsBody!.affectedByGravity = false
+            ebiModel.tale.physicsBody!.isDynamic = false
+            
+            for i in 0..<bodyCount {
+                let ebiBody = SKSpriteNode(imageNamed: "ebibody")
+                let ebX = taleX
+                let ebY = (taleY - width/6)  - (width/6 * CGFloat(i))
+                ebiBody.size = CGSize(width: width/6, height: width/6)
+                ebiBody.position = CGPoint(x: ebX, y: ebY)
+                ebiBody.physicsBody = SKPhysicsBody(circleOfRadius: 2)
+                ebiBody.physicsBody!.affectedByGravity = true
+                ebiBody.name = "ebiBody" + String(i)
+                ebiBodySprites.append(ebiBody)
+            }
+            for i in 1..<bodyCount {
+                let joint = SKPhysicsJointPin.joint(withBodyA:ebiBodySprites[i-1].physicsBody!, bodyB: ebiBodySprites[i].physicsBody!, anchor: CGPoint(x: ebiBodySprites[i-1].frame.midX, y: ebiBodySprites[i].frame.midY))
+                joint.frictionTorque = 0.2
+                joint.upperAngleLimit = CGFloat(Double.pi/4)
+                self.physicsWorld.add(joint)
+            }
+            //// 尻尾のjoint
+            let joint = SKPhysicsJointFixed.joint(withBodyA: ebiModel.tale.physicsBody!, bodyB: ebiBodySprites[0].physicsBody!, anchor: CGPoint(x: ebiModel.tale.frame.midX, y: ebiModel.tale.frame.maxY))
+            self.physicsWorld.add(joint)
+        }
+    }
     // スプライトの配列
     var ebiBodySprites:[SKSpriteNode] = []
     var aburaSprites:[SKSpriteNode] = []
@@ -21,6 +53,10 @@ class FryScene: SKScene {
     var bodyCount: Int
     
     var isTale:Bool = false
+    
+    fileprivate lazy var presenter: FlyPresenter! = {
+        return FlyPresenterImpl(model: FlyModelImpl(), output: self)
+    }()
 
     // MARK: - Initializer
     
@@ -64,9 +100,9 @@ class FryScene: SKScene {
         ebiModel.tale.physicsBody!.affectedByGravity = false
         ebiModel.tale.physicsBody!.isDynamic = false
         self.addChild(ebiModel.tale)
+
         
-        
-        //// 身体の初期設定
+        // 身体の初期設定
         for i in 0..<bodyCount {
             let ebiBody = SKSpriteNode(imageNamed: "ebibody")
             let ebX = taleX
@@ -132,23 +168,7 @@ class FryScene: SKScene {
             if (self.frame.height/2.0 < aburaSprites[i].position.y) {
                 aburaSprites[i].position.y -= 1.0
             }
-            
-            // あぶらとえびの距離計算
-            let dx:Float = Float(ebiBodySprites[aburaRandomSeed[i]].position.x - aburaSprites[i].position.x)
-            let dy:Float = Float(ebiBodySprites[aburaRandomSeed[i]].position.y - aburaSprites[i].position.y)
-            let dist:Float = sqrtf(dx * dx + dy * dy)
-            if (dist < 50.0) {
-                aburaSprites[i].position.x += CGFloat(dx)
-                aburaSprites[i].position.y += CGFloat(dy)
-                if !koromoSprites.contains(aburaSprites[i]){
-                    koromoSprites.append(aburaSprites[i])
-                    koromoRandomSeed.append(aburaRandomSeed[i])
-                }
-                // たまにあぶらのサイズを大きくする
-                if (Int.random(in: 0...100) == 0 && aburaSprites[i].position.y < self.frame.height/2.0) {
-                    aburaSprites[i].size = CGSize(width: aburaSprites[i].size.width*1.1, height: aburaSprites[i].size.height*1.1)
-                }
-            }
+            presenter.aburaToEbiCollision(ebiPos: ObjectPosition(pos: ebiBodySprites[aburaRandomSeed[i]].position), aburaPos:ObjectPosition(pos: aburaSprites[i].position), count: i)
         }
     }
     
@@ -174,3 +194,19 @@ class FryScene: SKScene {
     }
 }
 
+// MARK: - Extension-FlyPresenterOutput
+
+extension FryScene: FlyPresenterOutput {
+    func showUpdateAbura(count: Int, pos: ObjectPosition) {
+        aburaSprites[count].position.x += CGFloat(pos.x)
+        aburaSprites[count].position.y += CGFloat(pos.y)
+        if !koromoSprites.contains(aburaSprites[count]){
+            koromoSprites.append(aburaSprites[count])
+            koromoRandomSeed.append(aburaRandomSeed[count])
+        }
+        // たまにあぶらのサイズを大きくする
+        if (Int.random(in: 0...100) == 0 && aburaSprites[count].position.y < self.frame.height/2.0) {
+            aburaSprites[count].size = CGSize(width: aburaSprites[count].size.width*1.1, height: aburaSprites[count].size.height*1.1)
+        }
+    }
+}
