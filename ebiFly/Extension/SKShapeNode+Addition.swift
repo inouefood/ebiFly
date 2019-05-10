@@ -14,4 +14,9 @@ extension SKShapeNode {
         self.init(rect: rect)
         self.fillColor = color
     }
+    convenience init(size: CGSize, color: UIColor, pos: CGPoint) {
+        self.init(rectOf: size)
+        self.fillColor = color
+        self.position = pos
+    }
 }

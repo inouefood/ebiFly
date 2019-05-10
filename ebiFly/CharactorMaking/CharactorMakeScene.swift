@@ -67,7 +67,8 @@ class CharactorMakeScene: SKScene {
     
         ebiModel.tale.position = CGPoint(x: width/2, y: taleY)
         ebiModel.tale.size = CGSize(width: width/4, height: width/4)
-        ebiModel.tale.physicsBody = SKPhysicsBody(circleOfRadius: 20)
+        ebiModel.tale.physicsBody = SKPhysicsBody(circleOfRadius: 1)
+        ebiModel.tale.zPosition = 1.2
         ebiModel.tale.physicsBody!.affectedByGravity = false
         ebiModel.tale.physicsBody!.isDynamic = false
         self.addChild(ebiModel.tale)
