@@ -10,7 +10,6 @@ import UIKit
 import SpriteKit
 
 class FryScene: SKScene {
-    let numAbura:Int = Constant.SpriteNum.abura
     var ebiModel: EbiModel
     // スプライトの配列
     var aburaSprites:[SKSpriteNode] = []
@@ -86,12 +85,12 @@ class FryScene: SKScene {
         
         // あぶら --------------------------------------------------------------
         //// 配列の初期化
-        for _ in 0..<numAbura {
+        for _ in 0..<Constant.SpriteNum.abura {
             aburaRandomSeed.append(Int.random(in: 0...ebiModel.bodyCount-1))
         }
         
         //// あぶらたちの初期設定
-        for i in 0..<numAbura {
+        for i in 0..<Constant.SpriteNum.abura {
             let abura = SKSpriteNode(imageNamed: "abura")
             let aburaX = Int(arc4random_uniform(UInt32(self.frame.size.width)))
             let aburaY = Int(arc4random_uniform(UInt32(self.frame.size.height / 2.0)))
@@ -110,7 +109,7 @@ class FryScene: SKScene {
     
     override func update(_ currentTime: TimeInterval) {
         // あぶらの更新
-        for i in 0..<numAbura {
+        for i in 0..<Constant.SpriteNum.abura {
             // あぶらエリアより高い位置のときあぶらたちを落下させる
             if (self.frame.height/2.0 < aburaSprites[i].position.y) {
                 aburaSprites[i].position.y -= 1.0
