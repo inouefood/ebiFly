@@ -10,6 +10,8 @@
 		0D081FBA2285AB2600B74D86 /* FryPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D081FB92285AB2600B74D86 /* FryPresenter.swift */; };
 		0D081FBC2285ABAA00B74D86 /* FlyModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D081FBB2285ABAA00B74D86 /* FlyModel.swift */; };
 		0D081FBE2285AD4900B74D86 /* ObjectPosition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D081FBD2285AD4900B74D86 /* ObjectPosition.swift */; };
+		0D081FC02286891300B74D86 /* CharactorMakePresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D081FBF2286891300B74D86 /* CharactorMakePresenter.swift */; };
+		0D081FC2228689B900B74D86 /* CharactorMakeModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D081FC1228689B900B74D86 /* CharactorMakeModel.swift */; };
 		0DA6A18C223BD1160040133D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DA6A18B223BD1160040133D /* AppDelegate.swift */; };
 		0DA6A192223BD1160040133D /* TitleScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DA6A191223BD1160040133D /* TitleScene.swift */; };
 		0DA6A197223BD1160040133D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0DA6A195223BD1160040133D /* Main.storyboard */; };
@@ -54,6 +56,8 @@
 		0D081FB92285AB2600B74D86 /* FryPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FryPresenter.swift; sourceTree = "<group>"; };
 		0D081FBB2285ABAA00B74D86 /* FlyModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlyModel.swift; sourceTree = "<group>"; };
 		0D081FBD2285AD4900B74D86 /* ObjectPosition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ObjectPosition.swift; sourceTree = "<group>"; };
+		0D081FBF2286891300B74D86 /* CharactorMakePresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharactorMakePresenter.swift; sourceTree = "<group>"; };
+		0D081FC1228689B900B74D86 /* CharactorMakeModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharactorMakeModel.swift; sourceTree = "<group>"; };
 		0DA6A188223BD1160040133D /* ebiFly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ebiFly.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0DA6A18B223BD1160040133D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		0DA6A191223BD1160040133D /* TitleScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TitleScene.swift; sourceTree = "<group>"; };
@@ -199,6 +203,8 @@
 			isa = PBXGroup;
 			children = (
 				0DF70CAD223BE02C007105D8 /* CharactorMakeScene.swift */,
+				0D081FBF2286891300B74D86 /* CharactorMakePresenter.swift */,
+				0D081FC1228689B900B74D86 /* CharactorMakeModel.swift */,
 			);
 			path = CharactorMaking;
 			sourceTree = "<group>";
@@ -371,6 +377,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0D081FC02286891300B74D86 /* CharactorMakePresenter.swift in Sources */,
 				0DA6A192223BD1160040133D /* TitleScene.swift in Sources */,
 				0DAD9A012273FB59004A2615 /* SaucePresenter.swift in Sources */,
 				0DE54C2B225B744F00006ED4 /* SKSpriteNode+Addition.swift in Sources */,
@@ -378,6 +385,7 @@
 				0DFD696C2276FD0C000DBD93 /* SKScene+Addition.swift in Sources */,
 				0DF70D05223FC456007105D8 /* EbiModel.swift in Sources */,
 				0DF70CB8223BF988007105D8 /* SauceScene.swift in Sources */,
+				0D081FC2228689B900B74D86 /* CharactorMakeModel.swift in Sources */,
 				0DE54C672260A88600006ED4 /* EbiViewController.swift in Sources */,
 				0DA6A18C223BD1160040133D /* AppDelegate.swift in Sources */,
 				0D081FBE2285AD4900B74D86 /* ObjectPosition.swift in Sources */,
