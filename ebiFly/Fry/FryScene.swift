@@ -50,7 +50,13 @@ class FryScene: SKScene {
 
             self.removeChildren(in: self.ebiModel.body)
             self.removeChildren(in: [self.ebiModel.tale])
-            let scene = SauceScene(size: self.scene!.size, count: 5, abura: self.koromoSprites,  tale: self.ebiModel.tale, ebi: self.ebiModel.body, seed: self.koromoRandomSeed)
+        
+            var body:[SKSpriteNode] = []
+            for i in 0..<self.ebiModel.bodyCount {
+                body.append(self.ebiModel.body[i])
+            }
+            
+            let scene = SauceScene(size: self.scene!.size, count: 5, abura: self.koromoSprites,  tale: self.ebiModel.tale, ebi: body, seed: self.koromoRandomSeed)
             self.view!.presentScene(scene)
         }
         Timer.scheduledTimer(withTimeInterval: 2.9, repeats: false){(_) in
