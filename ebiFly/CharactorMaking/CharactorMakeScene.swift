@@ -11,8 +11,6 @@ import SpriteKit
 import GameplayKit
 
 class CharactorMakeScene: SKScene {
-    //胴体
-    var taleCollectionCount = 1
     var ebiModel: EbiModel
 
     //ボタン
@@ -21,6 +19,10 @@ class CharactorMakeScene: SKScene {
     lazy var bodyLeft = SKSpriteNode(image: "left", pos: CGPoint(x: width/6 , y: height/3), size: CGSize(width: width/6, height: width/6))
     lazy var bodyRight = SKSpriteNode(image: "right", pos: CGPoint(x: width - width/6, y: height/3), size: CGSize(width: width/6, height: width/6))
     lazy var flyLabel = SKLabelNode(fontSize: 70, text: "揚げる!!", pos: CGPoint(x:width/2, y:height/10))
+    
+    fileprivate lazy var presenter: CharactorMakePresenter! = {
+        return CharactorMakePresenterImpl(model: CharactorMakeModelImpl(), output: self)
+    }()
 
     var taleY: CGFloat!
     
@@ -67,7 +69,8 @@ class CharactorMakeScene: SKScene {
     
         ebiModel.tale.position = CGPoint(x: width/2, y: taleY)
         ebiModel.tale.size = CGSize(width: width/4, height: width/4)
-        ebiModel.tale.physicsBody = SKPhysicsBody(circleOfRadius: 20)
+        ebiModel.tale.physicsBody = SKPhysicsBody(circleOfRadius: 1)
+        ebiModel.tale.zPosition = 1.2
         ebiModel.tale.physicsBody!.affectedByGravity = false
         ebiModel.tale.physicsBody!.isDynamic = false
         self.addChild(ebiModel.tale)
@@ -79,19 +82,10 @@ class CharactorMakeScene: SKScene {
         if let location = touches.first?.location(in: self){
             let touchNode = self.atPoint(location)
             if touchNode == tailLeft {
-                taleCollectionCount += 1
-                if taleCollectionCount == 4 {
-                    taleCollectionCount = 1
-                }
-                ebiModel.setTaleTexture(selectNum: taleCollectionCount)
+                presenter.changeEbiTaleLeft()
             }
             if touchNode == tailRight {
-                taleCollectionCount -= 1
-                if taleCollectionCount == 0 {
-                    taleCollectionCount = 3
-                }
-                ebiModel.setTaleTexture(selectNum: taleCollectionCount)
-
+                presenter.changeEbiTaleRignt()
             }
             if touchNode == bodyLeft {
                 if ebiModel.bodyCount <= 1 {
@@ -110,11 +104,19 @@ class CharactorMakeScene: SKScene {
                 addBody(count: ebiModel.bodyCount)
             }
             if touchNode == flyLabel {
-                // TODO 遷移先先に渡すものをEbiModelだけに修正,レイアウト修正は1画面ずつ行いたいので後で
-                let scene = FryScene(size: self.scene!.size, bodyCount: ebiModel.bodyCount, taleImageStr: "tale1")
+                //SpriteKitでは親Nodeに追加済みのNodeを再度別親Nodeに追加しようとすると落ちる
+                self.removeChildren(in: ebiModel.body)
+                self.removeChildren(in: [ebiModel.tale])
+
+                let scene = FryScene(size: self.scene!.size, model: ebiModel)
                 self.view!.presentScene(scene)
             }
         }
     }
 }
 
+extension CharactorMakeScene: CharactorMakePresenterOutput {
+    func showUpdateEbiTale(taleCount: Int) {
+        ebiModel.setTaleTexture(selectNum: taleCount)
+    }
+}
