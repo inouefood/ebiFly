@@ -13,15 +13,15 @@ protocol CharactorMakeModel {
 }
 
 class CharactorMakeModelImpl:CharactorMakeModel {
-    private var taleCollectionCount = 1
+    private var taleImageCount = 1
     func changeEbiTale(count: Int) -> Int{
-        taleCollectionCount += count
-        if taleCollectionCount == 4 {
-            taleCollectionCount = 1
+        taleImageCount += count
+        if taleImageCount == 4 {
+            taleImageCount = 1
         }
-        if taleCollectionCount == 0 {
-            taleCollectionCount = 3
+        if taleImageCount == 0 {
+            taleImageCount = 3
         }
-        return taleCollectionCount
+        return taleImageCount
     }
 }
