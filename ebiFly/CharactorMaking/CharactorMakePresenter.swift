@@ -11,12 +11,17 @@ import Foundation
 protocol CharactorMakePresenter {
     func changeEbiTaleLeft()
     func changeEbiTaleRignt()
+    func addEbiBody(count: Int)
+    func subEbiBody(count: Int)
 }
 protocol CharactorMakePresenterOutput {
-    func showUpdateEbiTale(taleCount:Int)
+    func showUpdateEbiTale(taleCount: Int)
+    func showUpdateEbiBody(bodyCount: Int)
+    
 }
 
 class CharactorMakePresenterImpl: CharactorMakePresenter {
+    
     let model:CharactorMakeModel
     let output: CharactorMakePresenterOutput
     
@@ -32,5 +37,17 @@ class CharactorMakePresenterImpl: CharactorMakePresenter {
     
     func changeEbiTaleRignt() {
         output.showUpdateEbiTale(taleCount: model.changeEbiTale(count: -1))
+    }
+    func addEbiBody(count: Int) {
+        if count <= 1 {
+            return
+        }
+        output.showUpdateEbiBody(bodyCount: count - 1)
+    }
+    func subEbiBody(count: Int) {
+        if count >= 5 {
+            return
+        }
+        output.showUpdateEbiBody(bodyCount: count + 1)
     }
 }

@@ -40,13 +40,13 @@ class CharactorMakeScene: SKScene {
     override func didMove(to view: SKView) {
         taleY = height - height/6
 
-        addTail(taleImgStr: "tale1")
-        addBody(count: ebiModel.bodyCount)
+        createTale(taleImgStr: "tale1")
+        createBody(count: ebiModel.bodyCount)
     }
     
     // MARK: - PrivateMethod
     
-    private func addBody(count: Int){
+    private func createBody(count: Int){
         
         let taleX = width/2
         
@@ -64,7 +64,7 @@ class CharactorMakeScene: SKScene {
             ebiModel.body.append(ebiBody)
         }
     }
-    private func addTail(taleImgStr: String){
+    private func createTale(taleImgStr: String){
         self.addChild(bodyLeft, tailRight, tailLeft, bodyRight, flyLabel)
     
         ebiModel.tale.position = CGPoint(x: width/2, y: taleY)
@@ -88,20 +88,10 @@ class CharactorMakeScene: SKScene {
                 presenter.changeEbiTaleRignt()
             }
             if touchNode == bodyLeft {
-                if ebiModel.bodyCount <= 1 {
-                    return
-                }
-                self.removeChildren(in: ebiModel.body)
-                ebiModel.bodyCount -= 1
-                addBody(count: ebiModel.bodyCount)
+                presenter.subEbiBody(count: ebiModel.bodyCount)
             }
             if touchNode == bodyRight {
-                if ebiModel.bodyCount >= 5 {
-                    return
-                }
-                self.removeChildren(in: ebiModel.body)
-                ebiModel.bodyCount += 1
-                addBody(count: ebiModel.bodyCount)
+                presenter.addEbiBody(count: ebiModel.bodyCount)
             }
             if touchNode == flyLabel {
                 //SpriteKitでは親Nodeに追加済みのNodeを再度別親Nodeに追加しようとすると落ちる
@@ -116,6 +106,12 @@ class CharactorMakeScene: SKScene {
 }
 
 extension CharactorMakeScene: CharactorMakePresenterOutput {
+    func showUpdateEbiBody(bodyCount: Int) {
+        self.removeChildren(in: ebiModel.body)
+        ebiModel.bodyCount = bodyCount
+        createBody(count: ebiModel.bodyCount)
+    }
+    
     func showUpdateEbiTale(taleCount: Int) {
         ebiModel.setTaleTexture(selectNum: taleCount)
     }

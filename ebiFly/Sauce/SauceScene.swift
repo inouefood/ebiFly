@@ -33,13 +33,13 @@ class SauceScene: SKScene {
         ]
     }()
 
-    
     lazy var cloudSprite: [SKSpriteNode]! = {
         return [
             SKSpriteNode(image: "cround1", pos: CGPoint(x: width/3, y: height * 1.7), size: CGSize(width: width/2, height: width/3)),
             SKSpriteNode(image: "cround1", pos: CGPoint(x: width/1.3, y: height * 1.2), size: CGSize(width: width/2, height: width/3))
          ]
         }()
+    
     lazy var backgroundSky: [SKShapeNode]! = {
         return [
             SKShapeNode(rect: CGRect(x: 0, y: height/1.5, width: width, height: height * 2),color: UIColor(appColor: .sky)),
