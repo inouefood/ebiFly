@@ -70,11 +70,9 @@ class FryScene: SKScene {
     override func didMove(to view: SKView) {
         // 画面端での跳ね返り
         self.physicsBody = SKPhysicsBody(edgeLoopFrom: self.frame)
-        
         self.addChild(aburaBackground)
         
         Timer.scheduledTimer(withTimeInterval: 8, repeats: false){(_) in
-            
             self.removeChildren(in: self.aburaSprites)
             self.removeChildren(in: self.ebiModel.body)
             self.removeChildren(in: [self.ebiModel.tale])
@@ -111,31 +109,23 @@ class FryScene: SKScene {
         }
         
         // jointの設定
-        //// 身体のjoint
         for i in 1..<ebiModel.bodyCount {
-            let joint = SKPhysicsJointPin.joint(withBodyA:ebiModel.body[i-1].physicsBody!, bodyB: ebiModel.body[i].physicsBody!, anchor: CGPoint(x: ebiModel.body[i-1].frame.midX, y: ebiModel.body[i].frame.midY))
-            joint.frictionTorque = 0.2
-            joint.upperAngleLimit = CGFloat(Double.pi/4)
-            self.physicsWorld.add(joint)
+            let bodyJoint = SKPhysicsJointPin.joint(withBodyA:ebiModel.body[i-1].physicsBody!, bodyB: ebiModel.body[i].physicsBody!, anchor: CGPoint(x: ebiModel.body[i-1].frame.midX, y: ebiModel.body[i].frame.midY))
+            bodyJoint.frictionTorque = 0.2
+            bodyJoint.upperAngleLimit = CGFloat(Double.pi/4)
+            self.physicsWorld.add(bodyJoint)
         }
-        //// 尻尾のjoint
-        let joint = SKPhysicsJointFixed.joint(withBodyA: ebiModel.tale.physicsBody!, bodyB: ebiModel.body[0].physicsBody!, anchor: CGPoint(x: ebiModel.tale.frame.midX, y: ebiModel.tale.frame.maxY))
-        self.physicsWorld.add(joint)
+        let taleJoint = SKPhysicsJointFixed.joint(withBodyA: ebiModel.tale.physicsBody!, bodyB: ebiModel.body[0].physicsBody!, anchor: CGPoint(x: ebiModel.tale.frame.midX, y: ebiModel.tale.frame.maxY))
+        self.physicsWorld.add(taleJoint)
     }
     
     override func update(_ currentTime: TimeInterval) {
-        // あぶらの更新
         for i in 0..<Constant.SpriteNum.abura {
-            // あぶらエリアより高い位置のときあぶらたちを落下させる
-            if (self.frame.height/2.0 < aburaSprites[i].position.y) {
-                aburaSprites[i].position.y -= 1.0
-            }
             presenter.aburaToEbiCollision(ebiPos: ObjectPosition(pos: ebiModel.body[aburaRandomSeed[i]].position), aburaPos:ObjectPosition(pos: aburaSprites[i].position), count: i)
         }
     }
     
     // MARK: - Event
-    
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         touchBiginPos = touches.first!.location(in: self)
         taleBiginPos = ebiModel.tale.position
