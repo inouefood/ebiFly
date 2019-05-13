@@ -39,11 +39,15 @@ class FryScene: SKScene {
         return seeds
     }()
     
-    lazy var aburaBackground = SKShapeNode(size: CGSize(width: self.frame.size.width, height: self.frame.size.height), color: UIColor.init(red: 0.9, green: 0.8, blue: 0.5, alpha: 1.0), pos: CGPoint(x: self.frame.size.width/2, y: 0.0))
+    lazy var aburaBackground = {
+       return SKShapeNode(size: CGSize(width: self.frame.size.width, height: self.frame.size.height), color: UIColor.init(red: 0.9, green: 0.8, blue: 0.5, alpha: 1.0), pos: CGPoint(x: self.frame.size.width/2, y: 0.0))
+    }()
 
     var koromoSprites:[SKSpriteNode] = []
     var koromoRandomSeed:[Int] = []
-    var isTale:Bool = false
+
+    var touchBiginPos: CGPoint?
+    var taleBiginPos: CGPoint?
     
     var ebiModel: EbiModel
     fileprivate lazy var presenter: FlyPresenter! = {
@@ -70,7 +74,6 @@ class FryScene: SKScene {
         self.addChild(aburaBackground)
         
         Timer.scheduledTimer(withTimeInterval: 8, repeats: false){(_) in
-            self.isTale = false
             
             self.removeChildren(in: self.aburaSprites)
             self.removeChildren(in: self.ebiModel.body)
@@ -134,21 +137,24 @@ class FryScene: SKScene {
     // MARK: - Event
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        let location = touches.first!.location(in: self)
-        guard let node = atPoint(location) as? SKSpriteNode else{
-            return
-        }
-        if node == ebiModel.tale {
-            isTale = true
-        } else {
-            isTale = false
-        }
+        touchBiginPos = touches.first!.location(in: self)
+        taleBiginPos = ebiModel.tale.position
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        let location = touches.first!.location(in: self)
-        let action = SKAction.move(to: CGPoint(x:location.x, y:location.y), duration:0.1)
-        if isTale { ebiModel.tale.run(action) }
+        guard let touchPos = touchBiginPos, let talePos = taleBiginPos, let location = touches.first?.location(in: self) else {
+            return
+        }
+        let screenRangeX = 1..<width
+        let screenRrangeY = 1..<height
+        
+        //タップした座標からの移動距離をtaleのポジションに反映
+        let talePosX = talePos.x - (touchPos.x - location.x)
+        let talePosY = talePos.y - (touchPos.y - location.y)
+        
+        if screenRangeX.contains(talePosX) && screenRrangeY.contains(talePosY) {
+            ebiModel.tale.position = CGPoint(x: talePosX, y: talePosY)
+        }
     }
 }
 

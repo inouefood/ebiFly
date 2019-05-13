@@ -13,11 +13,11 @@ import GameplayKit
 class CharactorMakeScene: SKScene {
     var ebiModel: EbiModel
 
-    //ボタン
     lazy var tailLeft = SKSpriteNode(image: "left", pos: CGPoint(x: width/6, y: height - height/6), size: CGSize(width: width/6, height: width/6))
     lazy var tailRight = SKSpriteNode(image: "right", pos: CGPoint(x: width - width/6, y: height - height/6), size: CGSize(width: width/6, height: width/6))
     lazy var bodyLeft = SKSpriteNode(image: "left", pos: CGPoint(x: width/6 , y: height/3), size: CGSize(width: width/6, height: width/6))
     lazy var bodyRight = SKSpriteNode(image: "right", pos: CGPoint(x: width - width/6, y: height/3), size: CGSize(width: width/6, height: width/6))
+    
     lazy var flyLabel = SKLabelNode(fontSize: 70, text: "揚げる!!", pos: CGPoint(x:width/2, y:height/10))
     
     fileprivate lazy var presenter: CharactorMakePresenter! = {
@@ -42,17 +42,15 @@ class CharactorMakeScene: SKScene {
 
         createTale(taleImgStr: "tale1")
         createBody(count: ebiModel.bodyCount)
+        self.addChild(bodyLeft, tailRight, tailLeft, bodyRight, flyLabel)
     }
     
     // MARK: - PrivateMethod
     
     private func createBody(count: Int){
-        
-        let taleX = width/2
-        
         for i in 0..<count {
             let ebiBody = SKSpriteNode(imageNamed: "ebibody")
-            let ebX = taleX
+            let ebX = width/2
             let rootY = taleY - width/4
             let ebY = rootY - (width/4 * CGFloat(i))
             ebiBody.size = CGSize(width: width/4 , height: width/4)
@@ -65,8 +63,6 @@ class CharactorMakeScene: SKScene {
         }
     }
     private func createTale(taleImgStr: String){
-        self.addChild(bodyLeft, tailRight, tailLeft, bodyRight, flyLabel)
-    
         ebiModel.tale.position = CGPoint(x: width/2, y: taleY)
         ebiModel.tale.size = CGSize(width: width/4, height: width/4)
         ebiModel.tale.physicsBody = SKPhysicsBody(circleOfRadius: 1)
@@ -94,7 +90,7 @@ class CharactorMakeScene: SKScene {
                 presenter.addEbiBody(count: ebiModel.bodyCount)
             }
             if touchNode == flyLabel {
-                //SpriteKitでは親Nodeに追加済みのNodeを再度別親Nodeに追加しようとすると落ちる
+                //親Nodeに追加済みのNodeを再度別親Nodeに追加しようとすると落ちる
                 self.removeChildren(in: ebiModel.body)
                 self.removeChildren(in: [ebiModel.tale])
 
