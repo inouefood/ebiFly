@@ -10,16 +10,42 @@ import UIKit
 import SpriteKit
 
 class FryScene: SKScene {
-    var ebiModel: EbiModel
-    // スプライトの配列
-    var aburaSprites:[SKSpriteNode] = []
-    var aburaRandomSeed:[Int] = []
+    
+    lazy var aburaSprites:[SKSpriteNode] = {
+        var aburas:[SKSpriteNode] = []
+        for i in 0..<Constant.SpriteNum.abura {
+            let abura = SKSpriteNode(imageNamed: "abura")
+            let aburaX = Int(arc4random_uniform(UInt32(self.frame.size.width)))
+            let aburaY = Int(arc4random_uniform(UInt32(self.frame.size.height / 2.0)))
+            abura.position = CGPoint(x: aburaX, y: aburaY)
+            abura.size = CGSize(width: abura.size.width*0.5, height: abura.size.height*0.5)
+            abura.name = "abura" + String(i)
+            abura.zPosition = 1.1
+            // TODO 応急処置、できれば当たり判定を制御してプルプルさせたい
+            //            abura.physicsBody = SKPhysicsBody(circleOfRadius: 1)
+            //            abura.physicsBody!.affectedByGravity = false
+            //            abura.physicsBody!.linearDamping = 1.0
+           
+            aburas.append(abura)
+        }
+        return aburas
+    }()
+    
+    lazy var aburaRandomSeed:[Int] = {
+        var seeds:[Int] = []
+        for _ in 0..<Constant.SpriteNum.abura {
+            seeds.append(Int.random(in: 0...ebiModel.bodyCount-1))
+        }
+        return seeds
+    }()
+    
+    lazy var aburaBackground = SKShapeNode(size: CGSize(width: self.frame.size.width, height: self.frame.size.height), color: UIColor.init(red: 0.9, green: 0.8, blue: 0.5, alpha: 1.0), pos: CGPoint(x: self.frame.size.width/2, y: 0.0))
+
     var koromoSprites:[SKSpriteNode] = []
     var koromoRandomSeed:[Int] = []
-    lazy var aburaBackground = SKShapeNode(size: CGSize(width: self.frame.size.width, height: self.frame.size.height), color: UIColor.init(red: 0.9, green: 0.8, blue: 0.5, alpha: 1.0), pos: CGPoint(x: self.frame.size.width/2, y: 0.0))
-    
     var isTale:Bool = false
     
+    var ebiModel: EbiModel
     fileprivate lazy var presenter: FlyPresenter! = {
         return FlyPresenterImpl(model: FlyModelImpl(), output: self)
     }()
@@ -37,17 +63,16 @@ class FryScene: SKScene {
     }
     
     // MARK: - LifeCycle
-    
     override func didMove(to view: SKView) {
         // 画面端での跳ね返り
         self.physicsBody = SKPhysicsBody(edgeLoopFrom: self.frame)
         
         self.addChild(aburaBackground)
         
-        Timer.scheduledTimer(withTimeInterval: 10, repeats: false){(_) in
+        Timer.scheduledTimer(withTimeInterval: 8, repeats: false){(_) in
             self.isTale = false
+            
             self.removeChildren(in: self.aburaSprites)
-
             self.removeChildren(in: self.ebiModel.body)
             self.removeChildren(in: [self.ebiModel.tale])
         
@@ -59,14 +84,19 @@ class FryScene: SKScene {
             let scene = SauceScene(size: self.scene!.size, count: 5, abura: self.koromoSprites,  tale: self.ebiModel.tale, ebi: body, seed: self.koromoRandomSeed)
             self.view!.presentScene(scene)
         }
-        Timer.scheduledTimer(withTimeInterval: 2.9, repeats: false){(_) in
-            self.isTale = false
-        }
         
+        ebiInitialize()
+        
+        self.addChild(aburaSprites)
+    }
+    
+    // MARK: - PrivateMethod
+    
+    private func ebiInitialize(){
         ebiModel.tale.size = CGSize(width: width/6, height: width/6)
         ebiModel.tale.position = CGPoint(x: width/2, y: height - height/6)
         self.addChild(ebiModel.tale)
-
+        
         for i in 0..<ebiModel.bodyCount {
             let ebY = (height - height/6 - width/6)  - (width/6 * CGFloat(i))
             ebiModel.body[i].size = CGSize(width: width/6, height: width/6)
@@ -88,29 +118,6 @@ class FryScene: SKScene {
         //// 尻尾のjoint
         let joint = SKPhysicsJointFixed.joint(withBodyA: ebiModel.tale.physicsBody!, bodyB: ebiModel.body[0].physicsBody!, anchor: CGPoint(x: ebiModel.tale.frame.midX, y: ebiModel.tale.frame.maxY))
         self.physicsWorld.add(joint)
-        
-        // あぶら --------------------------------------------------------------
-        //// 配列の初期化
-        for _ in 0..<Constant.SpriteNum.abura {
-            aburaRandomSeed.append(Int.random(in: 0...ebiModel.bodyCount-1))
-        }
-        
-        //// あぶらたちの初期設定
-        for i in 0..<Constant.SpriteNum.abura {
-            let abura = SKSpriteNode(imageNamed: "abura")
-            let aburaX = Int(arc4random_uniform(UInt32(self.frame.size.width)))
-            let aburaY = Int(arc4random_uniform(UInt32(self.frame.size.height / 2.0)))
-            abura.position = CGPoint(x: aburaX, y: aburaY)
-            abura.size = CGSize(width: abura.size.width*0.5, height: abura.size.height*0.5)
-            abura.name = "abura" + String(i)
-            abura.zPosition = 1.1
-            // TODO 応急処置、できれば当たり判定を制御してプルプルさせたい
-//            abura.physicsBody = SKPhysicsBody(circleOfRadius: 1)
-//            abura.physicsBody!.affectedByGravity = false
-//            abura.physicsBody!.linearDamping = 1.0
-            self.addChild(abura)
-            aburaSprites.append(abura)
-        }
     }
     
     override func update(_ currentTime: TimeInterval) {
@@ -127,12 +134,11 @@ class FryScene: SKScene {
     // MARK: - Event
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        //タッチしたノードを取得する
         let location = touches.first!.location(in: self)
         guard let node = atPoint(location) as? SKSpriteNode else{
             return
         }
-        if(node == ebiModel.tale) {
+        if node == ebiModel.tale {
             isTale = true
         } else {
             isTale = false
@@ -142,7 +148,7 @@ class FryScene: SKScene {
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         let location = touches.first!.location(in: self)
         let action = SKAction.move(to: CGPoint(x:location.x, y:location.y), duration:0.1)
-        if (isTale) { ebiModel.tale.run(action) }
+        if isTale { ebiModel.tale.run(action) }
     }
 }
 
