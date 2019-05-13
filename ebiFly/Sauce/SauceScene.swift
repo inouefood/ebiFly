@@ -161,6 +161,11 @@ class SauceScene: SKScene {
             presenter.fallEbifly()
         }
         if isShakeEnd {
+            
+            // TODO 飛ばす処理は別Sceneで行う
+//            let scene = FlyScene(size:  self.scene!.size, flyingDistance: flyCirc, body: ebiBodySprites, tale: taleSprite)
+//            scene.scaleMode = SKSceneScaleMode.aspectFill
+//            self.view!.presentScene(scene)
             if flyCirc > countVal {
                 
                 for _ in 0...2 {

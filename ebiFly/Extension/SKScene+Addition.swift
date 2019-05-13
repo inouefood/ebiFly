@@ -17,12 +17,12 @@ extension SKScene {
     }
     var width: CGFloat {
         get {
-            return view!.frame.width
+            return frame.width
         }
     }
     var height: CGFloat {
         get {
-            return view!.frame.height
+            return frame.height
         }
     }
 }
