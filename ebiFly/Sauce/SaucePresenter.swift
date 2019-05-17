@@ -8,20 +8,20 @@
 
 import Foundation
 
-protocol SaucePresenter {
+protocol SaucePresenter:class {
     func shakeDevice(shake:@escaping(Bool) -> Void)
     func fallEbifly()
     func fallBackgroundItem()
     func vibrate()
 }
-protocol SaucePresenterOutput {
+protocol SaucePresenterOutput:class {
     func showUpdateEbiflyPos()
     func showUpdateBackgroundItem()
 }
 
 class SaucePresenterImpl: SaucePresenter{
     private var model: SauceModel
-    private var output: SaucePresenterOutput
+    private weak var output: SaucePresenterOutput?
     
     init(model: SauceModel, output: SaucePresenterOutput) {
         self.model = model
@@ -35,9 +35,9 @@ class SaucePresenterImpl: SaucePresenter{
         model.vibrate()
     }
     func fallEbifly() {
-        output.showUpdateEbiflyPos()
+        output?.showUpdateEbiflyPos()
     }
     func fallBackgroundItem() {
-        output.showUpdateBackgroundItem()
+        output?.showUpdateBackgroundItem()
     }
 }

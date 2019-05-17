@@ -8,17 +8,17 @@
 
 import Foundation
 
-protocol FlyPresenter {
+protocol FlyPresenter:class {
     func aburaToEbiCollision(ebiPos: ObjectPosition, aburaPos: ObjectPosition,count: Int)
 }
-protocol FlyPresenterOutput {
+protocol FlyPresenterOutput:class {
     func showUpdateAbura(count: Int, pos: ObjectPosition)
 }
 
 
 class FlyPresenterImpl: FlyPresenter {
-    let model: FlyModel
-    let output: FlyPresenterOutput
+    private let model: FlyModel
+    private weak var  output: FlyPresenterOutput?
     init(model: FlyModel, output: FlyPresenterOutput) {
         self.model = model
         self.output = output
@@ -27,7 +27,7 @@ class FlyPresenterImpl: FlyPresenter {
     func aburaToEbiCollision(ebiPos: ObjectPosition, aburaPos: ObjectPosition,count: Int){
         let ebiAburaDist = model.aburaToEbiCollision(ebiPos:ebiPos, aburaPos: aburaPos)
         if ebiAburaDist.collision {
-            output.showUpdateAbura(count:count , pos: ebiAburaDist.pos)
+            output?.showUpdateAbura(count:count , pos: ebiAburaDist.pos)
         }
     }
     
