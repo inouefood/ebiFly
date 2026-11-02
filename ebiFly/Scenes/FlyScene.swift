@@ -62,6 +62,7 @@ struct FlyView: View {
                 .transition(.scale.combined(with: .opacity))
             }
         }
+        .backdrop(.gradient(top: Color(scene.skyTop), bottom: Color(scene.skyBottom)))
         .animation(.spring(response: 0.35, dampingFraction: 0.65), value: scene.outcome)
         .animation(.spring(response: 0.35, dampingFraction: 0.65), value: scene.crashedInto)
         .onReceive(ads.$isRewardedReady) { scene.continueAvailable = $0 }
@@ -205,6 +206,9 @@ final class FlyScene: GameScene, ObservableObject {
     @Published private(set) var fuel = 1.0
     /// How many refuels so far (drives the gauge flash).
     @Published private(set) var refuelCount = 0
+    /// Current sky colours, so the space beside the column on wide screens matches the scene.
+    @Published private(set) var skyTop = UIColor(hex: 0x8FD8FF)
+    @Published private(set) var skyBottom = UIColor(hex: 0xD8F3FF)
     /// Tank size in meters of climbing: what the prep steps earned.
     let maxDistance: Int
     var usesTilt: Bool { motion.isAvailable }
@@ -240,6 +244,9 @@ final class FlyScene: GameScene, ObservableObject {
 
     private var items: [Item] = []
     private var flyer: ShrimpNode!
+    private var thrust: ThrustNode!
+    private var lastSpeedLine: TimeInterval = 0
+    private var launched = false
     private var ground: SKSpriteNode!
     private var floor: SKSpriteNode!
     private var sky: SKSpriteNode!
@@ -291,7 +298,10 @@ final class FlyScene: GameScene, ObservableObject {
         flyer.zPosition = 10
         flyer.startWiggle()
         addChild(flyer)
-        flyer.run(.repeatForever(.sequence([.run { [weak self] in self?.emitTrail() }, .wait(forDuration: 0.08)])))
+        thrust = ThrustNode(unit: u, power: climbSpeed / 460, target: self)
+        thrust.position = flyer.tailTip
+        thrust.zPosition = -1   // behind the tail fan
+        flyer.addChild(thrust)
 
         ground = SKSpriteNode(asset: "pot-front", width: 240 * u)
         ground.zPosition = 2
@@ -391,16 +401,21 @@ final class FlyScene: GameScene, ObservableObject {
             break
         }
         sky.texture = Tex.gradient(CGSize(width: 4, height: 64), top: top, bottom: bottom)
+        skyTop = top
+        skyBottom = bottom
     }
 
-    private func emitTrail() {
-        guard outcome == nil else { return }
-        let drop = SKSpriteNode(asset: "oil-drop", width: 12 * u)
-        drop.position = flyer.convert(CGPoint(x: .random(in: -25...25) * flyer.unit, y: flyer.tailTip.y), to: self)
-        drop.zRotation = .pi
-        drop.zPosition = 9
-        addChild(drop)
-        drop.run(.sequence([.group([.moveBy(x: 0, y: -60 * u, duration: 0.6), .fadeOut(withDuration: 0.6)]), .removeFromParent()]))
+    /// White streaks rushing past, faster with more sauce.
+    private func spawnSpeedLine() {
+        let h = CGFloat.random(in: 50...120) * u
+        let line = SKSpriteNode(color: .white, size: CGSize(width: 3 * u, height: h))
+        line.alpha = .random(in: 0.25...0.5)
+        line.position = CGPoint(x: .random(in: 0...size.width), y: size.height + h)
+        line.zPosition = 0.9   // over the sky, under clouds and obstacles
+        addChild(line)
+        let v = climbSpeed * k * 1.8
+        let dist = size.height + h * 2
+        line.run(.sequence([.moveBy(x: 0, y: -dist, duration: TimeInterval(dist / v)), .removeFromParent()]))
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -432,7 +447,19 @@ final class FlyScene: GameScene, ObservableObject {
         // short run-up so the player can get ready
         let warmup = min(1, (currentTime - (startTime ?? currentTime)) / 0.8)
         if fuelMeters <= 0 { coast = max(0, coast - dt / 0.7) }
-        let climb = climbSpeed * CGFloat(warmup) * coast * dt
+        let power = CGFloat(warmup) * coast
+        let climb = climbSpeed * power * dt
+        thrust.setIntensity(power)
+        thrust.aim(shrimpRotation: flyer.zRotation)
+        if !launched && warmup > 0.3 {
+            launched = true
+            thrust.burst()
+            Haptics.medium()
+        }
+        if power > 0.5, currentTime - lastSpeedLine > 0.07 {
+            lastSpeedLine = currentTime
+            spawnSpeedLine()
+        }
         camera0 += climb
         fuelMeters = max(0, fuelMeters - climb)
         extendWorld(to: camera0 + size.height / k + 400)
@@ -480,6 +507,7 @@ final class FlyScene: GameScene, ObservableObject {
         if !autopilot, currentTime >= invincibleUntil, let hit = collidingObstacle() {
             if !continueUsed && continueAvailable {
                 crashedInto = hit
+                thrust.setIntensity(0)
                 Haptics.heavy()
             } else {
                 end(hitBy: hit)
@@ -505,6 +533,7 @@ final class FlyScene: GameScene, ObservableObject {
             refuelCount = refuels
             Haptics.success()
             refuelPopup(at: item.node.position)
+            thrust.burst()
             item.node.removeAllActions()
             item.node.run(.sequence([.group([.scale(to: 2, duration: 0.2), .fadeOut(withDuration: 0.2)]), .removeFromParent()]))
             return true
@@ -581,6 +610,7 @@ final class FlyScene: GameScene, ObservableObject {
 
     private func end(hitBy: Obstacle?) {
         outcome = FlightOutcome(distance: Int(camera0), hitBy: hitBy, refuels: refuels)
+        thrust.setIntensity(0)
         motion.stop()
         if hitBy != nil {
             Haptics.heavy()

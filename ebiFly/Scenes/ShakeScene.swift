@@ -41,6 +41,7 @@ struct ShakeView: View {
             .padding(.bottom, 20 * s)
             .allowsHitTesting(false)
         }
+        .backdrop(.counter(wall: Color(hex: 0xFFE0D2), wallLow: Color(UIColor(hex: 0xFFE0D2).mixed(with: .white, 0.5)), counter: Color(hex: 0xE8C79A), edge: 0.52))
         .onChange(of: scene.finished) { done in
             guard done else { return }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { game.finishShake(scene.shakes) }

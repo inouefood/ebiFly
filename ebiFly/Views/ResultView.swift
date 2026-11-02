@@ -18,6 +18,7 @@ struct ResultView: View {
                 content(r)
             }
         }
+        .backdrop(.solid(Palette.resultBg))
         .onAppear {
             #if DEBUG
             // `-autoRetry YES`: press "もう一回" by itself after a few seconds (to check the interstitial)

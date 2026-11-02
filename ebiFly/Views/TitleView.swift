@@ -39,6 +39,7 @@ struct TitleView: View {
                 .padding(.bottom, 24 * s)
             }
         }
+        .backdrop(.gradient(top: Color(hex: 0x7FD3FF), bottom: Color(hex: 0xFFE9A8)))
     }
 }
 

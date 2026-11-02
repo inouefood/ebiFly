@@ -53,6 +53,10 @@ final class Ads: NSObject, ObservableObject {
     func startIfNeeded() {
         guard !started else { return }
         started = true
+        #if DEBUG
+        // `-skipAds YES`: no consent/ATT dialogs and no ads (for taking store screenshots)
+        if UserDefaults.standard.bool(forKey: "skipAds") { return }
+        #endif
         ConsentInformation.shared.requestConsentInfoUpdate(with: RequestParameters()) { [weak self] _ in
             Task { @MainActor in
                 ConsentForm.loadAndPresentIfRequired(from: Self.topViewController()) { _ in

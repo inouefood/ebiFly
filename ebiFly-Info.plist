@@ -2,10 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<!-- Merged with the generated Info.plist (GENERATE_INFOPLIST_FILE). Only keys that can't be build settings live here. -->
 	<key>GADApplicationIdentifier</key>
 	<string>ca-app-pub-8522231452310619~6687248068</string>
-	<!-- Google's list of SKAdNetwork IDs: https://developers.google.com/admob/ios/3p-skadnetworks -->
 	<key>SKAdNetworkItems</key>
 	<array>
 		<dict>

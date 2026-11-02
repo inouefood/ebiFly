@@ -20,6 +20,7 @@ struct MakeView: View {
             .padding(.top, 8)
             .padding(.bottom, 20 * s)
         }
+        .backdrop(.solid(Palette.cream))
     }
 
     private var plate: some View {

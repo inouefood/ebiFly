@@ -37,6 +37,7 @@ struct FryView: View {
             .padding(.top, 8)
             .padding(.bottom, 20 * s)
         }
+        .backdrop(.tiles(Color(hex: 0x2F4A4F)))
     }
 
     private var meter: some View {
