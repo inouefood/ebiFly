@@ -2,7 +2,7 @@
 """App Store screenshots: a big, easy-to-read headline over each app screen in a device frame.
 
 Inputs are raw simulator captures in Design/build/raw/<device>_<screen>.png
-(iPhone 17 Pro 1206x2622, iPad Pro 13" 2064x2752, iPhone Duo outer display 1398x2034).
+(iPhone 17 Pro 1206x2622, iPad Pro 13" 2064x2752, iPhone Duo unfolded 2007x2853).
 
     python3 Design/store_screenshots.py   ->  Design/store/screenshots/<device>/NN_<screen>.jpg
 """
@@ -21,7 +21,7 @@ INK = "#3a2418"
 DEVICES = {
     "iphone": dict(w=1206, h=2622, frame=0.70, top=690, head=128, sub=54, radius=0.13, bezel=22),
     "ipad": dict(w=2064, h=2752, frame=0.67, top=780, head=168, sub=70, radius=0.06, bezel=30),
-    "duo": dict(w=1398, h=2034, frame=0.68, top=560, head=120, sub=50, radius=0.08, bezel=22),
+    "duo": dict(w=2007, h=2853, frame=0.66, top=800, head=172, sub=72, radius=0.07, bezel=30),
 }
 
 # screen, headline (\n = line break), sub line, background, headline colour, decorations
