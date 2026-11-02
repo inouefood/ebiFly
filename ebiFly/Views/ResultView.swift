@@ -5,6 +5,8 @@ struct ResultView: View {
     @EnvironmentObject private var game: GameModel
     @Environment(\.uiScale) private var s
     @Environment(\.requestReview) private var requestReview
+    /// The review dialog was shown on this result, so no interstitial on the way out.
+    @State private var askedReview = false
 
     var body: some View {
         ZStack {
@@ -17,8 +19,17 @@ struct ResultView: View {
             }
         }
         .onAppear {
+            #if DEBUG
+            // `-autoRetry YES`: press "もう一回" by itself after a few seconds (to check the interstitial)
+            if UserDefaults.standard.bool(forKey: "autoRetry") {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 6) {
+                    Ads.shared.retryTapped(skip: askedReview) { game.startRun() }
+                }
+            }
+            #endif
             guard game.wantsReview else { return }
             game.wantsReview = false
+            askedReview = true
             // let the player see the score first
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { requestReview() }
         }
@@ -53,7 +64,9 @@ struct ResultView: View {
             breakdown(r)
 
             HStack(spacing: 10 * s) {
-                Button("もう一回") { game.startRun() }
+                Button("もう一回") {
+                    Ads.shared.retryTapped(skip: askedReview) { game.startRun() }
+                }
                     .buttonStyle(GameButtonStyle(wide: true, size: 15))
                 Button("きろく") { game.go(.records) }
                     .buttonStyle(GameButtonStyle(kind: .ghost, wide: true, size: 15))

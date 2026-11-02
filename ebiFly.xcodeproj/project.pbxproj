@@ -6,9 +6,14 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		EB1F0000000000000000C003 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = EB1F0000000000000000C002 /* GoogleMobileAds */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		EB1F0000000000000000A001 /* ebiFly.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ebiFly.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EB1F0000000000000000A00C /* ebiFly.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ebiFly.entitlements; sourceTree = "<group>"; };
+		EB1F0000000000000000C004 /* ebiFly-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "ebiFly-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -24,6 +29,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EB1F0000000000000000C003 /* GoogleMobileAds in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -34,6 +40,7 @@
 			isa = PBXGroup;
 			children = (
 				EB1F0000000000000000A00C /* ebiFly.entitlements */,
+				EB1F0000000000000000C004 /* ebiFly-Info.plist */,
 				EB1F0000000000000000A002 /* ebiFly */,
 				EB1F0000000000000000A005 /* Products */,
 			);
@@ -67,6 +74,7 @@
 			);
 			name = ebiFly;
 			packageProductDependencies = (
+				EB1F0000000000000000C002 /* GoogleMobileAds */,
 			);
 			productName = ebiFly;
 			productReference = EB1F0000000000000000A001 /* ebiFly.app */;
@@ -96,6 +104,9 @@
 			);
 			mainGroup = EB1F0000000000000000A004;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				EB1F0000000000000000C001 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = EB1F0000000000000000A005 /* Products */;
 			projectDirPath = "";
@@ -198,10 +209,11 @@
 				DEVELOPMENT_TEAM = 24BSY9Z4H5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "ebiFly-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "えびフライ";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.casual-games";
-				INFOPLIST_KEY_NSUserTrackingUsageDescription = "より良い広告やサービスをお届けするために使用します。";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.action-games";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "あなたに合った広告を表示するために使用します。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
@@ -230,10 +242,11 @@
 				DEVELOPMENT_TEAM = 24BSY9Z4H5;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "ebiFly-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "えびフライ";
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
-				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.casual-games";
-				INFOPLIST_KEY_NSUserTrackingUsageDescription = "より良い広告やサービスをお届けするために使用します。";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.action-games";
+				INFOPLIST_KEY_NSUserTrackingUsageDescription = "あなたに合った広告を表示するために使用します。";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
@@ -274,6 +287,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		EB1F0000000000000000C001 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/googleads/swift-package-manager-google-mobile-ads.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 13.11.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		EB1F0000000000000000C002 /* GoogleMobileAds */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = EB1F0000000000000000C001 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
+			productName = GoogleMobileAds;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = EB1F0000000000000000A009 /* Project object */;
 }

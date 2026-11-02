@@ -16,7 +16,7 @@ struct EbiFlyApp: App {
                 .onAppear { GameCenter.shared.authenticate() }
         }
         .onChange(of: scenePhase) { phase in
-            if phase == .active { TrackingPermission.requestIfNeeded() }
+            if phase == .active { Ads.shared.startIfNeeded() }
         }
     }
 }

@@ -6,6 +6,8 @@ struct FlyView: View {
     @Environment(\.uiScale) private var s
     @StateObject private var scene: FlyScene
     @State private var showHint = true
+    @State private var showingAd = false
+    @ObservedObject private var ads = Ads.shared
     private let shakes: Int
 
     init(tail: TailKind, bodyCount: Int, fry: Double, shakes: Int, maxDistance: Int) {
@@ -43,6 +45,11 @@ struct FlyView: View {
             .padding(.bottom, 22 * s)
             .allowsHitTesting(false)
 
+            if let hit = scene.crashedInto {
+                continueOffer(hit)
+                    .transition(.scale.combined(with: .opacity))
+            }
+
             if let outcome = scene.outcome {
                 ZStack {
                     Color(hex: 0xFFF6DC, alpha: 0.6).ignoresSafeArea()
@@ -56,6 +63,14 @@ struct FlyView: View {
             }
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.65), value: scene.outcome)
+        .animation(.spring(response: 0.35, dampingFraction: 0.65), value: scene.crashedInto)
+        .onReceive(ads.$isRewardedReady) { scene.continueAvailable = $0 }
+        #if DEBUG
+        // `-autoWatchAd YES`: open the ad as soon as the offer appears, to check it without tapping
+        .onChange(of: scene.crashedInto) { hit in
+            if hit != nil, UserDefaults.standard.bool(forKey: "autoWatchAd") { watchAd() }
+        }
+        #endif
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 2.4) { withAnimation { showHint = false } }
         }
@@ -64,6 +79,48 @@ struct FlyView: View {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
                 game.finishFlight(distance: outcome.distance, hitBy: outcome.hitBy, refuels: outcome.refuels)
             }
+        }
+    }
+}
+
+extension FlyView {
+    private func watchAd() {
+        showingAd = true
+        Ads.shared.showRewarded { earned in
+            showingAd = false
+            if earned { scene.continueFlight() } else { scene.giveUp() }
+        }
+    }
+
+    /// After a crash: watch a rewarded ad to keep flying from here (once per flight), or stop.
+    private func continueOffer(_ hit: Obstacle) -> some View {
+        ZStack {
+            Color(hex: 0x1B1410, alpha: 0.45).ignoresSafeArea()
+            VStack(spacing: 12 * s) {
+                OutlinedText(text: "\(hit.displayName)にぶつかった！", font: AppFont.display(22 * s), fill: Palette.accent, width: 2.5)
+                Text("\(scene.altitude.formatted()) m").font(AppFont.display(22 * s)).foregroundStyle(Palette.ink)
+                Text("広告を見ると ここからつづきを飛べます\n（1回のフライトで1回まで）")
+                    .font(AppFont.body(13 * s))
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(Palette.ink)
+                Button {
+                    watchAd()
+                } label: {
+                    HStack(spacing: 6 * s) {
+                        Image(systemName: "play.rectangle.fill")
+                        Text("広告を見てつづきから")
+                    }
+                }
+                .buttonStyle(GameButtonStyle(wide: true, size: 15))
+                .disabled(showingAd)
+                Button("ここまでにする") { scene.giveUp() }
+                    .buttonStyle(GameButtonStyle(kind: .ghost, wide: true, size: 15))
+                    .disabled(showingAd)
+            }
+            .padding(18 * s)
+            .frame(width: 290 * s)
+            .background(RoundedRectangle(cornerRadius: 22).fill(Color(hex: 0xFFF6DC)))
+            .overlay(RoundedRectangle(cornerRadius: 22).stroke(Palette.ink, lineWidth: 3))
         }
     }
 }
@@ -137,6 +194,13 @@ final class FlyScene: GameScene, ObservableObject {
     @Published private(set) var altitude = 0
     @Published private(set) var zone = "キッチン"
     @Published private(set) var outcome: FlightOutcome?
+    /// Set when the shrimp hit something and a "continue with an ad" offer is open; the flight is frozen meanwhile.
+    @Published private(set) var crashedInto: Obstacle?
+    /// Whether a rewarded ad is loaded (kept in sync by the view).
+    var continueAvailable = false
+    private var continueUsed = false
+    private var invincibleUntil: TimeInterval = 0
+    private var now: TimeInterval = 0
     /// Fuel left, 0...1 of the tank.
     @Published private(set) var fuel = 1.0
     /// How many refuels so far (drives the gauge flash).
@@ -356,6 +420,11 @@ final class FlyScene: GameScene, ObservableObject {
 
     override func update(_ currentTime: TimeInterval) {
         guard isLaidOut, outcome == nil else { return }
+        guard crashedInto == nil else {
+            lastTime = nil   // no big time step when the flight resumes
+            return
+        }
+        now = currentTime
         let dt = CGFloat(min(0.05, currentTime - (lastTime ?? currentTime)))
         lastTime = currentTime
         if startTime == nil { startTime = currentTime }
@@ -399,11 +468,22 @@ final class FlyScene: GameScene, ObservableObject {
             }
         }
         let autopilot = UserDefaults.standard.bool(forKey: "flyAutopilot")
+        // `-flyCrashAt 6`: with the autopilot, crash into a bird after that many seconds (to test the continue offer)
+        let crashAt = UserDefaults.standard.double(forKey: "flyCrashAt")
+        if autopilot, crashAt > 0, !continueUsed, currentTime - (startTime ?? currentTime) > crashAt {
+            if continueAvailable { crashedInto = .bird } else { end(hitBy: .bird) }
+            return
+        }
         #else
         let autopilot = false
         #endif
-        if !autopilot, let hit = collidingObstacle() {
-            end(hitBy: hit)
+        if !autopilot, currentTime >= invincibleUntil, let hit = collidingObstacle() {
+            if !continueUsed && continueAvailable {
+                crashedInto = hit
+                Haptics.heavy()
+            } else {
+                end(hitBy: hit)
+            }
         } else if coast <= 0 {
             end(hitBy: nil)
         }
@@ -475,6 +555,28 @@ final class FlyScene: GameScene, ObservableObject {
             if r.intersects(box) { return kind }
         }
         return nil
+    }
+
+    /// Resume after the rewarded ad: clear what was hit and blink for a moment of safety.
+    func continueFlight() {
+        guard crashedInto != nil else { return }
+        continueUsed = true
+        let box = flyer.calculateAccumulatedFrame().insetBy(dx: -40 * u, dy: -40 * u)
+        items.removeAll { item in
+            guard item.obstacle != nil, item.node.frame.intersects(box) else { return false }
+            item.node.run(.sequence([.group([.fadeOut(withDuration: 0.25), .scale(to: 1.4, duration: 0.25)]), .removeFromParent()]))
+            return true
+        }
+        invincibleUntil = now + 2
+        flyer.run(.repeat(.sequence([.fadeAlpha(to: 0.3, duration: 0.1), .fadeAlpha(to: 1, duration: 0.1)]), count: 10))
+        crashedInto = nil
+        Haptics.success()
+    }
+
+    func giveUp() {
+        guard let hit = crashedInto else { return }
+        crashedInto = nil
+        end(hitBy: hit)
     }
 
     private func end(hitBy: Obstacle?) {
