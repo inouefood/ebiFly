@@ -36,6 +36,7 @@ struct BatterView: View {
                 }
             }
         }
+        .backdrop(.dots(Color(hex: 0xF6DC95), dot: Color(hex: 0xE9C06A)))
     }
 }
 

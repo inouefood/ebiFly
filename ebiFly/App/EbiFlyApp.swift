@@ -29,7 +29,6 @@ struct RootView: View {
             // iPhone: full width. iPad: a phone-shaped column in the middle so the game keeps its proportions.
             let width = min(geo.size.width, geo.size.height * 0.56)
             ZStack {
-                Palette.letterbox.ignoresSafeArea()
                 screen
                     .id(game.screen)
                     .transition(.opacity)
@@ -37,6 +36,8 @@ struct RootView: View {
                     .environment(\.uiScale, min(max(width / 300, 1), 1.6))
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            // wide screens: each screen's own background continues beside the column (no dark bars)
+            .backdropBackground(unit: width / 300)
         }
         .statusBarHidden(true)
         .persistentSystemOverlays(.hidden)

@@ -62,6 +62,7 @@ struct FlyView: View {
                 .transition(.scale.combined(with: .opacity))
             }
         }
+        .backdrop(.gradient(top: Color(scene.skyTop), bottom: Color(scene.skyBottom)))
         .animation(.spring(response: 0.35, dampingFraction: 0.65), value: scene.outcome)
         .animation(.spring(response: 0.35, dampingFraction: 0.65), value: scene.crashedInto)
         .onReceive(ads.$isRewardedReady) { scene.continueAvailable = $0 }
@@ -205,6 +206,9 @@ final class FlyScene: GameScene, ObservableObject {
     @Published private(set) var fuel = 1.0
     /// How many refuels so far (drives the gauge flash).
     @Published private(set) var refuelCount = 0
+    /// Current sky colours, so the space beside the column on wide screens matches the scene.
+    @Published private(set) var skyTop = UIColor(hex: 0x8FD8FF)
+    @Published private(set) var skyBottom = UIColor(hex: 0xD8F3FF)
     /// Tank size in meters of climbing: what the prep steps earned.
     let maxDistance: Int
     var usesTilt: Bool { motion.isAvailable }
@@ -391,6 +395,8 @@ final class FlyScene: GameScene, ObservableObject {
             break
         }
         sky.texture = Tex.gradient(CGSize(width: 4, height: 64), top: top, bottom: bottom)
+        skyTop = top
+        skyBottom = bottom
     }
 
     private func emitTrail() {

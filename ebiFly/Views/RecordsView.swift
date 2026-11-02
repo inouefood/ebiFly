@@ -77,6 +77,7 @@ struct RecordsView: View {
                     .background(Palette.cream)
             }
         }
+        .backdrop(.solid(Palette.cream))
     }
 
     private func card<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
