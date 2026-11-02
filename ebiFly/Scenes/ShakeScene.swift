@@ -31,7 +31,7 @@ struct ShakeView: View {
                     } else if scene.started {
                         Toast(text: "もっとふって！")
                     } else {
-                        Toast(text: "iPhoneをふってソースをかけよう", sub: "3秒間にふった回数がパワーになる（画面タップでもOK）")
+                        Toast(text: "iPhoneをふってソースをかけよう", sub: "ふった回数で飛ぶ高さと上昇スピードがアップ（画面タップでもOK）")
                     }
                 }
                 .frame(minHeight: 56 * s)

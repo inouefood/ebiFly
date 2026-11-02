@@ -22,7 +22,7 @@ struct BatterView: View {
                 }
                 Spacer()
                 if !scene.started {
-                    Toast(text: "えびをドラッグしてパン粉をあつめよう", sub: "10秒間でたくさんつけるほど遠くへ飛ぶ")
+                    Toast(text: "えびを左右にうごかしてパン粉をキャッチ", sub: "金のパン粉は3こぶん。水てきに当たると3こ落ちる")
                 }
             }
             .padding(.horizontal, 18 * s)
@@ -66,19 +66,35 @@ struct FinishOverlay: View {
     }
 }
 
+/// Crumbs rain down and the shrimp, dragged left and right along the bottom, catches them.
+/// Gold crumbs count triple; water drops knock crumbs back off. It speeds up as time runs out.
 final class BatterScene: GameScene, ObservableObject {
     @Published private(set) var timeLeft = Int(Scoring.batterSeconds)
     @Published private(set) var count = 0
     @Published private(set) var started = false
     @Published private(set) var finished = false
 
+    private enum Kind { case crumb, gold, water }
+    private struct Falling {
+        let node: SKSpriteNode
+        let kind: Kind
+        let speed: CGFloat   // px/s at u = 1
+    }
+
+    /// Crumbs at which the batter looks fully coated.
+    static let fullCoat = 180
+    private static let waterPenalty = 3
+
     private let tail: TailKind
     private let bodyCount: Int
     private var shrimp: ShrimpNode!
-    private var crumbs: [SKSpriteNode] = []
+    private var falling: [Falling] = []
     private var lastTouch: CGPoint?
     private var startTime: TimeInterval?
+    private var lastTime: TimeInterval?
     private var lastSpawn: TimeInterval = 0
+    private var lastBurst: TimeInterval = 0
+    private var lastExtra: TimeInterval = 0
     private var tilt: CGFloat = 0
 
     init(tail: TailKind, bodyCount: Int) {
@@ -97,30 +113,53 @@ final class BatterScene: GameScene, ObservableObject {
         addChild(bg)
 
         shrimp = ShrimpNode(tail: tail, count: bodyCount, skin: SegmentSkin.batter(0), unit: 62 * u / ShrimpGeometry.width)
-        shrimp.position = CGPoint(x: size.width / 2, y: size.height - 170 * u)
+        shrimp.position = CGPoint(x: size.width / 2, y: shrimp.bottomExtent + 120 * u)
         shrimp.zPosition = 5
         shrimp.startWiggle()
         addChild(shrimp)
-
-        for _ in 0..<28 { spawnCrumb(animated: false) }
+        #if DEBUG
+        // `-startScreen batter` starts the timer right away so it can be checked without touching
+        if UserDefaults.standard.string(forKey: "startScreen") == "batter" { started = true }
+        #endif
     }
 
-    private var playArea: CGRect {
-        CGRect(x: 20 * u, y: 80 * u, width: size.width - 40 * u, height: size.height - 220 * u)
-    }
-
-    private func spawnCrumb(animated: Bool) {
-        let c = SKSpriteNode(asset: "crumb", width: 22 * u)
-        let a = playArea
-        c.position = CGPoint(x: .random(in: a.minX...a.maxX), y: .random(in: a.minY...a.maxY))
-        c.zRotation = .random(in: 0...(2 * .pi))
-        c.zPosition = 1
-        if animated {
-            c.setScale(0.1)
-            c.run(.scale(to: 1, duration: 0.2))
+    /// A heap of plain crumbs dumped around one spot.
+    private func spawnBurst(progress t: CGFloat) {
+        let cx = CGFloat.random(in: 50 * u...(size.width - 50 * u))
+        for i in 0..<Int.random(in: 5...8) {
+            spawn(progress: t, kind: .crumb, x: cx + .random(in: -40...40) * u, lift: CGFloat(i) * 14 * u)
         }
-        addChild(c)
-        crumbs.append(c)
+    }
+
+    private func spawn(progress t: CGFloat, kind forced: Kind? = nil, x: CGFloat? = nil, lift: CGFloat = 0) {
+        let r = Double.random(in: 0..<1)
+        let kind: Kind = forced ?? (r < 0.04 ? .gold : r < 0.04 + 0.18 + 0.12 * Double(t) ? .water : .crumb)
+        let node: SKSpriteNode
+        switch kind {
+        case .crumb:
+            node = SKSpriteNode(asset: "crumb", width: 22 * u)
+        case .gold:
+            node = SKSpriteNode(asset: "crumb", width: 24 * u)
+            node.color = UIColor(hex: 0xFFC21A)
+            node.colorBlendFactor = 0.65
+            let glow = SKShapeNode(circleOfRadius: 17 * u)
+            glow.fillColor = UIColor(hex: 0xFFF3B0).withAlphaComponent(0.7)
+            glow.strokeColor = UIColor(hex: 0xF2B632)
+            glow.lineWidth = 2 * u
+            glow.zPosition = -0.1
+            node.addChild(glow)
+        case .water:
+            node = SKSpriteNode(asset: "water-drop", width: 22 * u)
+        }
+        let px = x ?? .random(in: 24 * u...(size.width - 24 * u))
+        node.position = CGPoint(x: min(max(px, 16 * u), size.width - 16 * u), y: size.height + 20 * u + lift)
+        if kind != .water { node.zRotation = .random(in: 0...(2 * .pi)) }
+        node.zPosition = kind == .water ? 3 : 2
+        addChild(node)
+        // everything falls faster as the timer runs down; gold is quickest
+        let base: CGFloat = 170 + 170 * t
+        let speed = base * (kind == .gold ? 1.35 : kind == .water ? 1.1 : 1) * .random(in: 0.85...1.15)
+        falling.append(Falling(node: node, kind: kind, speed: speed))
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -132,10 +171,9 @@ final class BatterScene: GameScene, ObservableObject {
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard !finished, let t = touches.first, let last = lastTouch else { return }
         let p = t.location(in: self)
-        let dx = p.x - last.x, dy = p.y - last.y
+        let dx = p.x - last.x
         lastTouch = p
         shrimp.position.x = min(max(shrimp.position.x + dx, 30 * u), size.width - 30 * u)
-        shrimp.position.y = min(max(shrimp.position.y + dy, shrimp.bottomExtent + 10 * u), size.height - 110 * u)
         tilt = min(max(tilt - dx * 0.8, -24), 24)
     }
 
@@ -146,40 +184,86 @@ final class BatterScene: GameScene, ObservableObject {
         guard isLaidOut else { return }
         tilt *= 0.9
         shrimp.zRotation = tilt * .pi / 180
+        let dt = CGFloat(min(0.05, currentTime - (lastTime ?? currentTime)))
+        lastTime = currentTime
         guard started, !finished else { return }
         if startTime == nil { startTime = currentTime }
         let elapsed = currentTime - (startTime ?? currentTime)
+        let progress = CGFloat(min(1, elapsed / Scoring.batterSeconds))
         let left = max(0, Int(ceil(Scoring.batterSeconds - elapsed)))
         if left != timeLeft { timeLeft = left }
 
-        if currentTime - lastSpawn > 0.25, crumbs.count < 24 {
+        let interval = 0.13 - 0.06 * Double(progress)
+        if currentTime - lastSpawn > interval {
             lastSpawn = currentTime
-            spawnCrumb(animated: true)
+            spawn(progress: progress)
+        }
+        // extra plain crumbs: crumbs fall at 3x the rate of the mixed stream (water drops stay as they are)
+        if currentTime - lastExtra > interval / 2 {
+            lastExtra = currentTime
+            spawn(progress: progress, kind: .crumb)
+        }
+        if currentTime - lastBurst > 1.4 / 3 {
+            lastBurst = currentTime
+            spawnBurst(progress: progress)
         }
 
-        // the body (not the tail) picks up crumbs
+        // the body (not the tail) catches things
         let p = shrimp.position
-        let half = 30 * u
+        let half = 26 * u
         let top = p.y + 50 * shrimp.unit, bottom = p.y - shrimp.bottomExtent
-        var got = 0
-        crumbs.removeAll { c in
-            let hit = abs(c.position.x - p.x) < half && c.position.y < top && c.position.y > bottom
-            if hit {
-                got += 1
-                c.run(.sequence([.group([.scale(to: 0.2, duration: 0.25), .fadeOut(withDuration: 0.25)]), .removeFromParent()]))
+        var gained = 0, lost = 0
+        falling.removeAll { f in
+            f.node.position.y -= f.speed * u * dt
+            let pos = f.node.position
+            if abs(pos.x - p.x) < half && pos.y < top && pos.y > bottom {
+                switch f.kind {
+                case .crumb: gained += 1
+                case .gold: gained += 3
+                case .water: lost += Self.waterPenalty
+                }
+                f.node.run(.sequence([.group([.scale(to: 0.2, duration: 0.2), .fadeOut(withDuration: 0.2)]), .removeFromParent()]))
+                return true
             }
-            return hit
+            if pos.y < -30 * u {
+                f.node.removeFromParent()
+                return true
+            }
+            return false
         }
-        if got > 0 {
-            count += got
+        if gained > 0 {
+            count += gained
             Haptics.light()
-            shrimp.setSkin(SegmentSkin.batter(Double(count) / 25))
+            popup("+\(gained)", color: gained >= 3 ? UIColor(hex: 0xE0A000) : UIColor(hex: 0x3A2418))
+        }
+        if lost > 0 {
+            let actual = min(lost, count)
+            count -= actual
+            Haptics.heavy()
+            popup(actual > 0 ? "-\(actual)" : "びしょっ", color: UIColor(hex: 0x2F7FD0))
+            shrimp.run(.sequence([.moveBy(x: -5 * u, y: 0, duration: 0.03), .moveBy(x: 10 * u, y: 0, duration: 0.06), .moveBy(x: -5 * u, y: 0, duration: 0.03)]))
+        }
+        if gained > 0 || lost > 0 {
+            shrimp.setSkin(SegmentSkin.batter(Double(count) / Double(Self.fullCoat)))
         }
 
         if elapsed >= Scoring.batterSeconds {
             finished = true
             lastTouch = nil
+            for f in falling { f.node.run(.sequence([.fadeOut(withDuration: 0.2), .removeFromParent()])) }
+            falling.removeAll()
             Haptics.success()
         }
+    }
+
+    private func popup(_ text: String, color: UIColor) {
+        let label = SKLabelNode(text: text)
+        label.fontName = AppFont.displayName
+        label.fontSize = 22 * u
+        label.fontColor = color
+        label.position = CGPoint(x: shrimp.position.x + 34 * u, y: shrimp.position.y + 40 * u)
+        label.zPosition = 20
+        addChild(label)
+        label.run(.sequence([.group([.moveBy(x: 0, y: 36 * u, duration: 0.5), .fadeOut(withDuration: 0.5)]), .removeFromParent()]))
     }
 }

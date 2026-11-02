@@ -98,6 +98,12 @@ S["sauce-drop"] = ("-10 -15 20 27", f"""
 <circle cx="-3" cy="4" r="2" fill="#fff" opacity=".45"/>
 """)
 
+S["water-drop"] = ("-10 -15 20 27", f"""
+<path d="M0 -13 C6 -4 9 1 9 5 A9 9 0 0 1 -9 5 C-9 1 -6 -4 0 -13Z" fill="#8fd3ff" stroke="{INK}" stroke-width="2.4"/>
+<path d="M-5 0 Q-6 5 -3 8" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" opacity=".85"/>
+<circle cx="3" cy="-2" r="1.4" fill="#fff" opacity=".7"/>
+""")
+
 S["sauce"] = ("0 0 100 220", f"""
 <path d="M38 24 L38 42 Q14 52 14 80 L14 196 Q14 212 30 212 L70 212 Q86 212 86 196 L86 80 Q86 52 62 42 L62 24Z"
  fill="#4a2614" stroke="{INK}" stroke-width="{SW}" stroke-linejoin="round"/>
@@ -106,6 +112,15 @@ S["sauce"] = ("0 0 100 220", f"""
 <text x="50" y="132" text-anchor="middle" font-family="'Dela Gothic One','Hiragino Sans',sans-serif" font-size="15" fill="#4a2614">ソース</text>
 <text x="50" y="152" text-anchor="middle" font-family="'Zen Maru Gothic','Hiragino Maru Gothic ProN',sans-serif" font-weight="700" font-size="9" fill="#a0522d">EBI FRY</text>
 <rect x="22" y="66" width="7" height="120" rx="3.5" fill="#fff" opacity=".22"/>
+""")
+
+# fuel pickup while flying: a sauce bottle in a burst with a "+" badge
+S["fuel"] = ("0 0 120 120", f"""
+<path d="M60 60 L117.6 52.9 L117.6 67.1Z" fill="#ffe27a" opacity=".55"/><path d="M60 60 L113.4 82.7 L106.3 94.9Z" fill="#ffe27a" opacity=".55"/><path d="M60 60 L94.9 106.3 L82.7 113.4Z" fill="#ffe27a" opacity=".55"/><path d="M60 60 L67.1 117.6 L52.9 117.6Z" fill="#ffe27a" opacity=".55"/><path d="M60 60 L37.3 113.4 L25.1 106.3Z" fill="#ffe27a" opacity=".55"/><path d="M60 60 L13.7 94.9 L6.6 82.7Z" fill="#ffe27a" opacity=".55"/><path d="M60 60 L2.4 67.1 L2.4 52.9Z" fill="#ffe27a" opacity=".55"/><path d="M60 60 L6.6 37.3 L13.7 25.1Z" fill="#ffe27a" opacity=".55"/><path d="M60 60 L25.1 13.7 L37.3 6.6Z" fill="#ffe27a" opacity=".55"/><path d="M60 60 L52.9 2.4 L67.1 2.4Z" fill="#ffe27a" opacity=".55"/><path d="M60 60 L82.7 6.6 L94.9 13.7Z" fill="#ffe27a" opacity=".55"/><path d="M60 60 L106.3 25.1 L113.4 37.3Z" fill="#ffe27a" opacity=".55"/>
+<circle cx="60" cy="60" r="40" fill="#fff6c8" stroke="#f2b632" stroke-width="5"/>
+<use href="#sauce" x="44" y="22" width="32" height="70" transform="rotate(-14 60 57)"/>
+<circle cx="90" cy="32" r="17" fill="#5cbf4a" stroke="{INK}" stroke-width="{SW}"/>
+<path d="M90 23 V41 M81 32 H99" stroke="#fff" stroke-width="6" stroke-linecap="round"/>
 """)
 
 cloud_c = [(50, 72, 30), (88, 50, 38), (132, 58, 33), (162, 78, 24), (28, 86, 18)]
@@ -249,7 +264,7 @@ if __name__ == "__main__":
     out.mkdir(exist_ok=True)
     sizes = {"seg": (300, 300), "meteor": (240, 240), "tail-normal": (300, 300), "tail-heart": (300, 300),
              "tail-crown": (300, 300), "crumb": (96, 96), "oil-drop": (80, 108), "sauce-drop": (80, 108),
-             "sauce": (300, 660), "cloud": (600, 336), "bird": (192, 132), "plane": (510, 240), "moon": (360, 360),
+             "water-drop": (80, 108), "fuel": (240, 240), "sauce": (300, 660), "cloud": (600, 336), "bird": (192, 132), "plane": (510, 240), "moon": (360, 360),
              "star": (120, 120), "pot-back": (680, 360), "pot-front": (680, 360), "icon": (1024, 1024),
              "bento": (600, 420)}
     for k, (w, h) in sizes.items():

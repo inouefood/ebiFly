@@ -1,8 +1,10 @@
+import StoreKit
 import SwiftUI
 
 struct ResultView: View {
     @EnvironmentObject private var game: GameModel
     @Environment(\.uiScale) private var s
+    @Environment(\.requestReview) private var requestReview
 
     var body: some View {
         ZStack {
@@ -13,6 +15,12 @@ struct ResultView: View {
             if let r = game.lastResult {
                 content(r)
             }
+        }
+        .onAppear {
+            guard game.wantsReview else { return }
+            game.wantsReview = false
+            // let the player see the score first
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { requestReview() }
         }
     }
 
@@ -36,7 +44,7 @@ struct ResultView: View {
                     .background(Capsule().fill(Palette.green))
                     .padding(.top, 6)
             }
-            Text(r.hitBy.map { "\($0.displayName)にぶつかった" } ?? "さいごまで とびきった！")
+            Text(r.hitBy.map { "\($0.displayName)にぶつかった" } ?? "燃料をつかいきるまで とんだ！")
                 .font(AppFont.black(13 * s)).foregroundStyle(Palette.ink)
                 .padding(.top, 6)
 
@@ -76,8 +84,9 @@ struct ResultView: View {
         let rows: [(String, String)] = [
             ("パン粉", "\(r.crumbs)こ"),
             ("揚げ加減", "\(label) ×\(mult.formatted())"),
-            ("シェイク", "\(r.shakes)回"),
-            ("最大距離", "\(r.maxDistance.formatted())m"),
+            ("シェイク", "\(r.shakes)回（上昇 \(Int(Scoring.climbSpeed(shakes: r.shakes)))m/s）"),
+            ("燃料", "\(r.maxDistance.formatted())m ぶん"),
+            ("ソースほきゅう", "\(r.refuels)こ"),
         ]
         return VStack(spacing: 2) {
             ForEach(rows, id: \.0) { row in

@@ -6,9 +6,12 @@ struct FlyView: View {
     @Environment(\.uiScale) private var s
     @StateObject private var scene: FlyScene
     @State private var showHint = true
+    private let shakes: Int
 
-    init(tail: TailKind, bodyCount: Int, fry: Double, maxDistance: Int) {
-        _scene = StateObject(wrappedValue: FlyScene(tail: tail, bodyCount: bodyCount, fry: fry, maxDistance: maxDistance))
+    init(tail: TailKind, bodyCount: Int, fry: Double, shakes: Int, maxDistance: Int) {
+        _scene = StateObject(wrappedValue: FlyScene(tail: tail, bodyCount: bodyCount, fry: fry,
+                                                    climbSpeed: Scoring.climbSpeed(shakes: shakes), maxDistance: maxDistance))
+        self.shakes = shakes
     }
 
     var body: some View {
@@ -18,13 +21,16 @@ struct FlyView: View {
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
                     OutlinedText(text: scene.altitude.formatted(), font: AppFont.display(44 * s), fill: .white, width: 2.5)
                     OutlinedText(text: "m", font: AppFont.display(22 * s), fill: .white, width: 2)
-                    OutlinedText(text: "/ \(scene.maxDistance.formatted())", font: AppFont.display(15 * s), fill: .white, width: 2)
                 }
                 .padding(.top, 12 * s)
+                FuelGauge(level: scene.fuel, refuels: scene.refuelCount)
+                    .padding(.top, 4)
+                Pill(label: "ソース \(Scoring.sauceLabel(shakes: shakes))", value: "\(Int(scene.climbSpeed))", unit: "m/s")
+                    .padding(.top, 2)
                 Spacer()
                 if showHint {
                     Toast(text: scene.usesTilt ? "iPhoneをかたむけてよけよう" : "左右にドラッグしてよけよう",
-                          sub: "鳥・飛行機・いん石にぶつかったらそこまで")
+                          sub: "ソースのボトルで燃料ほきゅう。ぶつかったらそこまで")
                         .transition(.opacity)
                 }
                 Text(scene.zone)
@@ -41,7 +47,7 @@ struct FlyView: View {
                 ZStack {
                     Color(hex: 0xFFF6DC, alpha: 0.6).ignoresSafeArea()
                     VStack(spacing: 8) {
-                        OutlinedText(text: outcome.hitBy == nil ? "とびきった！" : "ぶつかった！",
+                        OutlinedText(text: outcome.hitBy == nil ? "燃料切れ！" : "ぶつかった！",
                                      font: AppFont.display(40 * s), fill: Palette.accent, width: 2.5)
                         Text("\(outcome.distance.formatted()) m").font(AppFont.black(18 * s)).foregroundStyle(Palette.ink)
                     }
@@ -56,7 +62,7 @@ struct FlyView: View {
         .onChange(of: scene.outcome) { outcome in
             guard let outcome else { return }
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
-                game.finishFlight(distance: outcome.distance, hitBy: outcome.hitBy)
+                game.finishFlight(distance: outcome.distance, hitBy: outcome.hitBy, refuels: outcome.refuels)
             }
         }
     }
@@ -65,12 +71,77 @@ struct FlyView: View {
 struct FlightOutcome: Equatable {
     let distance: Int
     let hitBy: Obstacle?
+    let refuels: Int
+}
+
+/// Fuel left, 0...1. Turns red and blinks when it is about to run out.
+struct FuelGauge: View {
+    let level: Double
+    /// Bumps on every refuel; the gauge flashes and shows "+" each time it changes.
+    var refuels = 0
+    @Environment(\.uiScale) private var s
+    @State private var blink = false
+    @State private var flash = false
+
+    private var low: Bool { level < 0.2 }
+
+    var body: some View {
+        HStack(spacing: 6 * s) {
+            Text("燃料").font(AppFont.black(13 * s)).foregroundStyle(Palette.ink)
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule().fill(Color.white)
+                    Capsule()
+                        .fill(low ? AnyShapeStyle(Palette.accent)
+                                  : AnyShapeStyle(LinearGradient(colors: [Color(hex: 0xF2B632), Color(hex: 0x6CC04A)],
+                                                                 startPoint: .leading, endPoint: .trailing)))
+                        .frame(width: geo.size.width * max(0, min(1, level)))
+                }
+                .clipShape(Capsule())
+                .overlay(Capsule().fill(Color.white.opacity(flash ? 0.7 : 0)))
+                .overlay(Capsule().stroke(Palette.ink, lineWidth: 2.5))
+            }
+            .frame(height: 16 * s)
+        }
+        .frame(width: 196 * s)
+        .padding(.horizontal, 12 * s).padding(.vertical, 6 * s)
+        .background(Capsule().fill(flash ? Color(hex: 0xFFF3B0) : Color.white.opacity(0.85)))
+        .overlay(Capsule().stroke(Color(hex: 0x5CBF4A), lineWidth: 4).opacity(flash ? 1 : 0))
+        .overlay(alignment: .trailing) {
+            OutlinedText(text: "+", font: AppFont.display(26 * s), fill: Color(hex: 0x5CBF4A), width: 2)
+                .offset(x: 26 * s, y: flash ? -6 * s : 4 * s)
+                .opacity(flash ? 1 : 0)
+        }
+        .scaleEffect(flash ? 1.12 : 1)
+        .opacity(low && blink && !flash ? 0.45 : 1)
+        .onChange(of: refuels) { _ in
+            withAnimation(.spring(response: 0.2, dampingFraction: 0.5)) { flash = true }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                withAnimation(.easeOut(duration: 0.3)) { flash = false }
+            }
+        }
+        .onChange(of: low) { isLow in
+            if isLow {
+                withAnimation(.easeInOut(duration: 0.25).repeatForever(autoreverses: true)) { blink = true }
+            } else {
+                blink = false
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("燃料")
+        .accessibilityValue("\(Int(level * 100))パーセント")
+    }
 }
 
 final class FlyScene: GameScene, ObservableObject {
     @Published private(set) var altitude = 0
     @Published private(set) var zone = "キッチン"
     @Published private(set) var outcome: FlightOutcome?
+    /// Fuel left, 0...1 of the tank.
+    @Published private(set) var fuel = 1.0
+    /// How many refuels so far (drives the gauge flash).
+    @Published private(set) var refuelCount = 0
+    /// Tank size in meters of climbing: what the prep steps earned.
     let maxDistance: Int
     var usesTilt: Bool { motion.isAvailable }
 
@@ -88,7 +159,20 @@ final class FlyScene: GameScene, ObservableObject {
         var vx: CGFloat = 0      // px/s at u = 1
         var fall: CGFloat = 0    // m/s
         var obstacle: Obstacle?
+        var isFuel = false
     }
+
+    /// Fuel is measured in meters of climbing. A sauce drop refills this much.
+    private static let refuelMeters: CGFloat = 180
+    private var fuelMeters: CGFloat = 0
+    private var refuels = 0
+    /// Once the tank is empty the shrimp coasts for a moment before stopping.
+    private var coast: CGFloat = 1
+    private var worldTop: CGFloat = 0
+    private var nextCloud: CGFloat = 350
+    private var nextStar: CGFloat = 3400
+    private var nextObstacle: CGFloat = 700
+    private var nextFuel: CGFloat = 480
 
     private var items: [Item] = []
     private var flyer: ShrimpNode!
@@ -105,7 +189,8 @@ final class FlyScene: GameScene, ObservableObject {
 
     /// pixels per meter, and how fast the camera climbs
     private var k: CGFloat { 0.45 * u }
-    private let climbSpeed: CGFloat = 400
+    /// Set by the sauce: more shakes, faster climb.
+    let climbSpeed: CGFloat
     /// The shrimp flies in the lower part of the screen so the player sees what's coming.
     private var flyerY: CGFloat { size.height * 0.3 }
 
@@ -117,11 +202,13 @@ final class FlyScene: GameScene, ObservableObject {
         (0, "キッチン"), (200, "鳥のエリア"), (1500, "飛行機のエリア"), (3400, "いん石のエリア"), (5500, "宇宙"),
     ]
 
-    init(tail: TailKind, bodyCount: Int, fry: Double, maxDistance: Int) {
+    init(tail: TailKind, bodyCount: Int, fry: Double, climbSpeed: Double, maxDistance: Int) {
+        self.climbSpeed = CGFloat(climbSpeed)
         self.tail = tail
         self.bodyCount = bodyCount
         self.fry = fry
         self.maxDistance = max(maxDistance, 300)
+        fuelMeters = CGFloat(self.maxDistance)
         super.init()
     }
 
@@ -171,21 +258,24 @@ final class FlyScene: GameScene, ObservableObject {
     }
 
     private func buildWorld() {
-        let D = CGFloat(maxDistance)
-        var a: CGFloat = 350
-        while a < min(D + 900, 5000) {
-            items.append(addItem("cloud", altitude: a, x: .random(in: -20...200), width: .random(in: 110...160), z: 1))
-            a += .random(in: 230...350)
-        }
-        a = 3400
-        while a < D + 900 {
-            items.append(addItem("star", altitude: a, x: .random(in: 0...280), width: .random(in: 10...22), z: 0))
-            a += .random(in: 60...140)
-        }
         items.append(addItem("moon", altitude: 5600, x: 170, width: 100, z: 0.5))
+        extendWorld(to: 1500)
+    }
 
-        a = 700
-        while a < D {
+    /// The flight has no fixed ceiling any more (refuels can take it past the tank),
+    /// so the world is generated a little ahead of the camera.
+    private func extendWorld(to top: CGFloat) {
+        guard top > worldTop else { return }
+        while nextCloud < min(top, 5000) {
+            items.append(addItem("cloud", altitude: nextCloud, x: .random(in: -20...200), width: .random(in: 110...160), z: 1))
+            nextCloud += .random(in: 230...350)
+        }
+        while nextStar < top {
+            items.append(addItem("star", altitude: nextStar, x: .random(in: 0...280), width: .random(in: 10...22), z: 0))
+            nextStar += .random(in: 60...140)
+        }
+        while nextObstacle < top {
+            let a = nextObstacle
             let kind: Obstacle = a < 1500 ? .bird : a < 3400 ? (Bool.random() ? .plane : .bird) : .meteor
             let width: CGFloat = kind == .plane ? 120 : kind == .bird ? 46 : 50
             var item = addItem(kind.rawValue, altitude: a, x: .random(in: 0...(300 - width)), width: width, z: 5)
@@ -195,8 +285,16 @@ final class FlyScene: GameScene, ObservableObject {
             item.obstacle = kind
             if dir < 0 { item.node.xScale = -1 }
             items.append(item)
-            a += .random(in: 230...390)
+            nextObstacle += .random(in: 230...390)
         }
+        while nextFuel < top {
+            var item = addItem("fuel", altitude: nextFuel, x: .random(in: 20...230), width: 50, z: 6)
+            item.isFuel = true
+            item.node.run(.repeatForever(.sequence([.scale(to: 1.15, duration: 0.35), .scale(to: 1, duration: 0.35)])))
+            items.append(item)
+            nextFuel += .random(in: 300...460)
+        }
+        worldTop = top
     }
 
     private func screenY(top altitude: CGFloat, camera c: CGFloat) -> CGFloat {
@@ -264,7 +362,11 @@ final class FlyScene: GameScene, ObservableObject {
 
         // short run-up so the player can get ready
         let warmup = min(1, (currentTime - (startTime ?? currentTime)) / 0.8)
-        camera0 = min(CGFloat(maxDistance), camera0 + climbSpeed * CGFloat(warmup) * dt)
+        if fuelMeters <= 0 { coast = max(0, coast - dt / 0.7) }
+        let climb = climbSpeed * CGFloat(warmup) * coast * dt
+        camera0 += climb
+        fuelMeters = max(0, fuelMeters - climb)
+        extendWorld(to: camera0 + size.height / k + 400)
 
         let gx = CGFloat(motion.tiltX)
         if abs(gx) > 0.03 {
@@ -281,16 +383,84 @@ final class FlyScene: GameScene, ObservableObject {
             items[i].altitude -= items[i].fall * dt
         }
         place(at: camera0)
+        collectFuel()
+        let level = Double(fuelMeters / CGFloat(maxDistance))
+        if abs(level - fuel) > 0.004 || (level == 0 && fuel != 0) { fuel = level }
 
         let alt = Int(camera0)
         if alt != altitude { altitude = alt }
         if let z = Self.zones.last(where: { alt >= $0.0 })?.1, z != zone { zone = z }
 
-        if let hit = collidingObstacle() {
+        #if DEBUG
+        // `-flyAutopilot YES`: steer to the next bottle and ignore obstacles, for checking refuel effects
+        if UserDefaults.standard.bool(forKey: "flyAutopilot") {
+            if let target = items.filter({ $0.isFuel && $0.altitude > camera0 }).min(by: { $0.altitude < $1.altitude }) {
+                flyerX += (target.x + target.width / 2 - flyerX) * min(1, 6 * dt)
+            }
+        }
+        let autopilot = UserDefaults.standard.bool(forKey: "flyAutopilot")
+        #else
+        let autopilot = false
+        #endif
+        if !autopilot, let hit = collidingObstacle() {
             end(hitBy: hit)
-        } else if camera0 >= CGFloat(maxDistance) {
+        } else if coast <= 0 {
             end(hitBy: nil)
         }
+    }
+
+    private func collectFuel() {
+        let box = CGRect(x: flyerX - 24 * u, y: flyer.position.y - flyer.topExtent, width: 48 * u,
+                         height: flyer.topExtent + flyer.bottomExtent)
+        // drop what has scrolled far below the screen while we are at it
+        let floorAlt = camera0 - (flyerY / k) - 200
+        items.removeAll { item in
+            if item.altitude < floorAlt && item.fall == 0 {
+                item.node.removeFromParent()
+                return true
+            }
+            guard item.isFuel, fuelMeters > 0, item.node.frame.intersects(box) else { return false }
+            fuelMeters = min(CGFloat(maxDistance), fuelMeters + Self.refuelMeters)
+            refuels += 1
+            refuelCount = refuels
+            Haptics.success()
+            refuelPopup(at: item.node.position)
+            item.node.removeAllActions()
+            item.node.run(.sequence([.group([.scale(to: 2, duration: 0.2), .fadeOut(withDuration: 0.2)]), .removeFromParent()]))
+            return true
+        }
+    }
+
+    /// "+燃料" floating up from where the bottle was picked up.
+    private func refuelPopup(at p: CGPoint) {
+        let node = SKNode()
+        node.position = CGPoint(x: min(max(p.x, 60 * u), size.width - 60 * u), y: p.y + 10 * u)
+        node.zPosition = 30
+        let text = "+燃料"
+        for (dx, dy) in [(-2, 0), (2, 0), (0, -2), (0, 2), (-1.5, -1.5), (1.5, 1.5), (-1.5, 1.5), (1.5, -1.5)] as [(CGFloat, CGFloat)] {
+            let outline = SKLabelNode(text: text)
+            outline.fontName = AppFont.displayName
+            outline.fontSize = 24 * u
+            outline.fontColor = UIColor(hex: 0x3A2418)
+            outline.position = CGPoint(x: dx * u, y: dy * u)
+            outline.zPosition = 0   // the view ignores sibling order, so layer explicitly
+            node.addChild(outline)
+        }
+        let label = SKLabelNode(text: text)
+        label.fontName = AppFont.displayName
+        label.fontSize = 24 * u
+        label.fontColor = UIColor(hex: 0x7CDB5A)
+        label.zPosition = 1
+        node.addChild(label)
+        node.setScale(0.5)
+        addChild(node)
+        let pop = SKAction.scale(to: 1.15, duration: 0.15)
+        pop.timingMode = .easeOut
+        node.run(.sequence([
+            pop, .scale(to: 1, duration: 0.1),
+            .group([.moveBy(x: 0, y: 50 * u, duration: 0.7), .sequence([.wait(forDuration: 0.35), .fadeOut(withDuration: 0.35)])]),
+            .removeFromParent(),
+        ]))
     }
 
     /// Hit box: a narrow column over the body, from the head down to just above the tail.
@@ -308,7 +478,7 @@ final class FlyScene: GameScene, ObservableObject {
     }
 
     private func end(hitBy: Obstacle?) {
-        outcome = FlightOutcome(distance: Int(camera0), hitBy: hitBy)
+        outcome = FlightOutcome(distance: Int(camera0), hitBy: hitBy, refuels: refuels)
         motion.stop()
         if hitBy != nil {
             Haptics.heavy()

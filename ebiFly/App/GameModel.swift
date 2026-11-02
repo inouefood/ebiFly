@@ -46,6 +46,7 @@ struct FlightResult {
     let crumbs: Int
     let fry: Double
     let shakes: Int
+    let refuels: Int
 }
 
 enum Scoring {
@@ -53,10 +54,25 @@ enum Scoring {
     static let batterSeconds: TimeInterval = 10
     static let shakeSeconds: TimeInterval = 3
 
-    /// The furthest the shrimp can fly if it dodges everything.
+    /// Fuel the prep steps put in the tank, in meters of climbing (before any refuel in the air).
     static func maxDistance(crumbs: Int, shakes: Int, multiplier: Double, bodyCount: Int) -> Int {
-        let base = Double(crumbs * 30 + shakes * 40)
+        // crumbs come in by the hundred, so each one is worth little
+        let base = Double(crumbs) * 10 / 3 + Double(shakes * 40)
         return Int((base * multiplier * (1 + Double(bodyCount - 3) * 0.12)).rounded())
+    }
+
+    /// Climb speed in m/s: the more sauce, the faster the shrimp rises.
+    static func climbSpeed(shakes: Int) -> Double {
+        min(640, 220 + Double(max(shakes, 0)) * 12)
+    }
+
+    static func sauceLabel(shakes: Int) -> String {
+        switch shakes {
+        case ..<10: return "ちょろちょろ"
+        case ..<20: return "ぐんぐん"
+        case ..<30: return "びゅーん"
+        default: return "ロケット"
+        }
     }
 
     static func fryVerdict(_ v: Double) -> (label: String, multiplier: Double) {
@@ -92,6 +108,9 @@ final class GameModel: ObservableObject {
     @Published private(set) var lastResult: FlightResult?
     @Published private(set) var best: Int
     @Published private(set) var history: [RunRecord]
+    /// Set after a run when the review dialog should be shown on the result screen.
+    @Published var wantsReview = false
+    private var reviewPrompt: ReviewPrompt
 
     private let defaults: UserDefaults
     private enum Key {
@@ -103,6 +122,7 @@ final class GameModel: ObservableObject {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
+        reviewPrompt = ReviewPrompt(defaults: defaults)
         best = defaults.integer(forKey: Key.best)
         if let data = defaults.data(forKey: Key.history),
            let saved = try? JSONDecoder().decode([RunRecord].self, from: data) {
@@ -132,7 +152,7 @@ final class GameModel: ObservableObject {
         shakes = 20
         if s == .result {
             lastResult = FlightResult(distance: 2300, maxDistance: maxDistance, hitBy: .plane, isNewBest: true,
-                                      crumbs: crumbs, fry: fry, shakes: shakes)
+                                      crumbs: crumbs, fry: fry, shakes: shakes, refuels: 3)
         }
         screen = s
     }
@@ -184,16 +204,17 @@ final class GameModel: ObservableObject {
         go(.fly)
     }
 
-    func finishFlight(distance: Int, hitBy: Obstacle?) {
+    func finishFlight(distance: Int, hitBy: Obstacle?, refuels: Int) {
         let isNew = distance > best
         lastResult = FlightResult(distance: distance, maxDistance: maxDistance, hitBy: hitBy, isNewBest: isNew,
-                                  crumbs: crumbs, fry: fry, shakes: shakes)
+                                  crumbs: crumbs, fry: fry, shakes: shakes, refuels: refuels)
         history.insert(RunRecord(distance: distance, date: Date()), at: 0)
         history = Array(history.prefix(20))
         if isNew { best = distance }
         defaults.set(best, forKey: Key.best)
         if let data = try? JSONEncoder().encode(history) { defaults.set(data, forKey: Key.history) }
         GameCenter.shared.submit(score: distance)
+        wantsReview = reviewPrompt.runFinished(isNewBest: isNew)
         go(.result)
     }
 }

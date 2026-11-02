@@ -65,6 +65,8 @@ JOBS = {  # asset name -> (symbol, px w, px h, colours)
     "crumb": ("crumb", 96, 96, None),
     "oil-drop": ("oil-drop", 80, 108, None),
     "sauce-drop": ("sauce-drop", 80, 108, None),
+    "water-drop": ("water-drop", 80, 108, None),
+    "fuel": ("fuel", 180, 180, None),
     "sauce": ("sauce", 300, 660, None),
     "cloud": ("cloud", 600, 336, None),
     "bird": ("bird", 192, 132, None),

@@ -3,6 +3,7 @@ import SwiftUI
 @main
 struct EbiFlyApp: App {
     @StateObject private var game = GameModel()
+    @Environment(\.scenePhase) private var scenePhase
 
     init() {
         AppFont.register()
@@ -13,6 +14,9 @@ struct EbiFlyApp: App {
             RootView()
                 .environmentObject(game)
                 .onAppear { GameCenter.shared.authenticate() }
+        }
+        .onChange(of: scenePhase) { phase in
+            if phase == .active { TrackingPermission.requestIfNeeded() }
         }
     }
 }
@@ -45,7 +49,7 @@ struct RootView: View {
         case .batter: BatterView(tail: game.tail, bodyCount: game.bodyCount)
         case .fry: FryView(tail: game.tail, bodyCount: game.bodyCount)
         case .shake: ShakeView(tail: game.tail, bodyCount: game.bodyCount, fry: game.fry)
-        case .fly: FlyView(tail: game.tail, bodyCount: game.bodyCount, fry: game.fry, maxDistance: game.maxDistance)
+        case .fly: FlyView(tail: game.tail, bodyCount: game.bodyCount, fry: game.fry, shakes: game.shakes, maxDistance: game.maxDistance)
         case .result: ResultView()
         case .records: RecordsView()
         }
