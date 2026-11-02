@@ -2,7 +2,10 @@
 """App Store header / promotional artwork (App Store Connect header / search-result sizes, opaque PNG).
 
 Logo + catch copy on the left, a big fried shrimp blasting off on the right, built from the same
-SVG symbols as the app art (art.py). Key content stays inside the centre so 16:9 crops are safe.
+SVG symbols as the app art (art.py).
+On iPhone the App Store shows only the centre ~53% of the width and the top ~63% of the height of a
+16:9 header, with the status bar and back/share buttons over the top. So the logo, copy and hero shrimp
+all sit inside SAFE; everything outside it is decoration that only iPad/Mac show.
 
     python3 Design/store_header.py   ->  Design/store/header-<w>x<h>.png for each size in SIZES
 """
@@ -20,6 +23,8 @@ INK = art.INK
 W, H = 1920, 1080  # reference layout (16:9); other aspect ratios widen the canvas and rescale around it
 # sizes App Store Connect accepts: header 5244x2950 / 3840x1646, search results 5244x2950 / 3840x2560 / 1920x1280
 SIZES = [(5244, 2950), (3840, 1646), (3840, 2560), (1920, 1280)]
+# iPhone-visible box for key content, in the 1920x1080 reference layout (x0, y0, x1, y1), with a margin
+SAFE = (540, 260, 1380, 640)
 
 
 def use(sym, x, y, w, h, extra=""):
@@ -34,7 +39,7 @@ def shrimp(x, y, angle, scale, n, tail):
 
 def scene(dw, dh, s, tx, ty):
     # dw x dh: canvas in design units; the shrimp group is drawn in 1920x1080 coordinates, scaled by s and moved by (tx, ty)
-    cx, cy = tx + 1430 * s, ty + 500 * s  # centre of the sunburst, behind the hero shrimp
+    cx, cy = tx + 960 * s, ty + 450 * s  # centre of the sunburst, behind the logo
     rays = "".join(
         f'<path d="M{cx} {cy} L{cx + 2200 * math.cos(math.radians(a)):.0f} {cy + 2200 * math.sin(math.radians(a)):.0f} '
         f'L{cx + 2200 * math.cos(math.radians(a + 9)):.0f} {cy + 2200 * math.sin(math.radians(a + 9)):.0f}Z" fill="#fff" opacity=".13"/>'
@@ -44,19 +49,19 @@ def scene(dw, dh, s, tx, ty):
     stars = "".join(use("star", x * dw / W, y * dh / H, z, z) for x, y, z in
                     [(90, 70, 54), (640, 50, 38), (900, 140, 30), (1040, 60, 44), (60, 420, 30)])
     # hero: flying up-right; the trail of fuel drops and speed lines runs back down-left from the tail
-    hx, hy, ang = 1500, 380, 40
+    hx, hy, ang = 1250, 345, 62
     back = math.radians(ang + 180)
     dx, dy = math.sin(back), -math.cos(back)  # unit vector pointing from head towards the tail
     drops = []
-    for i in range(16):
-        d = 230 + i * 30 + rng.uniform(-10, 10)
-        side = rng.uniform(-70, 70) * (0.4 + i / 16)
+    for i in range(7):
+        d = 150 + i * 26 + rng.uniform(-10, 10)
+        side = rng.uniform(-40, 40) * (0.4 + i / 7)
         px, py = hx + dx * d - dy * side, hy + dy * d + dx * side
-        z = max(26, 64 - i * 2.4) * rng.uniform(.8, 1.1)
+        z = max(22, 44 - i * 3) * rng.uniform(.8, 1.1)
         drops.append(f'<use href="#oil-drop" x="{px - z / 2:.0f}" y="{py - z / 2:.0f}" width="{z:.0f}" height="{z * 1.35:.0f}" '
-                     f'transform="rotate({ang + 180 + rng.uniform(-20, 20):.0f} {px:.0f} {py:.0f})" opacity="{max(.35, 1 - i * .04):.2f}"/>')
+                     f'transform="rotate({ang + 180 + rng.uniform(-20, 20):.0f} {px:.0f} {py:.0f})" opacity="{max(.35, 1 - i * .09):.2f}"/>')
     lines = []
-    for off, ln, d0 in [(-90, 260, 330), (0, 380, 300), (95, 240, 350), (-50, 180, 600), (60, 200, 640)]:
+    for off, ln, d0 in [(-45, 120, 190), (0, 170, 170), (45, 110, 200)]:
         x1, y1 = hx + dx * d0 - dy * off, hy + dy * d0 + dx * off
         lines.append(f'<path d="M{x1:.0f} {y1:.0f} L{x1 + dx * ln:.0f} {y1 + dy * ln:.0f}"/>')
     return f"""
@@ -73,21 +78,21 @@ def scene(dw, dh, s, tx, ty):
 <g transform="translate({tx:.0f} {ty:.0f}) scale({s:.4f})">
 {use("star", 1600, 130, 40, 40)}{use("star", 1700, 300, 30, 30)}
 {use("moon", 1740, 40, 120, 120)}
-{use("plane", 1030, 330, 200, 94)}
-{use("bird", 1180, 120, 80, 55)}
-{use("bird", 1800, 560, 70, 48, 'transform="scale(-1 1) translate(-3670 0)"')}
+{use("plane", 180, 230, 200, 94)}
+{use("bird", 1560, 420, 80, 55)}
+{use("bird", 380, 620, 70, 48, 'transform="scale(-1 1) translate(-830 0)"')}
 </g>
 {use("cloud", -160, dh - 180, 520, 291)}
 {use("cloud", 600 * dw / W, dh - 120, 380, 213)}
 {use("cloud", dw - 420, dh - 260, 560, 314)}
 {use("cloud", 1060 * dw / W, dh - 150, 420, 235)}
 <g transform="translate({tx:.0f} {ty:.0f}) scale({s:.4f})">
-<g stroke="#fff" stroke-width="22" stroke-linecap="round" opacity=".85">{''.join(lines)}</g>
+<g stroke="#fff" stroke-width="16" stroke-linecap="round" opacity=".85">{''.join(lines)}</g>
 {''.join(drops)}
-{shrimp(1170, 690, 25, 0.8, 3, "heart")}
-{shrimp(1720, 800, 55, 0.8, 3, "crown")}
-{shrimp(hx, hy, ang, 1.55, 5, "normal")}
-{use("fuel", 1690, 400, 120, 120)}
+{shrimp(270, 560, 25, 0.9, 3, "heart")}
+{shrimp(1680, 640, 40, 0.9, 3, "crown")}
+{shrimp(hx, hy, ang, 0.85, 5, "normal")}
+{use("fuel", 1700, 230, 110, 110)}
 </g>
 """
 
@@ -104,7 +109,7 @@ def page(width, height):
         dh = H if ratio < 2 else 960
         dw = round(dh * ratio)
         s = dh / H
-        tx, ty = dw - W * s - (60 if dw > W else 0), 0
+        tx, ty = (dw - W * s) / 2, 0  # keep the reference layout centred so the iPhone crop holds the logo
     k = width / dw
     return f"""<!doctype html><html><head><meta charset="utf-8"><style>
 @font-face {{ font-family: Dela; src: url('{fonts}/DelaGothicOne-Regular.ttf'); }}
@@ -112,10 +117,10 @@ def page(width, height):
 html, body {{ margin: 0; width: {width}px; height: {height}px; overflow: hidden; background: #5cc2ff; }}
 .stage {{ position: absolute; left: 0; top: 0; width: {dw}px; height: {dh}px; transform: scale({k}); transform-origin: 0 0; }}
 .stage > svg {{ position: absolute; inset: 0; }}
-.copy {{ position: absolute; left: {90 + (dw - W * s) * .35:.0f}px; top: {dh / 2 - 250 * s:.0f}px; width: 1000px; text-align: center;
-  transform: scale({s:.4f}); transform-origin: 0 0; }}
+.copy {{ position: absolute; left: {tx + 960 * s:.0f}px; top: {ty + 465 * s:.0f}px; width: 1100px; text-align: center;
+  transform: translate(-50%, -50%) scale({s * .66:.4f}); transform-origin: 50% 50%; }}
 .tag {{ display: inline-block; transform: rotate(-4deg); padding: 10px 44px; border-radius: 20px; background: #ec5a3c; color: #fff;
-  font-family: Dela; font-size: 64px; border: 9px solid {INK}; box-shadow: 9px 9px 0 {INK}; }}
+  font-family: Dela; font-size: 64px; margin-right: 440px; border: 9px solid {INK}; box-shadow: 9px 9px 0 {INK}; }}
 .logo {{ font-family: Dela; font-size: 200px; line-height: 1.1; white-space: nowrap; color: #f6c445; margin-top: 18px;
   -webkit-text-stroke: 22px {INK}; paint-order: stroke fill; text-shadow: 16px 16px 0 {INK}; letter-spacing: .01em; }}
 .sub {{ display: inline-block; margin-top: 40px; padding: 14px 52px; border-radius: 999px; background: {INK}; color: #fff;

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Game Center leaderboard artwork (1024 x 1024, no alpha) for the "ebifly.distance" leaderboard.
+"""Game Center leaderboard artwork (1024 x 1024, no alpha) for the "ebifly.distance.v2" leaderboard.
 
 Three fried shrimp on a winners' podium under a starry sky. Built from the same symbols as the app art.
 

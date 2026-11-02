@@ -6,7 +6,8 @@ import UIKit
 @MainActor
 final class GameCenter: ObservableObject {
     static let shared = GameCenter()
-    static let leaderboardID = "ebifly.distance"
+    // v2: the original "ebifly.distance" was released with the wrong sort order (Low to High); this one is High to Low.
+    static let leaderboardID = "ebifly.distance.v2"
 
     @Published private(set) var isAuthenticated = false
     private var pendingLogin: UIViewController?
