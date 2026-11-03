@@ -34,10 +34,16 @@ struct ShakeView: View {
                 Group {
                     if scene.finished {
                         Color.clear
-                    } else if scene.started {
-                        Toast(text: "もっとふって！")
                     } else {
-                        Toast(text: "iPhoneをふって\(sauce.displayName)をかけよう", sub: "ふった回数で飛ぶ高さと上昇スピードがアップ（画面タップでもOK）")
+                        // the hand keeps shaking the phone next to the message until time is up
+                        HStack(spacing: 8 * s) {
+                            MotionHint(kind: .shake, height: 64)
+                            if scene.started {
+                                Toast(text: "もっとふって！")
+                            } else {
+                                Toast(text: "iPhoneをふって\(sauce.displayName)をかけよう", sub: "ふった回数で飛ぶ高さと上昇スピードがアップ")
+                            }
+                        }
                     }
                 }
                 .frame(minHeight: 56 * s)
@@ -135,8 +141,12 @@ final class ShakeScene: GameScene, ObservableObject {
         motion.stop()
     }
 
+    /// Shaking is the only way to pour. Debug builds on a device without motion sensors (the simulator)
+    /// let a tap stand in for a shake so the step can still be played through.
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        registerShake()
+        #if DEBUG
+        if !motion.isAvailable { registerShake() }
+        #endif
     }
 
     private func registerShake() {

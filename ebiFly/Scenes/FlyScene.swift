@@ -39,9 +39,12 @@ struct FlyView: View {
                     .padding(.top, 2)
                 Spacer()
                 if showHint {
-                    Toast(text: scene.usesTilt ? "iPhoneをかたむけてよけよう" : "左右にドラッグしてよけよう",
-                          sub: "\(sauce.shortName)のボトルで燃料ほきゅう。ぶつかったらそこまで")
-                        .transition(.opacity)
+                    VStack(spacing: 8 * s) {
+                        MotionHint(kind: scene.usesTilt ? .tilt : .drag)
+                        Toast(text: scene.usesTilt ? "iPhoneをかたむけてよけよう" : "左右にドラッグしてよけよう",
+                              sub: "\(sauce.shortName)のボトルで燃料ほきゅう。ぶつかったらそこまで")
+                    }
+                    .transition(.opacity)
                 }
                 Text(scene.zone)
                     .font(AppFont.black(13 * s))
@@ -473,12 +476,23 @@ final class FlyScene: GameScene, ObservableObject {
         line.run(.sequence([.moveBy(x: 0, y: -dist, duration: TimeInterval(dist / v)), .removeFromParent()]))
     }
 
+    /// Steering is by tilting only. Debug builds on a device without motion sensors (the simulator)
+    /// steer by dragging instead so the flight can still be played.
+    private var allowsDrag: Bool {
+        #if DEBUG
+        return !usesTilt
+        #else
+        return false
+        #endif
+    }
+
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard allowsDrag else { return }
         lastTouch = touches.first?.location(in: self)
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard outcome == nil, !holding, let p = touches.first?.location(in: self), let last = lastTouch else { return }
+        guard allowsDrag, outcome == nil, !holding, let p = touches.first?.location(in: self), let last = lastTouch else { return }
         let dx = p.x - last.x
         lastTouch = p
         flyerX = min(max(flyerX + dx, 20 * u), size.width - 20 * u)

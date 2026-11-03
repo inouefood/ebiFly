@@ -131,6 +131,24 @@ S["fuel"] = ("0 0 120 120", f"""
 
 cloud_c = [(50, 72, 30), (88, 50, 38), (132, 58, 33), (162, 78, 24), (28, 86, 18)]
 add_fuels(S)
+# motion hint: a hand gripping an iPhone (palm behind, thumb and fingers wrapped over the edges)
+S["hand-phone"] = ("0 0 120 160", f"""
+<path d="M40 160 L40 138 Q20 128 20 104 Q20 84 34 78 L88 78 Q104 84 104 104 Q104 128 84 138 L84 160Z"
+ fill="#ffd2ad" stroke="{INK}" stroke-width="{SW}" stroke-linejoin="round"/>
+<rect x="30" y="8" width="60" height="112" rx="12" fill="#2b2f38" stroke="{INK}" stroke-width="{SW}"/>
+<rect x="36" y="16" width="48" height="96" rx="7" fill="#8fd8ff"/>
+<rect x="36" y="74" width="48" height="38" rx="0" fill="#d8f3ff"/>
+<path d="M36 105 L84 105 L84 105 Q84 112 77 112 L43 112 Q36 112 36 105Z" fill="#e8c79a"/>
+<rect x="52" y="20" width="16" height="4" rx="2" fill="#2b2f38"/>
+<g transform="translate(60 58) rotate(180) scale(.2)">
+ <use href="#tail-normal" x="-53" y="-108" width="106" height="106"/>
+ <use href="#seg" x="-41" y="-41" width="82" height="82" style="--crust:#efa53a;--crumb:#c06f1c"/>
+ <use href="#seg" x="-47.5" y="8.5" width="95" height="95" style="--crust:#efa53a;--crumb:#c06f1c"/>
+</g>
+<rect x="38" y="30" width="5" height="40" rx="2.5" fill="#fff" opacity=".45"/>
+{''.join(f'<rect x="80" y="{y}" width="26" height="13" rx="6.5" fill="#ffd2ad" stroke="{INK}" stroke-width="4" transform="rotate(-8 93 {y + 6.5})"/>' for y in (66, 80, 94, 108))}
+<path d="M24 120 Q22 100 34 88 Q40 84 44 90 Q46 96 40 102 Q34 110 36 122Z" fill="#ffd2ad" stroke="{INK}" stroke-width="4" stroke-linejoin="round"/>
+""")
 S["cloud"] = ("0 0 200 112", "".join(
     f'<circle cx="{x}" cy="{y}" r="{r}" fill="#fff" stroke="{INK}" stroke-width="{SW * 2}"/>' for x, y, r in cloud_c
 ) + f'<rect x="26" y="70" width="140" height="34" rx="17" fill="#fff" stroke="{INK}" stroke-width="{SW * 2}"/>' + "".join(
@@ -274,6 +292,7 @@ if __name__ == "__main__":
              "water-drop": (80, 108), "fuel": (240, 240), "sauce": (300, 660), "cloud": (600, 336), "bird": (192, 132), "plane": (510, 240), "moon": (360, 360),
              "star": (120, 120), "pot-back": (680, 360), "pot-front": (680, 360), "icon": (1024, 1024),
              "bento": (600, 420)}
+    sizes["hand-phone"] = (240, 320)
     sizes.update({f"tail-{k}": (300, 300) for k in TAIL_KEYS})
     sizes.update({f"coat-{k}": (300, 300) for k in COAT_KEYS})
     for k in SAUCE_KEYS:
