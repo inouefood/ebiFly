@@ -1,0 +1,12 @@
+{
+  "images": [
+    {
+      "filename": "fuel-choco.png",
+      "idiom": "universal"
+    }
+  ],
+  "info": {
+    "author": "xcode",
+    "version": 1
+  }
+}

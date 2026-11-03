@@ -162,7 +162,6 @@ enum SegmentSkin {
 @MainActor
 final class GameModel: ObservableObject {
     @Published private(set) var screen: Screen = .title
-    @Published var tail: TailKind = .normal
     @Published var bodyCount = 4
     @Published private(set) var crumbs = 0
     @Published private(set) var fry = 0.5
@@ -170,9 +169,11 @@ final class GameModel: ObservableObject {
     @Published private(set) var lastResult: FlightResult?
     @Published private(set) var best: Int
     @Published private(set) var history: [RunRecord]
-    /// Exchange points to spend on tails.
+    /// Exchange points to spend on tails, coats and sauces.
     @Published private(set) var points: Int
-    @Published private(set) var ownedTails: Set<TailKind>
+    /// Raw values of what the player owns / has on, per category.
+    @Published private var owned: [ItemCategory: Set<String>] = [:]
+    @Published private var equippedRaw: [ItemCategory: String] = [:]
     /// Set after a run when the review dialog should be shown on the result screen.
     @Published var wantsReview = false
     private var reviewPrompt: ReviewPrompt
@@ -181,10 +182,8 @@ final class GameModel: ObservableObject {
     private enum Key {
         static let best = "best"
         static let history = "history"
-        static let tail = "tail"
         static let bodyCount = "bodyCount"
         static let points = "points"
-        static let ownedTails = "ownedTails"
     }
 
     init(defaults: UserDefaults = .standard) {
@@ -199,20 +198,10 @@ final class GameModel: ObservableObject {
             history = []
         }
         points = defaults.integer(forKey: Key.points)
-        if let saved = defaults.stringArray(forKey: Key.ownedTails) {
-            ownedTails = Set(saved.compactMap(TailKind.init(rawValue:)))
-        } else {
-            // Before the exchange, the heart was free and the crown came with a 3000 m best.
-            // Players who already played keep what they had; new players start with only the normal tail.
-            var kept: Set<TailKind> = []
-            if best > 0 { kept.insert(.heart) }
-            if best >= 3000 { kept.insert(.crown) }
-            ownedTails = kept
-        }
-        ownedTails.formUnion(TailKind.allCases.filter { $0.price == 0 })
-        if let raw = defaults.string(forKey: Key.tail), let t = TailKind(rawValue: raw), ownedTails.contains(t) {
-            tail = t
-        }
+        // Everyone starts with only the free item of each kind; the rest (heart and crown included) is exchanged for points.
+        load(TailKind.self)
+        load(CoatKind.self)
+        load(SauceKind.self)
         let n = defaults.integer(forKey: Key.bodyCount)
         if Scoring.bodyRange.contains(n) { bodyCount = n }
         #if DEBUG
@@ -243,18 +232,54 @@ final class GameModel: ObservableObject {
         Scoring.maxDistance(crumbs: crumbs, shakes: shakes, multiplier: fryMultiplier, bodyCount: bodyCount)
     }
 
-    func isUnlocked(_ t: TailKind) -> Bool { ownedTails.contains(t) }
+    // MARK: - collection
 
-    /// Spend points on a tail and put it on. Returns false if it is not affordable.
+    var tail: TailKind { equipped() }
+    var coat: CoatKind { equipped() }
+    var sauce: SauceKind { equipped() }
+
+    func equipped<T: Collectible>(_: T.Type = T.self) -> T {
+        equippedRaw[T.category].flatMap(T.init(rawValue:)) ?? .free
+    }
+
+    func owns<T: Collectible>(_ item: T) -> Bool {
+        owned[T.category, default: []].contains(item.rawValue)
+    }
+
+    func ownedCount(_ category: ItemCategory) -> Int { owned[category, default: []].count }
+
+    /// Something not owned yet that the points can already pay for.
+    var hasAffordableItem: Bool {
+        func any<T: Collectible>(_: T.Type) -> Bool { T.allCases.contains { !owns($0) && points >= $0.price } }
+        return any(TailKind.self) || any(CoatKind.self) || any(SauceKind.self)
+    }
+
+    func equip<T: Collectible>(_ item: T) {
+        guard owns(item) else { return }
+        equippedRaw[T.category] = item.rawValue
+        defaults.set(item.rawValue, forKey: T.category.selectionKey)
+    }
+
+    /// Spend points on an item and put it on. Returns false if it is not affordable.
     @discardableResult
-    func exchange(_ t: TailKind) -> Bool {
-        guard !ownedTails.contains(t), points >= t.price else { return false }
-        points -= t.price
-        ownedTails.insert(t)
+    func exchange<T: Collectible>(_ item: T) -> Bool {
+        guard !owns(item), points >= item.price else { return false }
+        points -= item.price
+        owned[T.category, default: []].insert(item.rawValue)
         defaults.set(points, forKey: Key.points)
-        defaults.set(ownedTails.map(\.rawValue).sorted(), forKey: Key.ownedTails)
-        select(tail: t)
+        defaults.set(owned[T.category, default: []].sorted(), forKey: T.category.ownedKey)
+        equip(item)
         return true
+    }
+
+    private func load<T: Collectible>(_: T.Type) {
+        let saved = defaults.stringArray(forKey: T.category.ownedKey) ?? []
+        var set = Set(saved.filter { T(rawValue: $0) != nil })
+        set.formUnion(T.allCases.filter { $0.price == 0 }.map(\.rawValue))
+        owned[T.category] = set
+        if let raw = defaults.string(forKey: T.category.selectionKey), set.contains(raw) {
+            equippedRaw[T.category] = raw
+        }
     }
 
     func go(_ s: Screen) {
@@ -266,12 +291,6 @@ final class GameModel: ObservableObject {
         fry = 0.5
         shakes = 0
         go(.make)
-    }
-
-    func select(tail t: TailKind) {
-        guard isUnlocked(t) else { return }
-        tail = t
-        defaults.set(t.rawValue, forKey: Key.tail)
     }
 
     func changeBody(by delta: Int) {

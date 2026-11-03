@@ -3,15 +3,34 @@ import SwiftUI
 struct MakeView: View {
     @EnvironmentObject private var game: GameModel
     @Environment(\.uiScale) private var s
-    /// A tail the player doesn't own yet, tried on the plate before exchanging points for it.
-    @State private var trying: TailKind?
-    /// The tail row opened up into a grid of every tail.
+    @State private var tab: ItemCategory = .tail
+    /// Something the player doesn't own yet, tried on before exchanging points for it.
+    @State private var trying: Trial?
+    /// The item row opened up into a grid of every item.
     @State private var showAll = false
-    @State private var shakeTail: TailKind?
+    @State private var shaking: String?
     @State private var popPlate = false
     @State private var note: String?
 
-    private var shownTail: TailKind { trying ?? game.tail }
+    private struct Trial: Equatable {
+        let category: ItemCategory
+        let raw: String
+        let name: String
+        let price: Int
+
+        init<T: Collectible>(_ item: T) {
+            category = T.category
+            raw = item.rawValue
+            name = item.displayName
+            price = item.price
+        }
+    }
+
+    /// What the plate shows: the item being tried on, otherwise what the player has on.
+    private func shown<T: Collectible>(_: T.Type) -> T {
+        if let trying, trying.category == T.category, let item = T(rawValue: trying.raw) { return item }
+        return game.equipped()
+    }
 
     var body: some View {
         ZStack {
@@ -39,7 +58,7 @@ struct MakeView: View {
 
     // MARK: - plate
 
-    /// Shrinks to fit when the tail grid is open.
+    /// Shrinks to fit when the item grid is open.
     private var plate: some View {
         GeometryReader { geo in
             plateArt
@@ -48,7 +67,7 @@ struct MakeView: View {
         }
         .overlay(alignment: .bottom) {
             if let t = trying {
-                Text("ためしにつけ中：\(t.displayName)")
+                Text("ためしにつけ中：\(t.name)")
                     .font(AppFont.black(12 * s))
                     .foregroundStyle(.white)
                     .padding(.horizontal, 12 * s).padding(.vertical, 3 * s)
@@ -60,16 +79,35 @@ struct MakeView: View {
     }
 
     private var plateArt: some View {
-        ZStack {
+        // the tail tab shows the shrimp as it is now (raw); coats and sauces show it fried, so they can be seen
+        let fried = tab != .tail
+        let sauce = shown(SauceKind.self)
+        return ZStack {
             Circle().fill(Color.white)
                 .overlay(Circle().inset(by: 9 * s).stroke(Color(hex: 0xEAF3FB), lineWidth: 14 * s))
                 .overlay(Circle().stroke(Palette.ink, lineWidth: 4))
                 .frame(width: 210 * s, height: 210 * s)
-            ShrimpView(tail: shownTail, count: game.bodyCount, skin: SegmentSkin.batter(0), unit: 0.62 * s)
+            ShrimpView(tail: shown(TailKind.self), count: game.bodyCount,
+                       skin: fried ? SegmentSkin.fry(0.5) : SegmentSkin.batter(0), unit: 0.62 * s,
+                       coat: fried ? shown(CoatKind.self).overlayName : nil)
                 .rotationEffect(.degrees(-20))
                 .scaleEffect(popPlate ? 1.12 : 1)
                 .animation(.spring(response: 0.3, dampingFraction: 0.6), value: game.bodyCount)
+            if tab == .sauce {
+                // a few drops on the shrimp and the bottle tipped over it
+                ForEach(0..<3, id: \.self) { i in
+                    Image(sauce.dropName).resizable().scaledToFit()
+                        .frame(width: 16 * s)
+                        .offset(x: [-14, 6, 20][i] * s, y: [-30, -4, 22][i] * s)
+                }
+                Image(sauce.bottleName).resizable().scaledToFit()
+                    .frame(height: 104 * s)
+                    .rotationEffect(.degrees(150))
+                    .offset(x: 78 * s, y: -66 * s)
+                    .transition(.scale.combined(with: .opacity))
+            }
         }
+        .animation(.spring(response: 0.3, dampingFraction: 0.7), value: tab)
     }
 
     // MARK: - panel
@@ -77,28 +115,27 @@ struct MakeView: View {
     private var panel: some View {
         VStack(alignment: .leading, spacing: 10 * s) {
             HStack(spacing: 6 * s) {
-                Text("しっぽ").font(AppFont.black(13 * s))
-                Text("\(game.ownedTails.count)/\(TailKind.allCases.count)")
-                    .font(AppFont.black(11 * s)).foregroundStyle(Palette.muted).monospacedDigit()
+                tabs
                 Spacer(minLength: 4)
                 pointsBadge
                 Button {
                     Haptics.light()
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { showAll.toggle() }
                 } label: {
-                    HStack(spacing: 2) {
-                        Text(showAll ? "とじる" : "ぜんぶ")
-                        Image(systemName: showAll ? "chevron.up" : "chevron.down")
-                    }
-                    .font(AppFont.black(11 * s))
-                    .padding(.horizontal, 8 * s).padding(.vertical, 3 * s)
-                    .background(Capsule().fill(Palette.cream))
-                    .overlay(Capsule().stroke(Palette.ink, lineWidth: 2))
+                    Image(systemName: showAll ? "chevron.up" : "square.grid.3x3.fill")
+                        .font(.system(size: 11 * s, weight: .bold))
+                        .frame(width: 26 * s, height: 22 * s)
+                        .background(Capsule().fill(Palette.cream))
+                        .overlay(Capsule().stroke(Palette.ink, lineWidth: 2))
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(showAll ? "しっぽの一覧をとじる" : "しっぽをぜんぶ見る")
+                .accessibilityLabel(showAll ? "一覧をとじる" : "ぜんぶ見る")
             }
-            tailPicker
+            switch tab {
+            case .tail: picker(TailKind.self)
+            case .coat: picker(CoatKind.self)
+            case .sauce: picker(SauceKind.self)
+            }
             HStack(spacing: 10) {
                 Text("からだ").font(AppFont.black(13 * s)).frame(width: 52 * s, alignment: .leading)
                 HStack(spacing: 14 * s) {
@@ -122,12 +159,40 @@ struct MakeView: View {
         .overlay(RoundedRectangle(cornerRadius: 20).stroke(Palette.ink, lineWidth: 3))
     }
 
+    private var tabs: some View {
+        HStack(spacing: 4 * s) {
+            ForEach(ItemCategory.allCases) { c in
+                let on = tab == c
+                Button {
+                    guard !on else { return }
+                    Haptics.light()
+                    withAnimation(.easeOut(duration: 0.2)) {
+                        tab = c
+                        trying = nil
+                    }
+                } label: {
+                    Text(c.label)
+                        .font(AppFont.black(12 * s))
+                        .lineLimit(1).fixedSize()
+                        .foregroundStyle(on ? .white : Palette.ink)
+                        .padding(.horizontal, 8 * s).padding(.vertical, 3 * s)
+                        .background(Capsule().fill(on ? Palette.ink : Palette.cream))
+                        .overlay(Capsule().stroke(Palette.ink, lineWidth: 2))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("\(c.label) \(game.ownedCount(c))しゅるい もっている")
+                .accessibilityAddTraits(on ? .isSelected : [])
+            }
+        }
+    }
+
     private var pointsBadge: some View {
         HStack(alignment: .firstTextBaseline, spacing: 2) {
             Text(game.points.formatted()).font(AppFont.display(14 * s)).monospacedDigit()
                 .contentTransition(.numericText())
             Text("pt").font(AppFont.black(10 * s))
         }
+        .lineLimit(1).fixedSize()
         .padding(.horizontal, 8 * s).padding(.vertical, 1)
         .background(Capsule().fill(Palette.gold))
         .overlay(Capsule().stroke(Palette.ink, lineWidth: 2))
@@ -135,12 +200,12 @@ struct MakeView: View {
         .accessibilityLabel("もってるポイント \(game.points)")
     }
 
-    /// Every tail, cheapest first: a sideways row normally, a grid when opened up.
-    @ViewBuilder private var tailPicker: some View {
+    /// Every item of a kind, cheapest first: a sideways row normally, a grid when opened up.
+    @ViewBuilder private func picker<T: Collectible>(_: T.Type) -> some View {
         if showAll {
             ScrollView {
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6 * s), count: 5), spacing: 8 * s) {
-                    ForEach(TailKind.allCases) { tailChip($0, size: 46 * s) }
+                    ForEach(T.allCases) { chip($0, size: 46 * s) }
                 }
                 .padding(.vertical, 6)
                 .padding(.horizontal, 2)
@@ -150,45 +215,49 @@ struct MakeView: View {
             ScrollViewReader { proxy in
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: 8 * s) {
-                        ForEach(TailKind.allCases) { tailChip($0, size: 50 * s).id($0) }
+                        ForEach(T.allCases) { chip($0, size: 50 * s).id($0.rawValue) }
                     }
                     .padding(.vertical, 6)
                     .padding(.horizontal, 2)
                 }
                 .frame(height: 50 * s + 12)
-                .onAppear { proxy.scrollTo(shownTail, anchor: .center) }
+                .onAppear { proxy.scrollTo(shown(T.self).rawValue, anchor: .center) }
             }
         }
     }
 
-    private func tailChip(_ t: TailKind, size: CGFloat) -> some View {
-        let owned = game.isUnlocked(t)
-        let selected = shownTail == t
-        let affordable = game.points >= t.price
-        return Button { tap(t) } label: {
-            Image(t.imageName).resizable().frame(width: size * 0.68, height: size * 0.68)
-                .grayscale(owned ? 0 : 0.7)
-                .opacity(owned || selected ? 1 : affordable ? 0.75 : 0.4)
-                .frame(width: size, height: size)
-                .background(RoundedRectangle(cornerRadius: 14).fill(selected ? Color(hex: 0xFFE7DF) : Palette.paper))
-                .overlay(RoundedRectangle(cornerRadius: 14).stroke(
-                    selected ? Palette.accent : Palette.line,
-                    style: StrokeStyle(lineWidth: selected ? 3.5 : 2.5, dash: selected && !owned ? [6, 4] : [])))
-                .overlay(alignment: .bottom) {
-                    if !owned {
-                        Text("\(t.price.formatted())pt")
-                            .font(AppFont.black(8.5 * s)).monospacedDigit()
-                            .foregroundStyle(.white)
-                            .padding(.horizontal, 4)
-                            .background(RoundedRectangle(cornerRadius: 6).fill(affordable ? Palette.green : Palette.ink))
-                            .offset(y: 6)
-                    }
+    private func chip<T: Collectible>(_ item: T, size: CGFloat) -> some View {
+        let owned = game.owns(item)
+        let selected = shown(T.self) == item
+        let affordable = game.points >= item.price
+        let key = "\(T.category.rawValue).\(item.rawValue)"
+        return Button { tap(item) } label: {
+            ZStack {
+                ForEach(item.iconLayers, id: \.self) { Image($0).resizable().scaledToFit() }
+            }
+            .frame(width: size * 0.68, height: size * 0.68)
+            .grayscale(owned ? 0 : 0.7)
+            .opacity(owned || selected ? 1 : affordable ? 0.75 : 0.4)
+            .frame(width: size, height: size)
+            .background(RoundedRectangle(cornerRadius: 14).fill(selected ? Color(hex: 0xFFE7DF) : Palette.paper))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(
+                selected ? Palette.accent : Palette.line,
+                style: StrokeStyle(lineWidth: selected ? 3.5 : 2.5, dash: selected && !owned ? [6, 4] : [])))
+            .overlay(alignment: .bottom) {
+                if !owned {
+                    Text("\(item.price.formatted())pt")
+                        .font(AppFont.black(8.5 * s)).monospacedDigit()
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 4)
+                        .background(RoundedRectangle(cornerRadius: 6).fill(affordable ? Palette.green : Palette.ink))
+                        .offset(y: 6)
                 }
-                .offset(x: shakeTail == t ? 4 : 0)
+            }
+            .offset(x: shaking == key ? 4 : 0)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(t.displayName)
-        .accessibilityValue(owned ? (game.tail == t ? "つけている" : "もっている") : "\(t.price)ポイント")
+        .accessibilityLabel(item.displayName)
+        .accessibilityValue(owned ? (game.equipped(T.self) == item ? "つけている" : "もっている") : "\(item.price)ポイント")
         .accessibilityAddTraits(selected ? .isSelected : [])
     }
 
@@ -213,30 +282,40 @@ struct MakeView: View {
         }
     }
 
-    private func tap(_ t: TailKind) {
+    private func tap<T: Collectible>(_ item: T) {
         Haptics.light()
+        let owned = game.owns(item)
         withAnimation(.easeOut(duration: 0.2)) {
-            if game.isUnlocked(t) {
+            if owned {
                 trying = nil
-                game.select(tail: t)
+                game.equip(item)
             } else {
-                trying = t
+                trying = Trial(item)
             }
         }
-        if !game.isUnlocked(t), game.points < t.price {
-            withAnimation(.default) { shakeTail = t }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { shakeTail = nil }
+        if !owned, game.points < item.price {
+            let key = "\(T.category.rawValue).\(item.rawValue)"
+            withAnimation(.default) { shaking = key }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { shaking = nil }
         }
     }
 
-    private func exchange(_ t: TailKind) {
+    private func exchange(_ t: Trial) {
+        func buy<T: Collectible>(_: T.Type) -> Bool { T(rawValue: t.raw).map { game.exchange($0) } ?? false }
+        var done = false
         withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
-            guard game.exchange(t) else { return }
+            switch t.category {
+            case .tail: done = buy(TailKind.self)
+            case .coat: done = buy(CoatKind.self)
+            case .sauce: done = buy(SauceKind.self)
+            }
+            guard done else { return }
             trying = nil
             popPlate = true
         }
+        guard done else { return }
         Haptics.success()
-        show("「\(t.displayName)」をゲット！")
+        show("「\(t.name)」をゲット！")
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
             withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) { popPlate = false }
         }

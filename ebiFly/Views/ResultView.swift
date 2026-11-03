@@ -85,7 +85,8 @@ struct ResultView: View {
         let px = w / 300   // bento artwork is 300 x 210 design units
         return ZStack(alignment: .topLeading) {
             Image("bento").resizable().frame(width: w, height: w * 210 / 300)
-            ShrimpView(tail: game.tail, count: game.bodyCount, skin: SegmentSkin.fry(r.fry), unit: 54 / ShrimpGeometry.width * px)
+            ShrimpView(tail: game.tail, count: game.bodyCount, skin: SegmentSkin.fry(r.fry), unit: 54 / ShrimpGeometry.width * px,
+                       coat: game.coat.overlayName)
                 .rotationEffect(.degrees(-62))
                 .position(x: 208 * px, y: 104 * px)
         }
@@ -102,7 +103,6 @@ struct ResultView: View {
             ("燃料", "\(r.maxDistance.formatted())m ぶん"),
             ("ソースほきゅう", "\(r.refuels)こ"),
         ]
-        let next = TailKind.allCases.first { !game.isUnlocked($0) && game.points >= $0.price }
         return VStack(spacing: 2) {
             ForEach(rows, id: \.0) { row in
                 HStack {
@@ -118,11 +118,11 @@ struct ResultView: View {
                 Text("+\(r.points.formatted())pt").font(AppFont.display(15 * s)).foregroundStyle(Palette.accent).monospacedDigit()
                 Text("（もってる \(game.points.formatted())pt）").font(AppFont.body(11 * s)).monospacedDigit()
             }
-            if next != nil {
+            if game.hasAffordableItem {
                 Button { Ads.shared.retryTapped(skip: askedReview) { game.startRun() } } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "gift.fill")
-                        Text("こうかんできるしっぽがあるよ！ つくりにいく")
+                        Text("こうかんできるアイテムがあるよ！ つくりにいく")
                         Image(systemName: "chevron.right")
                     }
                     .font(AppFont.black(11.5 * s))

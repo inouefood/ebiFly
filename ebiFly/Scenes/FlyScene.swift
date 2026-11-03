@@ -9,11 +9,14 @@ struct FlyView: View {
     @State private var showingAd = false
     @ObservedObject private var ads = Ads.shared
     private let shakes: Int
+    private let sauce: SauceKind
 
-    init(tail: TailKind, bodyCount: Int, fry: Double, shakes: Int, maxDistance: Int) {
+    init(tail: TailKind, bodyCount: Int, fry: Double, shakes: Int, maxDistance: Int, coat: CoatKind, sauce: SauceKind) {
         _scene = StateObject(wrappedValue: FlyScene(tail: tail, bodyCount: bodyCount, fry: fry,
-                                                    climbSpeed: Scoring.climbSpeed(shakes: shakes), maxDistance: maxDistance))
+                                                    climbSpeed: Scoring.climbSpeed(shakes: shakes), maxDistance: maxDistance,
+                                                    coat: coat, sauce: sauce))
         self.shakes = shakes
+        self.sauce = sauce
     }
 
     var body: some View {
@@ -32,12 +35,12 @@ struct FlyView: View {
                 .padding(.top, 12 * s)
                 FuelGauge(level: scene.fuel, refuels: scene.refuelCount)
                     .padding(.top, 4)
-                Pill(label: "ソース \(Scoring.sauceLabel(shakes: shakes))", value: "\(Int(scene.climbSpeed))", unit: "m/s")
+                Pill(label: "\(sauce.shortName) \(Scoring.sauceLabel(shakes: shakes))", value: "\(Int(scene.climbSpeed))", unit: "m/s")
                     .padding(.top, 2)
                 Spacer()
                 if showHint {
                     Toast(text: scene.usesTilt ? "iPhoneをかたむけてよけよう" : "左右にドラッグしてよけよう",
-                          sub: "ソースのボトルで燃料ほきゅう。ぶつかったらそこまで")
+                          sub: "\(sauce.shortName)のボトルで燃料ほきゅう。ぶつかったらそこまで")
                         .transition(.opacity)
                 }
                 Text(scene.zone)
@@ -239,6 +242,8 @@ final class FlyScene: GameScene, ObservableObject {
     private let tail: TailKind
     private let bodyCount: Int
     private let fry: Double
+    private let coat: CoatKind
+    private let sauce: SauceKind
     private let motion = MotionService()
 
     private struct Item {
@@ -296,7 +301,10 @@ final class FlyScene: GameScene, ObservableObject {
         (0, "キッチン"), (200, "鳥のエリア"), (1500, "飛行機のエリア"), (3400, "いん石のエリア"), (5500, "宇宙"),
     ]
 
-    init(tail: TailKind, bodyCount: Int, fry: Double, climbSpeed: Double, maxDistance: Int) {
+    init(tail: TailKind, bodyCount: Int, fry: Double, climbSpeed: Double, maxDistance: Int,
+         coat: CoatKind = .plain, sauce: SauceKind = .sauce) {
+        self.coat = coat
+        self.sauce = sauce
         self.climbSpeed = CGFloat(climbSpeed)
         self.tail = tail
         self.bodyCount = bodyCount
@@ -316,12 +324,13 @@ final class FlyScene: GameScene, ObservableObject {
         updateSky(0)
 
         flyerX = size.width / 2
-        flyer = ShrimpNode(tail: tail, count: bodyCount, skin: SegmentSkin.fry(fry), unit: 62 * u / ShrimpGeometry.width)
+        flyer = ShrimpNode(tail: tail, count: bodyCount, skin: SegmentSkin.fry(fry), unit: 62 * u / ShrimpGeometry.width,
+                            coat: coat.overlayName)
         flyer.zRotation = .pi  // head up, tail down
         flyer.zPosition = 10
         flyer.startWiggle()
         addChild(flyer)
-        thrust = ThrustNode(unit: u, power: climbSpeed / 460, target: self)
+        thrust = ThrustNode(unit: u, power: climbSpeed / 460, target: self, colors: sauce.jetColors)
         thrust.position = flyer.tailTip
         thrust.zPosition = -1   // behind the tail fan
         flyer.addChild(thrust)
@@ -405,7 +414,7 @@ final class FlyScene: GameScene, ObservableObject {
             nextObstacle += .random(in: 230...390)
         }
         while nextFuel < top {
-            var item = addItem("fuel", altitude: nextFuel, x: .random(in: 20...230), width: 50, z: 6)
+            var item = addItem(sauce.fuelName, altitude: nextFuel, x: .random(in: 20...230), width: 50, z: 6)
             item.isFuel = true
             item.node.run(.repeatForever(.sequence([.scale(to: 1.15, duration: 0.35), .scale(to: 1, duration: 0.35)])))
             items.append(item)

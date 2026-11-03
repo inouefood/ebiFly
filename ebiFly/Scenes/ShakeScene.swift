@@ -6,8 +6,11 @@ struct ShakeView: View {
     @Environment(\.uiScale) private var s
     @StateObject private var scene: ShakeScene
 
-    init(tail: TailKind, bodyCount: Int, fry: Double) {
-        _scene = StateObject(wrappedValue: ShakeScene(tail: tail, bodyCount: bodyCount, fry: fry))
+    private let sauce: SauceKind
+
+    init(tail: TailKind, bodyCount: Int, fry: Double, coat: CoatKind, sauce: SauceKind) {
+        _scene = StateObject(wrappedValue: ShakeScene(tail: tail, bodyCount: bodyCount, fry: fry, coat: coat, sauce: sauce))
+        self.sauce = sauce
     }
 
     var body: some View {
@@ -15,7 +18,7 @@ struct ShakeView: View {
             SpriteView(scene: scene, options: [.ignoresSiblingOrder]).ignoresSafeArea()
             VStack(spacing: 0) {
                 StepsBar(current: 3)
-                Text("ソースをかける").font(AppFont.display(24 * s)).foregroundStyle(Palette.ink).padding(.top, 4)
+                Text("\(sauce.displayName)をかける").font(AppFont.display(24 * s)).foregroundStyle(Palette.ink).padding(.top, 4)
                 Pill(label: "のこり", value: "\(scene.timeLeft)", unit: "秒")
                     .padding(.top, 6 * s)
                     .opacity(scene.started ? 1 : 0.5)
@@ -34,7 +37,7 @@ struct ShakeView: View {
                     } else if scene.started {
                         Toast(text: "もっとふって！")
                     } else {
-                        Toast(text: "iPhoneをふってソースをかけよう", sub: "ふった回数で飛ぶ高さと上昇スピードがアップ（画面タップでもOK）")
+                        Toast(text: "iPhoneをふって\(sauce.displayName)をかけよう", sub: "ふった回数で飛ぶ高さと上昇スピードがアップ（画面タップでもOK）")
                     }
                 }
                 .frame(minHeight: 56 * s)
@@ -46,7 +49,7 @@ struct ShakeView: View {
 
             if scene.finished {
                 FinishOverlay(lead: "シェイク", big: "\(scene.shakes)回",
-                              trail: "ソース「\(Scoring.sauceLabel(shakes: scene.shakes))」", button: "とばす！") {
+                              trail: "\(sauce.shortName)「\(Scoring.sauceLabel(shakes: scene.shakes))」", button: "とばす！") {
                     game.finishShake(scene.shakes)
                 }
             }
@@ -81,14 +84,18 @@ final class ShakeScene: GameScene, ObservableObject {
     private let tail: TailKind
     private let bodyCount: Int
     private let fry: Double
+    private let coat: CoatKind
+    private let sauce: SauceKind
     private let motion = MotionService()
     private var bottle: SKSpriteNode!
     private var shrimp: ShrimpNode!
 
-    init(tail: TailKind, bodyCount: Int, fry: Double) {
+    init(tail: TailKind, bodyCount: Int, fry: Double, coat: CoatKind, sauce: SauceKind) {
         self.tail = tail
         self.bodyCount = bodyCount
         self.fry = fry
+        self.coat = coat
+        self.sauce = sauce
         super.init()
     }
 
@@ -107,13 +114,14 @@ final class ShakeScene: GameScene, ObservableObject {
         edge.zPosition = -9
         addChild(edge)
 
-        shrimp = ShrimpNode(tail: tail, count: bodyCount, skin: SegmentSkin.fry(fry), unit: 54 * u / ShrimpGeometry.width)
+        shrimp = ShrimpNode(tail: tail, count: bodyCount, skin: SegmentSkin.fry(fry), unit: 54 * u / ShrimpGeometry.width,
+                            coat: coat.overlayName)
         shrimp.zRotation = -.pi / 2
         shrimp.position = CGPoint(x: size.width / 2 - shrimp.centerOffset, y: size.height * 0.42)
         shrimp.zPosition = 2
         addChild(shrimp)
 
-        bottle = SKSpriteNode(asset: "sauce", width: 76 * u)
+        bottle = SKSpriteNode(asset: sauce.bottleName, width: 76 * u)
         bottle.position = CGPoint(x: size.width * 0.6, y: size.height * 0.66)
         bottle.zRotation = 150 * .pi / 180
         bottle.zPosition = 5
@@ -152,7 +160,7 @@ final class ShakeScene: GameScene, ObservableObject {
         // spout is the top of the bottle, rotated with it
         let h = bottle.size.height / 2
         let spout = CGPoint(x: bottle.position.x - sin(bottle.zRotation) * h * 0.9, y: bottle.position.y + cos(bottle.zRotation) * h * 0.9)
-        let drop = SKSpriteNode(asset: "sauce-drop", width: 14 * u)
+        let drop = SKSpriteNode(asset: sauce.dropName, width: 14 * u)
         drop.position = CGPoint(x: spout.x + .random(in: -8...8) * u, y: spout.y)
         drop.zPosition = 4
         addChild(drop)

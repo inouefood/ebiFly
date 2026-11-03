@@ -12,7 +12,8 @@ final class ThrustNode: SKNode {
     private var intensity: CGFloat = 0
 
     /// `power` ~ climb speed relative to the average (1 = 460 m/s); more sauce, bigger jet.
-    init(unit u: CGFloat, power: CGFloat, target: SKNode) {
+    /// `colors`: hot and cooler particle colours for the jet (the sauce in use); nil = fire.
+    init(unit u: CGFloat, power: CGFloat, target: SKNode, colors: (UIColor, UIColor)? = nil) {
         self.u = u
         self.power = power
         flame = SKSpriteNode(texture: Self.flameTexture)
@@ -40,8 +41,9 @@ final class ThrustNode: SKNode {
         jet.particleAlphaSpeed = -1.7
         jet.particleRotationRange = .pi * 2
         jet.particleColorBlendFactor = 1
+        let (hot, cool) = colors ?? (UIColor(hex: 0xFFC84A), UIColor(hex: 0xF07A2E))
         jet.particleColorSequence = SKKeyframeSequence(
-            keyframeValues: [UIColor(hex: 0xFFF6C8), UIColor(hex: 0xFFC84A), UIColor(hex: 0xF07A2E), UIColor(hex: 0xC9BFB4)],
+            keyframeValues: [UIColor(hex: 0xFFF6C8), hot, cool, UIColor(hex: 0xC9BFB4)],
             times: [0, 0.18, 0.45, 1])
         jet.yAcceleration = -500 * u          // the world rushes past, so the exhaust falls away quickly
         jet.targetNode = target
