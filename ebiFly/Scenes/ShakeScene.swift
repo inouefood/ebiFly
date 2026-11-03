@@ -16,6 +16,9 @@ struct ShakeView: View {
             VStack(spacing: 0) {
                 StepsBar(current: 3)
                 Text("ソースをかける").font(AppFont.display(24 * s)).foregroundStyle(Palette.ink).padding(.top, 4)
+                Pill(label: "のこり", value: "\(scene.timeLeft)", unit: "秒")
+                    .padding(.top, 6 * s)
+                    .opacity(scene.started ? 1 : 0.5)
                 Spacer()
                 gauge
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
@@ -27,7 +30,7 @@ struct ShakeView: View {
                 .padding(.vertical, 8 * s)
                 Group {
                     if scene.finished {
-                        OutlinedText(text: "発射！", font: AppFont.display(30 * s), fill: Palette.accent, width: 2.5)
+                        Color.clear
                     } else if scene.started {
                         Toast(text: "もっとふって！")
                     } else {
@@ -40,12 +43,15 @@ struct ShakeView: View {
             .padding(.top, 8)
             .padding(.bottom, 20 * s)
             .allowsHitTesting(false)
+
+            if scene.finished {
+                FinishOverlay(lead: "シェイク", big: "\(scene.shakes)回",
+                              trail: "ソース「\(Scoring.sauceLabel(shakes: scene.shakes))」", button: "とばす！") {
+                    game.finishShake(scene.shakes)
+                }
+            }
         }
         .backdrop(.counter(wall: Color(hex: 0xFFE0D2), wallLow: Color(UIColor(hex: 0xFFE0D2).mixed(with: .white, 0.5)), counter: Color(hex: 0xE8C79A), edge: 0.52))
-        .onChange(of: scene.finished) { done in
-            guard done else { return }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { game.finishShake(scene.shakes) }
-        }
     }
 
     private var gauge: some View {
@@ -68,6 +74,7 @@ struct ShakeView: View {
 
 final class ShakeScene: GameScene, ObservableObject {
     @Published private(set) var shakes = 0
+    @Published private(set) var timeLeft = Int(Scoring.shakeSeconds)
     @Published private(set) var started = false
     @Published private(set) var finished = false
 
@@ -128,6 +135,11 @@ final class ShakeScene: GameScene, ObservableObject {
         guard isLaidOut, !finished else { return }
         if !started {
             started = true
+            let tick = SKAction.sequence([.wait(forDuration: 1), .run { [weak self] in
+                guard let self else { return }
+                self.timeLeft = max(0, self.timeLeft - 1)
+            }])
+            run(.repeat(tick, count: Int(Scoring.shakeSeconds)))
             run(.sequence([.wait(forDuration: Scoring.shakeSeconds), .run { [weak self] in self?.finish() }]))
         }
         shakes += 1
@@ -150,8 +162,9 @@ final class ShakeScene: GameScene, ObservableObject {
     }
 
     private func finish() {
+        timeLeft = 0
         finished = true
         motion.stop()
-        Haptics.heavy()
+        Haptics.success()
     }
 }

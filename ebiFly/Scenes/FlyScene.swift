@@ -20,6 +20,11 @@ struct FlyView: View {
         ZStack {
             SpriteView(scene: scene, options: [.ignoresSiblingOrder]).ignoresSafeArea()
             VStack(spacing: 0) {
+                if scene.countdown != nil {
+                    StepsBar(current: 4)
+                        .padding(.top, 8)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                }
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
                     OutlinedText(text: scene.altitude.formatted(), font: AppFont.display(44 * s), fill: .white, width: 2.5)
                     OutlinedText(text: "m", font: AppFont.display(22 * s), fill: .white, width: 2)
@@ -45,6 +50,17 @@ struct FlyView: View {
             .padding(.bottom, 22 * s)
             .allowsHitTesting(false)
 
+            if let n = scene.countdown {
+                OutlinedText(text: n == 0 ? "発射！" : "\(n)", font: AppFont.display((n == 0 ? 56 : 84) * s),
+                             fill: n == 0 ? Palette.accent : .white, width: 3, shadow: 4)
+                    .id(n)
+                    .transition(.asymmetric(insertion: .scale(scale: 2.2).combined(with: .opacity),
+                                            removal: .scale(scale: 0.6).combined(with: .opacity)))
+                    .offset(y: -40 * s)
+                    .allowsHitTesting(false)
+                    .accessibilityLabel(n == 0 ? "発射" : "\(n)")
+            }
+
             if let hit = scene.crashedInto {
                 continueOffer(hit)
                     .transition(.scale.combined(with: .opacity))
@@ -63,6 +79,7 @@ struct FlyView: View {
             }
         }
         .backdrop(.gradient(top: Color(scene.skyTop), bottom: Color(scene.skyBottom)))
+        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: scene.countdown)
         .animation(.spring(response: 0.35, dampingFraction: 0.65), value: scene.outcome)
         .animation(.spring(response: 0.35, dampingFraction: 0.65), value: scene.crashedInto)
         .onReceive(ads.$isRewardedReady) { scene.continueAvailable = $0 }
@@ -72,8 +89,10 @@ struct FlyView: View {
             if hit != nil, UserDefaults.standard.bool(forKey: "autoWatchAd") { watchAd() }
         }
         #endif
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.4) { withAnimation { showHint = false } }
+        .onChange(of: scene.countdown) { n in
+            // keep the hint up through the countdown and a moment into the flight
+            guard n == nil else { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { withAnimation { showHint = false } }
         }
         .onChange(of: scene.outcome) { outcome in
             guard let outcome else { return }
@@ -197,6 +216,10 @@ final class FlyScene: GameScene, ObservableObject {
     @Published private(set) var outcome: FlightOutcome?
     /// Set when the shrimp hit something and a "continue with an ad" offer is open; the flight is frozen meanwhile.
     @Published private(set) var crashedInto: Obstacle?
+    /// 3, 2, 1, then 0 ("発射！") before the flight starts; nil once it is under way.
+    @Published private(set) var countdown: Int? = 3
+    /// The shrimp waits on the pot until the countdown reaches 0.
+    private var holding = true
     /// Whether a rewarded ad is loaded (kept in sync by the view).
     var continueAvailable = false
     private var continueUsed = false
@@ -317,6 +340,26 @@ final class FlyScene: GameScene, ObservableObject {
         buildWorld()
         motion.startTilt()
         place(at: 0)
+        startCountdown()
+    }
+
+    private func startCountdown() {
+        var steps: [SKAction] = []
+        for n in [3, 2, 1] {
+            steps.append(.run { [weak self] in
+                self?.countdown = n
+                Haptics.light()
+            })
+            steps.append(.wait(forDuration: 0.65))
+        }
+        steps.append(.run { [weak self] in
+            self?.countdown = 0
+            self?.holding = false
+        })
+        steps.append(.wait(forDuration: 0.7))
+        steps.append(.run { [weak self] in self?.countdown = nil })
+        // a beat after the screen fades in, so "3" isn't missed
+        run(.sequence([.wait(forDuration: 0.4)] + steps))
     }
 
     override func willMove(from view: SKView) {
@@ -423,7 +466,7 @@ final class FlyScene: GameScene, ObservableObject {
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard outcome == nil, let p = touches.first?.location(in: self), let last = lastTouch else { return }
+        guard outcome == nil, !holding, let p = touches.first?.location(in: self), let last = lastTouch else { return }
         let dx = p.x - last.x
         lastTouch = p
         flyerX = min(max(flyerX + dx, 20 * u), size.width - 20 * u)
@@ -434,7 +477,7 @@ final class FlyScene: GameScene, ObservableObject {
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) { lastTouch = nil }
 
     override func update(_ currentTime: TimeInterval) {
-        guard isLaidOut, outcome == nil else { return }
+        guard isLaidOut, outcome == nil, !holding else { return }
         guard crashedInto == nil else {
             lastTime = nil   // no big time step when the flight resumes
             return
