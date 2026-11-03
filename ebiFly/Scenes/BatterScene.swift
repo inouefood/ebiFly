@@ -6,8 +6,11 @@ struct BatterView: View {
     @Environment(\.uiScale) private var s
     @StateObject private var scene: BatterScene
 
+    private let coat: CoatKind
+
     init(tail: TailKind, bodyCount: Int, coat: CoatKind) {
         _scene = StateObject(wrappedValue: BatterScene(tail: tail, bodyCount: bodyCount, coat: coat))
+        self.coat = coat
     }
 
     var body: some View {
@@ -18,11 +21,11 @@ struct BatterView: View {
                 HStack {
                     Pill(label: "のこり", value: "\(scene.timeLeft)", unit: "秒")
                     Spacer()
-                    Pill(label: "パン粉", value: "\(scene.count)")
+                    Pill(label: coat.crumbLabel, value: "\(scene.count)")
                 }
                 Spacer()
                 if !scene.started {
-                    Toast(text: "えびを左右にうごかしてパン粉をキャッチ", sub: "金のパン粉は3こぶん。水てきに当たると\(BatterScene.waterPenalty)こ落ちる")
+                    Toast(text: "えびを左右にうごかして\(coat.crumbLabel)をキャッチ", sub: "金色のは3こぶん。水てきに当たると\(BatterScene.waterPenalty)こ落ちる")
                 }
             }
             .padding(.horizontal, 18 * s)
@@ -31,7 +34,7 @@ struct BatterView: View {
             .allowsHitTesting(false)
 
             if scene.finished {
-                FinishOverlay(lead: "パン粉", big: "\(scene.count)こ", trail: "ゲット！", button: "揚げる") {
+                FinishOverlay(lead: coat.crumbLabel, big: "\(scene.count)こ", trail: "ゲット！", button: "揚げる") {
                     game.finishBatter(crumbs: scene.count)
                 }
             }
@@ -149,9 +152,9 @@ final class BatterScene: GameScene, ObservableObject {
         let node: SKSpriteNode
         switch kind {
         case .crumb:
-            node = SKSpriteNode(asset: "crumb", width: 22 * u)
+            node = SKSpriteNode(asset: coat.crumbName, width: 22 * u)
         case .gold:
-            node = SKSpriteNode(asset: "crumb", width: 24 * u)
+            node = SKSpriteNode(asset: coat.crumbName, width: 24 * u)
             node.color = UIColor(hex: 0xFFC21A)
             node.colorBlendFactor = 0.65
             let glow = SKShapeNode(circleOfRadius: 17 * u)

@@ -86,6 +86,7 @@ for _k in TAIL_KEYS:
     JOBS[f"tail-{_k}"] = (f"tail-{_k}", 318, 318, None)
 for _k in COAT_KEYS:
     JOBS[f"coat-{_k}"] = (f"coat-{_k}", 300, 300, None)
+    JOBS[f"crumb-{_k}"] = (f"crumb-{_k}", 96, 96, None)
 for _k in SAUCE_KEYS:
     JOBS[f"bottle-{_k}"] = (f"bottle-{_k}", 300, 660, None)
     JOBS[f"drop-{_k}"] = (f"drop-{_k}", 80, 108, None)

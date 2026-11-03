@@ -1,5 +1,6 @@
 """Batter coats and sauces exchanged for points on the make screen (cosmetic only).
 
+- crumb-<key>:  what falls in the batter step with this coat ("-12 -12 24 24" like `crumb`).
 - coat-<key>:   overlay drawn on top of a body ball (same "-50 -50 100 100" box as `seg`), so the
                 fry colour underneath still shows through. Ends with the ball outline so it stays crisp.
 - bottle-<key>: the bottle shaken in the sauce step ("0 0 100 220", spout at the top like `sauce`).
@@ -198,6 +199,34 @@ def _drops():
     return D
 
 
+def _crumbs():
+    """What falls in the batter step for each coat ("-12 -12 24 24" like `crumb`)."""
+    rng = random.Random(41)
+    K = {}
+    K["sesame"] = (f'<ellipse cx="-3" cy="1" rx="6.5" ry="3.6" transform="rotate(-25 -3 1)" fill="#fff4d6" stroke="{INK}" stroke-width="2"/>'
+                   f'<ellipse cx="4" cy="-3" rx="5.5" ry="3" transform="rotate(30 4 -3)" fill="#2a1a10" stroke="{INK}" stroke-width="2"/>'
+                   f'<ellipse cx="2" cy="5" rx="5" ry="2.8" transform="rotate(10 2 5)" fill="#fff4d6" stroke="{INK}" stroke-width="2"/>')
+    K["nori"] = (f'<polygon points="{_poly(0, 0, 10, rng, 7)}" fill="#2e7d32" stroke="{INK}" stroke-width="2.2" stroke-linejoin="round"/>'
+                 '<path d="M-4 -2 L3 1" stroke="#5fa04a" stroke-width="1.6" stroke-linecap="round"/>')
+    K["cheese"] = (f'<path d="M-9 6 L9 6 L9 -2 L-9 -8Z" fill="#ffd23f" stroke="{INK}" stroke-width="2.2" stroke-linejoin="round"/>'
+                   '<circle cx="-3" cy="1" r="1.8" fill="#e8a317"/><circle cx="4" cy="2" r="1.3" fill="#e8a317"/>')
+    K["curry"] = (f'<polygon points="{_poly(0, 0, 10, rng, 7)}" fill="#e8a812" stroke="{INK}" stroke-width="2.4" stroke-linejoin="round"/>'
+                  '<circle cx="-3" cy="-1" r="1.5" fill="#a0461c"/><circle cx="3" cy="3" r="1.2" fill="#a0461c"/><circle cx="-2" cy="-3" r="2" fill="#fff" opacity=".5"/>')
+    K["matcha"] = (f'<polygon points="{_poly(0, 0, 10, rng, 7)}" fill="#8cc152" stroke="{INK}" stroke-width="2.4" stroke-linejoin="round"/>'
+                   '<circle cx="2" cy="2" r="1.6" fill="#4e7d22"/><circle cx="-2" cy="-3" r="2" fill="#fff" opacity=".5"/>')
+    K["cornflake"] = (f'<path d="M-10 2 Q-8 -8 0 -9 Q9 -8 10 0 Q8 9 -1 8 Q-9 9 -10 2Z" fill="#f3c25a" stroke="#b8761c" stroke-width="2.2"/>'
+                      f'<path d="M-10 2 Q-8 -8 0 -9 Q9 -8 10 0 Q8 9 -1 8 Q-9 9 -10 2Z" fill="none" stroke="{INK}" stroke-width="1.4" opacity=".6"/>'
+                      '<path d="M-5 -2 Q0 -5 5 -2" stroke="#fff4c2" stroke-width="1.8" fill="none" stroke-linecap="round"/>')
+    K["sprinkle"] = "".join(
+        f'<rect x="{x - 5}" y="{y - 1.8}" width="10" height="3.6" rx="1.8" transform="rotate({r} {x} {y})" fill="{c}" stroke="{INK}" stroke-width="1.3"/>'
+        for x, y, r, c in [(-3, -3, 30, "#ec5a3c"), (3, 1, -40, "#4bb3e6"), (-1, 5, 10, "#6cc04a")])
+    K["charcoal"] = (f'<polygon points="{_poly(0, 0, 10, rng, 7)}" fill="#3a3432" stroke="{INK}" stroke-width="2.4" stroke-linejoin="round"/>'
+                     '<circle cx="-2" cy="-2" r="1.6" fill="#7d746e"/><circle cx="3" cy="2" r="1.2" fill="#7d746e"/>')
+    K["gold"] = (f'<polygon points="{_poly(0, 0, 10, rng, 5)}" fill="#ffd54a" stroke="#b8820f" stroke-width="2" stroke-linejoin="round"/>'
+                 '<path d="M-3 -7 Q-3 -3 1 -3 Q-3 -3 -3 1 Q-3 -3 -7 -3 Q-3 -3 -3 -7Z" fill="#fff"/>')
+    return K
+
+
 def add_extras(S, seg):
     for k, body in _coats(seg).items():
         S[f"coat-{k}"] = ("-50 -50 100 100", body)
@@ -205,6 +234,8 @@ def add_extras(S, seg):
         S[f"bottle-{k}"] = ("0 0 100 220", body)
     for k, body in _drops().items():
         S[f"drop-{k}"] = ("-10 -15 20 27", body)
+    for k, body in _crumbs().items():
+        S[f"crumb-{k}"] = ("-12 -12 24 24", body)
 
 
 def add_fuels(S):

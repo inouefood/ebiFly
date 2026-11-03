@@ -295,6 +295,7 @@ if __name__ == "__main__":
     sizes["hand-phone"] = (240, 320)
     sizes.update({f"tail-{k}": (300, 300) for k in TAIL_KEYS})
     sizes.update({f"coat-{k}": (300, 300) for k in COAT_KEYS})
+    sizes.update({f"crumb-{k}": (96, 96) for k in COAT_KEYS})
     for k in SAUCE_KEYS:
         sizes.update({f"bottle-{k}": (300, 660), f"drop-{k}": (80, 108), f"fuel-{k}": (240, 240)})
     for k, (w, h) in sizes.items():

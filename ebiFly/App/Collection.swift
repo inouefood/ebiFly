@@ -81,6 +81,11 @@ enum CoatKind: String, Collectible {
         }
     }
 
+    /// What falls in the batter step (sesame seeds, nori flakes, ...); the plain coat uses the panko crumb.
+    var crumbName: String { self == .plain ? "crumb" : "crumb-\(rawValue)" }
+    /// What the batter step calls the falling bits ("パン粉" for the plain coat).
+    var crumbLabel: String { self == .plain ? "パン粉" : displayName }
+
     /// Image drawn over each ball; nil for the plain coat.
     var overlayName: String? { self == .plain ? nil : "coat-\(rawValue)" }
     var iconLayers: [String] { [SegmentSkin.fry(0.5)] + (overlayName.map { [$0] } ?? []) }
