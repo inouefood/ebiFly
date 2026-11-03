@@ -358,12 +358,15 @@ final class FlyScene: GameScene, ObservableObject {
             steps.append(.run { [weak self] in
                 self?.countdown = n
                 Haptics.light()
+                // the "ready" sound builds up over the last second into the launch
+                if n == 1 { Sound.launchReady.play() }
             })
             steps.append(.wait(forDuration: 0.65))
         }
         steps.append(.run { [weak self] in
             self?.countdown = 0
             self?.holding = false
+            Sound.launch.play()
         })
         steps.append(.wait(forDuration: 0.7))
         steps.append(.run { [weak self] in self?.countdown = nil })
@@ -561,6 +564,7 @@ final class FlyScene: GameScene, ObservableObject {
                 crashedInto = hit
                 thrust.setIntensity(0)
                 Haptics.heavy()
+                Sound.collision.play()
             } else {
                 end(hitBy: hit)
             }
@@ -584,6 +588,7 @@ final class FlyScene: GameScene, ObservableObject {
             refuels += 1
             refuelCount = refuels
             Haptics.success()
+            Sound.fuel.play(minInterval: 0.1)
             refuelPopup(at: item.node.position)
             thrust.burst()
             item.node.removeAllActions()
@@ -657,19 +662,23 @@ final class FlyScene: GameScene, ObservableObject {
     func giveUp() {
         guard let hit = crashedInto else { return }
         crashedInto = nil
-        end(hitBy: hit)
+        end(hitBy: hit, crashSoundPlayed: true)
     }
 
-    private func end(hitBy: Obstacle?) {
+    /// `crashSoundPlayed`: the crash already made its sound when the continue offer opened.
+    private func end(hitBy: Obstacle?, crashSoundPlayed: Bool = false) {
         outcome = FlightOutcome(distance: Int(camera0), hitBy: hitBy, refuels: refuels)
         thrust.setIntensity(0)
         motion.stop()
         if hitBy != nil {
             Haptics.heavy()
+            if !crashSoundPlayed { Sound.collision.play() }
+            run(.sequence([.wait(forDuration: 0.35), .run { Sound.gameOver.play() }]))
             let s = SKAction.sequence([.moveBy(x: -6, y: 0, duration: 0.03), .moveBy(x: 12, y: 0, duration: 0.06), .moveBy(x: -6, y: 0, duration: 0.03)])
             flyer.run(.repeat(s, count: 4))
         } else {
             Haptics.success()
+            Sound.gameOver.play()
         }
     }
 }

@@ -119,7 +119,7 @@ struct MakeView: View {
                 Spacer(minLength: 4)
                 pointsBadge
                 Button {
-                    Haptics.light()
+                    Haptics.light(); Sound.uiTap.play()
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { showAll.toggle() }
                 } label: {
                     Image(systemName: showAll ? "chevron.up" : "square.grid.3x3.fill")
@@ -165,7 +165,7 @@ struct MakeView: View {
                 let on = tab == c
                 Button {
                     guard !on else { return }
-                    Haptics.light()
+                    Haptics.light(); Sound.uiTap.play()
                     withAnimation(.easeOut(duration: 0.2)) {
                         tab = c
                         trying = nil
@@ -283,7 +283,7 @@ struct MakeView: View {
     }
 
     private func tap<T: Collectible>(_ item: T) {
-        Haptics.light()
+        Haptics.light(); Sound.uiTap.play()
         let owned = game.owns(item)
         withAnimation(.easeOut(duration: 0.2)) {
             if owned {
@@ -315,6 +315,7 @@ struct MakeView: View {
         }
         guard done else { return }
         Haptics.success()
+        Sound.stepClear.play()
         show("「\(t.name)」をゲット！")
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
             withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) { popPlate = false }
@@ -329,7 +330,7 @@ struct MakeView: View {
     }
 
     private func stepButton(_ text: String, label: String, action: @escaping () -> Void) -> some View {
-        Button(action: { Haptics.light(); action() }) {
+        Button(action: { Haptics.light(); Sound.uiTap.play(); action() }) {
             Text(text).font(AppFont.black(18 * s))
                 .frame(width: 34 * s, height: 34 * s)
                 .background(Circle().fill(Palette.cream))

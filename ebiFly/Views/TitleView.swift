@@ -77,7 +77,6 @@ final class TitleScene: GameScene, ObservableObject {
     private static let maxObstacles = 5
 
     override func layout() {
-        Sound.collision.preload()
         let h = size.height
         let bg = SKSpriteNode(texture: Tex.gradient(size, top: UIColor(hex: 0x7FD3FF), bottom: UIColor(hex: 0xFFE9A8)))
         bg.size = size
@@ -227,7 +226,7 @@ final class TitleScene: GameScene, ObservableObject {
         shrimp.removeAction(forKey: "fly")
         shrimp.removeAction(forKey: "trail")
         Haptics.medium()
-        Sound.collision.play()
+        Sound.titleCollision.play()
 
         // bounce away from the obstacle, a little upward, spinning
         var dx = shrimp.position.x - obstacle.position.x

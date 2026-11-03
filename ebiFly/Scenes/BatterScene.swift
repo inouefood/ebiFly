@@ -63,7 +63,10 @@ struct FinishOverlay: View {
             .scaleEffect(shown ? 1 : 0.5)
             .opacity(shown ? 1 : 0)
         }
-        .onAppear { withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) { shown = true } }
+        .onAppear {
+            Sound.stepClear.play()
+            withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) { shown = true }
+        }
     }
 }
 
@@ -221,14 +224,16 @@ final class BatterScene: GameScene, ObservableObject {
         let p = shrimp.position
         let half = 26 * u
         let top = p.y + shrimp.bottomExtent, bottom = p.y - 50 * shrimp.unit
-        var gained = 0, lost = 0
+        var gained = 0, lost = 0, gotGold = false
         falling.removeAll { f in
             f.node.position.y -= f.speed * u * dt
             let pos = f.node.position
             if abs(pos.x - p.x) < half && pos.y < top && pos.y > bottom {
                 switch f.kind {
                 case .crumb: gained += 1
-                case .gold: gained += 3
+                case .gold:
+                    gained += 3
+                    gotGold = true
                 case .water: lost += Self.waterPenalty
                 }
                 f.node.run(.sequence([.group([.scale(to: 0.2, duration: 0.2), .fadeOut(withDuration: 0.2)]), .removeFromParent()]))
@@ -243,12 +248,14 @@ final class BatterScene: GameScene, ObservableObject {
         if gained > 0 {
             count += gained
             Haptics.light()
+            if gotGold { Sound.gold.play() } else { Sound.panko.play(minInterval: 0.04) }
             popup("+\(gained)", color: gained >= 3 ? UIColor(hex: 0xE0A000) : UIColor(hex: 0x3A2418))
         }
         if lost > 0 {
             let actual = min(lost, count)
             count -= actual
             Haptics.heavy()
+            Sound.waterHit.play()
             popup(actual > 0 ? "-\(actual)" : "びしょっ", color: UIColor(hex: 0x2F7FD0))
             shrimp.run(.sequence([.moveBy(x: -5 * u, y: 0, duration: 0.03), .moveBy(x: 10 * u, y: 0, duration: 0.06), .moveBy(x: -5 * u, y: 0, duration: 0.03)]))
         }

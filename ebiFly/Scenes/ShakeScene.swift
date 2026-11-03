@@ -152,6 +152,7 @@ final class ShakeScene: GameScene, ObservableObject {
         }
         shakes += 1
         Haptics.light()
+        Sound.sauceShake.play(minInterval: 0.05)
 
         bottle.removeAction(forKey: "shake")
         let base = 150 * CGFloat.pi / 180
@@ -166,7 +167,8 @@ final class ShakeScene: GameScene, ObservableObject {
         addChild(drop)
         let fall = SKAction.moveTo(y: shrimp.position.y + 10 * u, duration: 0.45)
         fall.timingMode = .easeIn
-        drop.run(.sequence([fall, .group([.scaleX(to: 1.6, y: 0.4, duration: 0.15), .fadeOut(withDuration: 0.3)]), .removeFromParent()]))
+        drop.run(.sequence([fall, .run { Sound.sauceDrop.play(minInterval: 0.08) },
+                            .group([.scaleX(to: 1.6, y: 0.4, duration: 0.15), .fadeOut(withDuration: 0.3)]), .removeFromParent()]))
     }
 
     private func finish() {
