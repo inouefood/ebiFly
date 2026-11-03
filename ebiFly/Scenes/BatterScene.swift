@@ -6,8 +6,8 @@ struct BatterView: View {
     @Environment(\.uiScale) private var s
     @StateObject private var scene: BatterScene
 
-    init(tail: TailKind, bodyCount: Int) {
-        _scene = StateObject(wrappedValue: BatterScene(tail: tail, bodyCount: bodyCount))
+    init(tail: TailKind, bodyCount: Int, coat: CoatKind) {
+        _scene = StateObject(wrappedValue: BatterScene(tail: tail, bodyCount: bodyCount, coat: coat))
     }
 
     var body: some View {
@@ -88,6 +88,7 @@ final class BatterScene: GameScene, ObservableObject {
 
     private let tail: TailKind
     private let bodyCount: Int
+    private let coat: CoatKind
     private var shrimp: ShrimpNode!
     private var falling: [Falling] = []
     private var lastTouch: CGPoint?
@@ -98,9 +99,10 @@ final class BatterScene: GameScene, ObservableObject {
     private var lastExtra: TimeInterval = 0
     private var tilt: CGFloat = 0
 
-    init(tail: TailKind, bodyCount: Int) {
+    init(tail: TailKind, bodyCount: Int, coat: CoatKind) {
         self.tail = tail
         self.bodyCount = bodyCount
+        self.coat = coat
         super.init()
     }
 
@@ -113,7 +115,9 @@ final class BatterScene: GameScene, ObservableObject {
         bg.zPosition = -10
         addChild(bg)
 
-        shrimp = ShrimpNode(tail: tail, count: bodyCount, skin: SegmentSkin.batter(0), unit: 62 * u / ShrimpGeometry.width)
+        shrimp = ShrimpNode(tail: tail, count: bodyCount, skin: SegmentSkin.batter(0), unit: 62 * u / ShrimpGeometry.width,
+                            coat: coat.overlayName)
+        shrimp.setCoatAlpha(0)
         shrimp.position = CGPoint(x: size.width / 2, y: shrimp.bottomExtent + 120 * u)
         shrimp.zPosition = 5
         shrimp.startWiggle()
@@ -245,7 +249,9 @@ final class BatterScene: GameScene, ObservableObject {
             shrimp.run(.sequence([.moveBy(x: -5 * u, y: 0, duration: 0.03), .moveBy(x: 10 * u, y: 0, duration: 0.06), .moveBy(x: -5 * u, y: 0, duration: 0.03)]))
         }
         if gained > 0 || lost > 0 {
-            shrimp.setSkin(SegmentSkin.batter(Double(count) / Double(Self.fullCoat)))
+            let t = min(1, Double(count) / Double(Self.fullCoat))
+            shrimp.setSkin(SegmentSkin.batter(t))
+            shrimp.setCoatAlpha(CGFloat(t))
         }
 
         if elapsed >= Scoring.batterSeconds {

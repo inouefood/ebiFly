@@ -141,19 +141,28 @@ struct StepsBar: View {
     var body: some View {
         HStack(spacing: 4 * s) {
             ForEach(Self.names.indices, id: \.self) { i in
-                HStack(spacing: 2 * s) {
-                    if i < step {
-                        Image(systemName: "checkmark").font(.system(size: 8 * s, weight: .black))
-                            .transition(.scale.combined(with: .opacity))
+                Text(Self.names[i])
+                    .font(AppFont.black(10 * s))
+                    .lineLimit(1)
+                    .fixedSize()
+                    .padding(.horizontal, 7 * s)
+                    .padding(.vertical, 1)
+                    .foregroundStyle(foreground(i))
+                    .background(Capsule().fill(background(i)))
+                    .overlay(Capsule().stroke(Palette.accent, lineWidth: 2).opacity(i == step && pop ? 1 : 0))
+                    // the check is a badge on top so finished steps don't get wider and push the bar onto two lines
+                    .overlay(alignment: .topTrailing) {
+                        if i < step {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 6 * s, weight: .black))
+                                .foregroundStyle(.white)
+                                .frame(width: 11 * s, height: 11 * s)
+                                .background(Circle().fill(Palette.green))
+                                .overlay(Circle().stroke(Palette.ink, lineWidth: 1.2))
+                                .offset(x: 4 * s, y: -5 * s)
+                                .transition(.scale.combined(with: .opacity))
+                        }
                     }
-                    Text(Self.names[i])
-                }
-                .font(AppFont.black(10 * s))
-                .padding(.horizontal, 7 * s)
-                .padding(.vertical, 1)
-                .foregroundStyle(foreground(i))
-                .background(Capsule().fill(background(i)))
-                .overlay(Capsule().stroke(Palette.accent, lineWidth: 2).opacity(i == step && pop ? 1 : 0))
                 .scaleEffect(i == step && pop ? 1.3 : 1)
                 .zIndex(i == step ? 1 : 0)
             }
