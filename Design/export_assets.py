@@ -10,6 +10,7 @@ import shutil
 import subprocess
 
 import art
+from tails import TAIL_KEYS
 
 ROOT = pathlib.Path(__file__).resolve().parent
 XCASSETS = ROOT.parent / "ebiFly" / "Assets.xcassets"
@@ -79,6 +80,8 @@ JOBS = {  # asset name -> (symbol, px w, px h, colours)
     "bento": ("bento", 600, 420, None),
     "icon": ("icon", 1024, 1024, None),
 }
+for _k in TAIL_KEYS:
+    JOBS[f"tail-{_k}"] = (f"tail-{_k}", 318, 318, None)
 for i in range(6):
     JOBS[f"seg-b{i}"] = ("seg", 300, 300, batter_colors(i / 5))
 for i in range(11):

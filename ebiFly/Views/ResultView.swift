@@ -102,6 +102,7 @@ struct ResultView: View {
             ("燃料", "\(r.maxDistance.formatted())m ぶん"),
             ("ソースほきゅう", "\(r.refuels)こ"),
         ]
+        let next = TailKind.allCases.first { !game.isUnlocked($0) && game.points >= $0.price }
         return VStack(spacing: 2) {
             ForEach(rows, id: \.0) { row in
                 HStack {
@@ -109,6 +110,30 @@ struct ResultView: View {
                     Spacer()
                     Text(row.1).font(AppFont.black(12.5 * s)).monospacedDigit()
                 }
+            }
+            Divider().overlay(Palette.line).padding(.vertical, 2)
+            HStack(alignment: .firstTextBaseline) {
+                Text("ポイント").font(AppFont.black(12.5 * s))
+                Spacer()
+                Text("+\(r.points.formatted())pt").font(AppFont.display(15 * s)).foregroundStyle(Palette.accent).monospacedDigit()
+                Text("（もってる \(game.points.formatted())pt）").font(AppFont.body(11 * s)).monospacedDigit()
+            }
+            if next != nil {
+                Button { Ads.shared.retryTapped(skip: askedReview) { game.startRun() } } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "gift.fill")
+                        Text("こうかんできるしっぽがあるよ！ つくりにいく")
+                        Image(systemName: "chevron.right")
+                    }
+                    .font(AppFont.black(11.5 * s))
+                    .lineLimit(1).minimumScaleFactor(0.75)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 10).padding(.vertical, 3)
+                    .frame(maxWidth: .infinity)
+                    .background(Capsule().fill(Palette.green))
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 4)
             }
         }
         .foregroundStyle(Palette.ink)

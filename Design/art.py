@@ -83,6 +83,10 @@ S["tail-crown"] = ("-50 -50 100 100", f"""
 <circle cx="39" cy="-22" r="4.5" fill="#fff4c2" stroke="{INK}" stroke-width="2.5"/>
 """)
 
+from tails import TAIL_KEYS, add_tails  # noqa: E402  (extra tails for the exchange)
+
+add_tails(S)
+
 S["crumb"] = ("-12 -12 24 24", f"""
 <polygon points="{blob(0, 0, 10, random.Random(3), 7)}" fill="#f0c25a" stroke="{INK}" stroke-width="2.4" stroke-linejoin="round"/>
 <circle cx="-2" cy="-3" r="2" fill="#fff" opacity=".6"/>
@@ -267,6 +271,7 @@ if __name__ == "__main__":
              "water-drop": (80, 108), "fuel": (240, 240), "sauce": (300, 660), "cloud": (600, 336), "bird": (192, 132), "plane": (510, 240), "moon": (360, 360),
              "star": (120, 120), "pot-back": (680, 360), "pot-front": (680, 360), "icon": (1024, 1024),
              "bento": (600, 420)}
+    sizes.update({f"tail-{k}": (300, 300) for k in TAIL_KEYS})
     for k, (w, h) in sizes.items():
         (out / f"{k}.svg").write_text(standalone(k, w, h))
 

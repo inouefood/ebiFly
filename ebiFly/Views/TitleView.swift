@@ -33,6 +33,9 @@ struct TitleView: View {
                     Text("ベスト").font(AppFont.black(13 * s))
                     Text(game.best.formatted()).font(AppFont.display(18 * s)).monospacedDigit()
                     Text("m").font(AppFont.black(13 * s))
+                    Text("・").font(AppFont.black(13 * s))
+                    Text(game.points.formatted()).font(AppFont.display(18 * s)).monospacedDigit()
+                    Text("pt").font(AppFont.black(13 * s))
                 }
                 .foregroundStyle(Palette.ink)
                 .padding(.top, 14 * s)

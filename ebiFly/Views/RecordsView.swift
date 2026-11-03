@@ -40,25 +40,25 @@ struct RecordsView: View {
                             }
                         }
                     }
-                    card("しっぽコレクション") {
-                        HStack(spacing: 10 * s) {
+                    card("しっぽコレクション  \(game.ownedTails.count)/\(TailKind.allCases.count)") {
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6 * s), count: 5), spacing: 6 * s) {
                             ForEach(TailKind.allCases) { t in
-                                VStack(spacing: 4) {
-                                    ZStack {
-                                        RoundedRectangle(cornerRadius: 12).fill(Palette.paper)
-                                        RoundedRectangle(cornerRadius: 12).stroke(Palette.line, lineWidth: 2.5)
-                                        if game.isUnlocked(t) {
-                                            Image(t.imageName).resizable().padding(10 * s)
-                                        } else {
-                                            Text("?").font(AppFont.display(20 * s)).foregroundStyle(Palette.line)
-                                        }
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 10).fill(Palette.paper)
+                                    RoundedRectangle(cornerRadius: 10).stroke(Palette.line, lineWidth: 2)
+                                    if game.isUnlocked(t) {
+                                        Image(t.imageName).resizable().padding(6 * s)
+                                    } else {
+                                        Text("?").font(AppFont.display(16 * s)).foregroundStyle(Palette.line)
                                     }
-                                    .frame(width: 60 * s, height: 60 * s)
-                                    Text(game.isUnlocked(t) ? t.displayName : "\(t.unlockDistance.formatted())mで解放")
-                                        .font(AppFont.black(9.5 * s)).foregroundStyle(Palette.muted)
                                 }
+                                .aspectRatio(1, contentMode: .fit)
+                                .accessibilityLabel(game.isUnlocked(t) ? t.displayName : "まだもっていない")
                             }
                         }
+                        Text("しっぽは「つくる」画面でポイントとこうかんできます。")
+                            .font(AppFont.body(11 * s)).foregroundStyle(Palette.muted)
+                            .padding(.top, 4)
                     }
                     Button("ランキングを見る") { gameCenter.showLeaderboard() }
                         .buttonStyle(GameButtonStyle(kind: .ghost, wide: true, size: 16))
