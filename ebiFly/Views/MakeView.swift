@@ -70,8 +70,9 @@ struct MakeView: View {
         .overlay(alignment: .topLeading) { pointsBadge.padding(.top, 6 * s) }
         .overlay(alignment: .bottom) {
             if let t = trying {
-                Text("ためしにつけ中：\(t.name)")
+                Text("ためしにつけ中：\(t.name)（\(t.price.formatted())pt）")
                     .font(AppFont.black(12 * s))
+                    .lineLimit(1).minimumScaleFactor(0.75)
                     .foregroundStyle(.white)
                     .padding(.horizontal, 12 * s).padding(.vertical, 3 * s)
                     .background(Capsule().fill(Palette.ink.opacity(0.85)))
@@ -273,9 +274,14 @@ struct MakeView: View {
                     Haptics.light()
                     withAnimation(.easeOut(duration: 0.2)) { trying = nil }
                 }
-                .buttonStyle(GameButtonStyle(kind: .ghost, size: 16))
-                Button(short > 0 ? "あと \(short.formatted())pt" : "\(t.price.formatted())pt でこうかん") { exchange(t) }
-                    .buttonStyle(GameButtonStyle(wide: true, size: 16))
+                .buttonStyle(GameButtonStyle(kind: .ghost, wide: true, size: 16))
+                // same width as "やめる" on purpose: spending points can't be undone, so it isn't pushed harder
+                // than backing out (the price is shown on the plate, which keeps this label short enough to fit)
+                Button { exchange(t) } label: {
+                    Text(short > 0 ? "あと\(short.formatted())pt" : "こうかん")
+                        .lineLimit(1).minimumScaleFactor(0.7)
+                }
+                .buttonStyle(GameButtonStyle(wide: true, size: 16))
                     .disabled(short > 0)
             }
         } else {

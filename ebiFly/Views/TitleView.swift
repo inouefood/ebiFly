@@ -23,9 +23,9 @@ struct TitleView: View {
                 .padding(.top, 40 * s)
                 Spacer()
                 VStack(spacing: 14 * s) {
-                    Button("あそぶ") { game.startRun() }
+                    Button("あそぶ") { leave { game.startRun() } }
                         .buttonStyle(GameButtonStyle(wide: true))
-                    Button("きろく") { game.go(.records) }
+                    Button("きろく") { leave { game.go(.records) } }
                         .buttonStyle(GameButtonStyle(kind: .ghost, wide: true))
                 }
                 .frame(width: 200 * s)
@@ -43,6 +43,15 @@ struct TitleView: View {
             }
         }
         .backdrop(.gradient(top: Color(hex: 0x7FD3FF), bottom: Color(hex: 0xFFE9A8)))
+        .onDisappear { scene.muted = true }
+    }
+
+    /// The title stays on screen (and keeps simulating) while it cross-fades into the next screen, so it
+    /// must go quiet *before* navigating. (An onChange(of: game.screen) here doesn't work: once the screen
+    /// changes this view is already out of the tree and no longer updated.)
+    private func leave(_ go: () -> Void) {
+        scene.muted = true
+        go()
     }
 }
 
@@ -73,6 +82,8 @@ final class TitleScene: GameScene, ObservableObject {
     }
 
     private var flyers: [Flyer] = []
+    /// Set when leaving the title: no more collisions (so no sound or haptics) while it fades out.
+    var muted = false
     private var obstacles: [SKSpriteNode] = []
     private static let maxObstacles = 5
 
@@ -154,6 +165,11 @@ final class TitleScene: GameScene, ObservableObject {
 
     // MARK: tap to drop an obstacle
 
+    override func willMove(from view: SKView) {
+        super.willMove(from: view)
+        muted = true
+    }
+
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard isLaidOut, let p = touches.first?.location(in: self) else { return }
         placeObstacle(at: p)
@@ -198,7 +214,7 @@ final class TitleScene: GameScene, ObservableObject {
     // MARK: collisions
 
     override func update(_ currentTime: TimeInterval) {
-        guard isLaidOut, !obstacles.isEmpty else { return }
+        guard isLaidOut, !muted, view?.window != nil, !obstacles.isEmpty else { return }
         for i in flyers.indices where !flyers[i].knocked {
             let shrimp = flyers[i].node
             guard let hit = obstacles.first(where: { touches(shrimp, $0) }) else { continue }
