@@ -65,6 +65,9 @@ struct MakeView: View {
                 .scaleEffect(min(1, geo.size.height / (226 * s)))
                 .frame(width: geo.size.width, height: geo.size.height)
         }
+        // points in the free corner beside the round plate (the panel's tab row has no room for them;
+        // the top-right is where the sauce bottle goes)
+        .overlay(alignment: .topLeading) { pointsBadge.padding(.top, 6 * s) }
         .overlay(alignment: .bottom) {
             if let t = trying {
                 Text("ためしにつけ中：\(t.name)")
@@ -117,7 +120,6 @@ struct MakeView: View {
             HStack(spacing: 6 * s) {
                 tabs
                 Spacer(minLength: 4)
-                pointsBadge
                 Button {
                     Haptics.light(); Sound.uiTap.play()
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { showAll.toggle() }
