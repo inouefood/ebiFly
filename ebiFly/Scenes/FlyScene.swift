@@ -88,16 +88,16 @@ struct FlyView: View {
         .onReceive(ads.$isRewardedReady) { scene.continueAvailable = $0 }
         #if DEBUG
         // `-autoWatchAd YES`: open the ad as soon as the offer appears, to check it without tapping
-        .onChange(of: scene.crashedInto) { hit in
+        .onChange(of: scene.crashedInto) { _, hit in
             if hit != nil, UserDefaults.standard.bool(forKey: "autoWatchAd") { watchAd() }
         }
         #endif
-        .onChange(of: scene.countdown) { n in
+        .onChange(of: scene.countdown) { _, n in
             // keep the hint up through the countdown and a moment into the flight
             guard n == nil else { return }
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { withAnimation { showHint = false } }
         }
-        .onChange(of: scene.outcome) { outcome in
+        .onChange(of: scene.outcome) { _, outcome in
             guard let outcome else { return }
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
                 game.finishFlight(distance: outcome.distance, hitBy: outcome.hitBy, refuels: outcome.refuels)
@@ -194,13 +194,13 @@ struct FuelGauge: View {
         }
         .scaleEffect(flash ? 1.12 : 1)
         .opacity(low && blink && !flash ? 0.45 : 1)
-        .onChange(of: refuels) { _ in
+        .onChange(of: refuels) {
             withAnimation(.spring(response: 0.2, dampingFraction: 0.5)) { flash = true }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
                 withAnimation(.easeOut(duration: 0.3)) { flash = false }
             }
         }
-        .onChange(of: low) { isLow in
+        .onChange(of: low) { _, isLow in
             if isLow {
                 withAnimation(.easeInOut(duration: 0.25).repeatForever(autoreverses: true)) { blink = true }
             } else {

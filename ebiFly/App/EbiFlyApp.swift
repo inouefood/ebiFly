@@ -17,7 +17,7 @@ struct EbiFlyApp: App {
                 .environmentObject(game)
                 .onAppear { GameCenter.shared.authenticate() }
         }
-        .onChange(of: scenePhase) { phase in
+        .onChange(of: scenePhase) { _, phase in
             if phase == .active { Ads.shared.startIfNeeded() }
         }
     }

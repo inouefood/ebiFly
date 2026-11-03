@@ -57,12 +57,11 @@ final class Ads: NSObject, ObservableObject {
         // `-skipAds YES`: no consent/ATT dialogs and no ads (for taking store screenshots)
         if UserDefaults.standard.bool(forKey: "skipAds") { return }
         #endif
-        ConsentInformation.shared.requestConsentInfoUpdate(with: RequestParameters()) { [weak self] _ in
-            Task { @MainActor in
-                ConsentForm.loadAndPresentIfRequired(from: Self.topViewController()) { _ in
-                    Task { @MainActor in self?.requestTrackingThenStart() }
-                }
-            }
+        Task { [weak self] in
+            // errors are ignored on purpose: ads still start (as non-personalised) if consent can't be updated
+            try? await ConsentInformation.shared.requestConsentInfoUpdate(with: RequestParameters())
+            try? await ConsentForm.loadAndPresentIfRequired(from: Self.topViewController())
+            self?.requestTrackingThenStart()
         }
     }
 

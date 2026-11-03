@@ -95,7 +95,7 @@ struct GameButtonStyle: ButtonStyle {
             .background(Capsule().fill(Palette.ink).offset(y: 5))
             .opacity(isEnabled ? 1 : 0.5)
             .animation(.easeOut(duration: 0.06), value: pressed)
-            .onChange(of: pressed) { down in
+            .onChange(of: pressed) { _, down in
                 if down { Sound.uiTap.play() }
             }
     }
