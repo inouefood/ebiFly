@@ -44,7 +44,7 @@ struct RecordsView: View {
                         collection(TailKind.self)
                         collection(CoatKind.self)
                         collection(SauceKind.self)
-                        Text("「つくる」画面でポイントとこうかんできます。")
+                        Text("ショップでポイントとこうかんできます（「つくる」画面や結果画面から）。")
                             .font(AppFont.body(11 * s)).foregroundStyle(Palette.muted)
                             .padding(.top, 4)
                     }

@@ -1,7 +1,7 @@
 import SwiftUI
 
 enum Screen: Hashable {
-    case title, make, batter, fry, shake, fly, result, records
+    case title, make, batter, fry, shake, fly, result, records, shop
 }
 
 /// Tails, in the order the make screen lists them (cheapest first). Purely cosmetic.
@@ -214,7 +214,8 @@ final class GameModel: ObservableObject {
     private func applyDebugStart() {
         guard let name = UserDefaults.standard.string(forKey: "startScreen") else { return }
         let screens: [String: Screen] = ["title": .title, "make": .make, "batter": .batter, "fry": .fry,
-                                         "shake": .shake, "fly": .fly, "result": .result, "records": .records]
+                                         "shake": .shake, "fly": .fly, "result": .result, "records": .records,
+                                         "shop": .shop]
         guard let s = screens[name] else { return }
         crumbs = 22
         fry = 0.5
@@ -280,6 +281,16 @@ final class GameModel: ObservableObject {
         if let raw = defaults.string(forKey: T.category.selectionKey), set.contains(raw) {
             equippedRaw[T.category] = raw
         }
+    }
+
+    /// Where the shop's "もどる" goes, and which tab it opens on.
+    private(set) var shopReturn: Screen = .make
+    private(set) var shopTab: ItemCategory = .tail
+
+    func openShop(from screen: Screen, tab: ItemCategory = .tail) {
+        shopReturn = screen
+        shopTab = tab
+        go(.shop)
     }
 
     func go(_ s: Screen) {

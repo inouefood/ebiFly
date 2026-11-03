@@ -56,6 +56,7 @@ struct RootView: View {
                            maxDistance: game.maxDistance, coat: game.coat, sauce: game.sauce)
         case .result: ResultView()
         case .records: RecordsView()
+        case .shop: ShopView()
         }
     }
 }

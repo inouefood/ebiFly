@@ -119,10 +119,10 @@ struct ResultView: View {
                 Text("（もってる \(game.points.formatted())pt）").font(AppFont.body(11 * s)).monospacedDigit()
             }
             if game.hasAffordableItem {
-                Button { Ads.shared.retryTapped(skip: askedReview) { game.startRun() } } label: {
+                Button { game.openShop(from: .result) } label: {
                     HStack(spacing: 4) {
-                        Image(systemName: "gift.fill")
-                        Text("こうかんできるアイテムがあるよ！ つくりにいく")
+                        Image(systemName: "bag.fill")
+                        Text("こうかんできるアイテムがあるよ！ ショップへ")
                         Image(systemName: "chevron.right")
                     }
                     .font(AppFont.black(11.5 * s))
