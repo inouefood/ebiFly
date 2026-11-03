@@ -7,6 +7,7 @@ struct EbiFlyApp: App {
 
     init() {
         AppFont.register()
+        Sound.configure()
     }
 
     var body: some Scene {
