@@ -22,7 +22,7 @@ struct BatterView: View {
                 }
                 Spacer()
                 if !scene.started {
-                    Toast(text: "えびを左右にうごかしてパン粉をキャッチ", sub: "金のパン粉は3こぶん。水てきに当たると3こ落ちる")
+                    Toast(text: "えびを左右にうごかしてパン粉をキャッチ", sub: "金のパン粉は3こぶん。水てきに当たると\(BatterScene.waterPenalty)こ落ちる")
                 }
             }
             .padding(.horizontal, 18 * s)
@@ -84,7 +84,9 @@ final class BatterScene: GameScene, ObservableObject {
 
     /// Crumbs at which the batter looks fully coated.
     static let fullCoat = 180
-    private static let waterPenalty = 3
+    /// Crumbs a water drop knocks off. Big enough that ignoring the drops and standing under everything
+    /// loses to dodging them (checked with a rough simulation of the spawns: ~113 vs ~144 crumbs).
+    static let waterPenalty = 10
 
     private let tail: TailKind
     private let bodyCount: Int
@@ -118,7 +120,9 @@ final class BatterScene: GameScene, ObservableObject {
         shrimp = ShrimpNode(tail: tail, count: bodyCount, skin: SegmentSkin.batter(0), unit: 62 * u / ShrimpGeometry.width,
                             coat: coat.overlayName)
         shrimp.setCoatAlpha(0)
-        shrimp.position = CGPoint(x: size.width / 2, y: shrimp.bottomExtent + 120 * u)
+        // head up, tail down (same as in flight)
+        shrimp.zRotation = .pi
+        shrimp.position = CGPoint(x: size.width / 2, y: shrimp.topExtent + 72 * u)
         shrimp.zPosition = 5
         shrimp.startWiggle()
         addChild(shrimp)
@@ -138,7 +142,7 @@ final class BatterScene: GameScene, ObservableObject {
 
     private func spawn(progress t: CGFloat, kind forced: Kind? = nil, x: CGFloat? = nil, lift: CGFloat = 0) {
         let r = Double.random(in: 0..<1)
-        let kind: Kind = forced ?? (r < 0.04 ? .gold : r < 0.04 + 0.18 + 0.12 * Double(t) ? .water : .crumb)
+        let kind: Kind = forced ?? (r < 0.04 ? .gold : r < 0.04 + 0.14 + 0.10 * Double(t) ? .water : .crumb)
         let node: SKSpriteNode
         switch kind {
         case .crumb:
@@ -188,7 +192,7 @@ final class BatterScene: GameScene, ObservableObject {
     override func update(_ currentTime: TimeInterval) {
         guard isLaidOut else { return }
         tilt *= 0.9
-        shrimp.zRotation = tilt * .pi / 180
+        shrimp.zRotation = .pi + tilt * .pi / 180
         let dt = CGFloat(min(0.05, currentTime - (lastTime ?? currentTime)))
         lastTime = currentTime
         guard started, !finished else { return }
@@ -213,10 +217,10 @@ final class BatterScene: GameScene, ObservableObject {
             spawnBurst(progress: progress)
         }
 
-        // the body (not the tail) catches things
+        // the body (not the tail) catches things; the head is at the top
         let p = shrimp.position
         let half = 26 * u
-        let top = p.y + 50 * shrimp.unit, bottom = p.y - shrimp.bottomExtent
+        let top = p.y + shrimp.bottomExtent, bottom = p.y - 50 * shrimp.unit
         var gained = 0, lost = 0
         falling.removeAll { f in
             f.node.position.y -= f.speed * u * dt
@@ -268,7 +272,7 @@ final class BatterScene: GameScene, ObservableObject {
         label.fontName = AppFont.displayName
         label.fontSize = 22 * u
         label.fontColor = color
-        label.position = CGPoint(x: shrimp.position.x + 34 * u, y: shrimp.position.y + 40 * u)
+        label.position = CGPoint(x: shrimp.position.x + 34 * u, y: shrimp.position.y + shrimp.bottomExtent - 20 * u)
         label.zPosition = 20
         addChild(label)
         label.run(.sequence([.group([.moveBy(x: 0, y: 36 * u, duration: 0.5), .fadeOut(withDuration: 0.5)]), .removeFromParent()]))
