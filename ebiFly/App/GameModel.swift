@@ -11,7 +11,6 @@ enum TailKind: String, CaseIterable, Codable, Identifiable {
     case fish, star, maple, ginkgo, shell, butterfly, moon, bolt, flame, snow
     case sun, wings, peacock, rainbow, silver, rocket, crown, gold, gem, galaxy
 
-    var id: String { rawValue }
     var imageName: String { "tail-\(rawValue)" }
 
     var displayName: String {

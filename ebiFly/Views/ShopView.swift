@@ -86,6 +86,7 @@ struct ShopView: View {
                 .padding(.vertical, 8)
                 .padding(.horizontal, 4)
             }
+            .id(tab)
             .frame(height: 186 * s)   // three rows, the rest scrolls (fits an iPhone SE)
             Text("とんだきょり10mごとに1pt。こうかんしたアイテムは「つくる」画面でつけかえられます。")
                 .font(AppFont.body(11 * s))

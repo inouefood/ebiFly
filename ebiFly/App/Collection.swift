@@ -36,7 +36,9 @@ where RawValue == String, AllCases == [Self] {
 }
 
 extension Collectible {
-    var id: String { rawValue }
+    /// Unique across kinds: some raw values are shared (a "gold" tail and a "gold" coat, a "curry" coat
+    /// and a "curry" sauce), and lists that show one kind after another must not mix them up.
+    var id: String { "\(Self.category.rawValue).\(rawValue)" }
     static var free: Self { allCases[0] }
 
     /// Rewarded ads that get this item instead of points. One ad, but only for items the points could

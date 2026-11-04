@@ -92,19 +92,21 @@ struct MakeView: View {
                 .padding(.horizontal, 2)
             }
             .frame(maxHeight: 196 * s)
+            .id(T.category)
         } else {
             ScrollViewReader { proxy in
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: 8 * s) {
-                        ForEach(owned) { chip($0, size: 50 * s).id($0.rawValue) }
+                        ForEach(owned) { chip($0, size: 50 * s).id($0.id) }
                         shopChip(size: 50 * s)
                     }
                     .padding(.vertical, 6)
                     .padding(.horizontal, 2)
                 }
                 .frame(height: 50 * s + 12)
-                .onAppear { proxy.scrollTo(game.equipped(T.self).rawValue, anchor: .center) }
+                .onAppear { proxy.scrollTo(game.equipped(T.self).id, anchor: .center) }
             }
+            .id(T.category)
         }
     }
 
