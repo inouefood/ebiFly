@@ -150,10 +150,23 @@ struct ShopView: View {
     /// The other way to get it: watch rewarded ads, more of them for pricier items (Collectible.adsNeeded).
     /// The other way to get it: one rewarded ad instead of the points. Only for items the points could
     /// pay for (green price tag); ones still out of reach (black tag) need more flying first.
+    /// - green tag (the points could pay): one ad gets it free, the points stay
+    /// - black tag (they can't yet): one ad takes 1,000 pt off, then it's exchanged at that price
+    ///   (still out of reach even then: the button says how many points are missing)
     private func adButton(_ t: ItemTrial) -> some View {
         let affordable = game.points >= t.price
-        let label = !affordable ? "ポイントがたりないと広告ではもらえません"
-            : ads.isShopRewardedReady || watchingAd ? "広告を見てもらう（ポイントはへらない）" : "広告をじゅんび中…"
+        let discountShort = t.discountedPrice - game.points
+        let usable = affordable || discountShort <= 0
+        let label: String
+        if !usable {
+            label = "広告で\(ItemTrial.discountLabel)引き：あと\(discountShort.formatted())pt"
+        } else if !(ads.isShopRewardedReady || watchingAd) {
+            label = "広告をじゅんび中…"
+        } else if affordable {
+            label = "広告を見てもらう（ポイントはへらない）"
+        } else {
+            label = "広告を見て\(ItemTrial.discountLabel)引き（\(t.discountedPrice.formatted())pt）"
+        }
         return Button { watchAd(t) } label: {
             HStack(spacing: 6 * s) {
                 Image(systemName: "play.rectangle.fill")
@@ -161,8 +174,9 @@ struct ShopView: View {
             }
         }
         .buttonStyle(GameButtonStyle(kind: .ghost, wide: true, size: 14))
-        .disabled(!affordable || !ads.isShopRewardedReady || watchingAd)
-        .accessibilityHint(affordable ? "広告を1回見ると「\(t.name)」がもらえます" : "")
+        .disabled(!usable || !ads.isShopRewardedReady || watchingAd)
+        .accessibilityHint(!usable ? "" : affordable ? "広告を1回見ると「\(t.name)」がもらえます"
+                           : "広告を1回見ると\(t.discountedPrice)ポイントで「\(t.name)」とこうかんできます")
     }
 
     private func watched(_ t: ItemTrial) -> Int {
@@ -178,9 +192,11 @@ struct ShopView: View {
         ads.showRewarded(.shop) { earned in
             watchingAd = false
             guard earned else { return }
+            // decide by the points now: free when they could pay, otherwise the discounted exchange
+            let discounted = game.points < t.price
             var done = false
             withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
-                done = countAd(t)
+                done = discounted ? exchangeDiscounted(t) : countAd(t)
                 if done {
                     trying = nil
                     popPlate = true
@@ -191,6 +207,14 @@ struct ShopView: View {
             } else {
                 show("あと\(t.adsNeeded - watched(t))回で「\(t.name)」をゲット！")
             }
+        }
+    }
+
+    private func exchangeDiscounted(_ t: ItemTrial) -> Bool {
+        switch t.category {
+        case .tail: return t.item(TailKind.self).map { game.exchangeWithAdDiscount($0) } ?? false
+        case .coat: return t.item(CoatKind.self).map { game.exchangeWithAdDiscount($0) } ?? false
+        case .sauce: return t.item(SauceKind.self).map { game.exchangeWithAdDiscount($0) } ?? false
         }
     }
 

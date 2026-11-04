@@ -302,6 +302,21 @@ final class GameModel: ObservableObject {
     /// Ads watched so far toward an item.
     func adsWatched<T: Collectible>(_ item: T) -> Int { adProgress[item.adKey, default: 0] }
 
+    /// After a rewarded ad: exchange an item the points couldn't pay for at its discounted price
+    /// (Collectible.adDiscount off). Returns false if even that isn't affordable.
+    @discardableResult
+    func exchangeWithAdDiscount<T: Collectible>(_ item: T) -> Bool {
+        guard !owns(item), points < item.price, points >= item.discountedPrice else { return false }
+        points -= item.discountedPrice
+        owned[T.category, default: []].insert(item.rawValue)
+        adProgress[item.adKey] = nil
+        defaults.set(adProgress, forKey: Key.adProgress)
+        defaults.set(points, forKey: Key.points)
+        defaults.set(owned[T.category, default: []].sorted(), forKey: T.category.ownedKey)
+        equip(item)
+        return true
+    }
+
     /// Count one rewarded ad toward an item; once enough have been watched it is owned and put on.
     /// Returns true when this ad completed it.
     @discardableResult
