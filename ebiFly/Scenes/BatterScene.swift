@@ -25,7 +25,7 @@ struct BatterView: View {
                 }
                 Spacer()
                 if !scene.started {
-                    Toast(text: "えびを左右にうごかして\(coat.crumbLabel)をキャッチ", sub: "金色のは3こぶん。水てきに当たると\(BatterScene.waterPenalty)こ落ちる")
+                    Toast(text: "えびを左右にうごかして\(coat.crumbLabel)をキャッチ", sub: "タップかドラッグで動かせる。金色のは3こぶん。水てきに当たると\(BatterScene.waterPenalty)こ落ちる")
                 }
             }
             .padding(.horizontal, 18 * s)
@@ -90,9 +90,9 @@ final class BatterScene: GameScene, ObservableObject {
 
     /// Crumbs at which the batter looks fully coated.
     static let fullCoat = 180
-    /// Crumbs a water drop knocks off. Big enough that ignoring the drops and standing under everything
-    /// loses to dodging them (checked with a rough simulation of the spawns: ~113 vs ~144 crumbs).
-    static let waterPenalty = 10
+    /// Crumbs a water drop knocks off. Ignoring the drops and standing under everything loses badly to
+    /// dodging them (rough simulation of the spawns: ~30 vs ~80 crumbs; it was ~113 vs ~144 at 10).
+    static let waterPenalty = 30
 
     private let tail: TailKind
     private let bodyCount: Int
@@ -106,6 +106,10 @@ final class BatterScene: GameScene, ObservableObject {
     private var lastBurst: TimeInterval = 0
     private var lastExtra: TimeInterval = 0
     private var tilt: CGFloat = 0
+    /// Where a tap sent the shrimp; it slides there quickly. Dragging takes over from it.
+    private var tapTarget: CGFloat?
+    private var minX: CGFloat { 30 * u }
+    private var maxX: CGFloat { size.width - 30 * u }
 
     init(tail: TailKind, bodyCount: Int, coat: CoatKind) {
         self.tail = tail
@@ -179,7 +183,10 @@ final class BatterScene: GameScene, ObservableObject {
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard !finished, let t = touches.first else { return }
-        lastTouch = t.location(in: self)
+        let p = t.location(in: self)
+        lastTouch = p
+        // a tap moves the shrimp to that spot; if the finger then drags, dragging takes over
+        tapTarget = min(max(p.x, minX), maxX)
         if !started { started = true }
     }
 
@@ -188,7 +195,8 @@ final class BatterScene: GameScene, ObservableObject {
         let p = t.location(in: self)
         let dx = p.x - last.x
         lastTouch = p
-        shrimp.position.x = min(max(shrimp.position.x + dx, 30 * u), size.width - 30 * u)
+        tapTarget = nil
+        shrimp.position.x = min(max(shrimp.position.x + dx, minX), maxX)
         tilt = min(max(tilt - dx * 0.8, -24), 24)
     }
 
@@ -201,6 +209,13 @@ final class BatterScene: GameScene, ObservableObject {
         shrimp.zRotation = .pi + tilt * .pi / 180
         let dt = CGFloat(min(0.05, currentTime - (lastTime ?? currentTime)))
         lastTime = currentTime
+        if let target = tapTarget, !finished {
+            let gap = target - shrimp.position.x
+            let step = min(abs(gap), 1100 * u * dt) * (gap < 0 ? -1 : 1)
+            shrimp.position.x += step
+            tilt = min(max(tilt - step * 0.8, -24), 24)
+            if abs(gap) < 1 { tapTarget = nil }
+        }
         guard started, !finished else { return }
         if startTime == nil { startTime = currentTime }
         let elapsed = currentTime - (startTime ?? currentTime)
