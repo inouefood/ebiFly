@@ -198,3 +198,7 @@ final class ShakeScene: GameScene, ObservableObject {
         Haptics.success()
     }
 }
+
+#if DEBUG
+#Preview("ソース") { PreviewScreen { ShakeView(tail: .crown, bodyCount: 4, fry: 0.5, coat: .sesame, sauce: .mayo) } }
+#endif

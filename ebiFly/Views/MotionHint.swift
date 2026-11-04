@@ -72,3 +72,15 @@ struct MotionHint: View {
             .opacity(lit ? 1 : 0.25)
     }
 }
+
+#if DEBUG
+#Preview("操作の案内") {
+    HStack(spacing: 24) {
+        MotionHint(kind: .shake)
+        MotionHint(kind: .tilt)
+        MotionHint(kind: .drag)
+    }
+    .padding()
+    .background(Color(hex: 0x8FD8FF))
+}
+#endif

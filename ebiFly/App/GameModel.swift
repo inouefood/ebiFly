@@ -226,6 +226,27 @@ final class GameModel: ObservableObject {
         }
         screen = s
     }
+
+    /// Xcode Previews only: a model with its own throwaway defaults and sample values.
+    /// - Parameters:
+    ///   - points: exchange points to start with.
+    ///   - owned: how many items of each kind are owned (cheapest first), to show the make screen and shop filled in.
+    static func preview(points: Int = 1800, owned: Int = 4) -> GameModel {
+        let defaults = UserDefaults(suiteName: "ebiFly.preview")!
+        defaults.removePersistentDomain(forName: "ebiFly.preview")
+        defaults.set(points, forKey: Key.points)
+        defaults.set(Array(TailKind.allCases.prefix(owned).map(\.rawValue)), forKey: ItemCategory.tail.ownedKey)
+        defaults.set(Array(CoatKind.allCases.prefix(owned).map(\.rawValue)), forKey: ItemCategory.coat.ownedKey)
+        defaults.set(Array(SauceKind.allCases.prefix(owned).map(\.rawValue)), forKey: ItemCategory.sauce.ownedKey)
+        defaults.set(1234, forKey: Key.best)
+        let model = GameModel(defaults: defaults)
+        model.crumbs = 120
+        model.fry = 0.5
+        model.shakes = 22
+        model.lastResult = FlightResult(distance: 2300, maxDistance: model.maxDistance, hitBy: .plane, isNewBest: true,
+                                        crumbs: model.crumbs, fry: model.fry, shakes: model.shakes, refuels: 3, points: 230)
+        return model
+    }
     #endif
 
     var fryMultiplier: Double { Scoring.fryVerdict(fry).multiplier }

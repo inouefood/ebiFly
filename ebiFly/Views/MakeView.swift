@@ -153,3 +153,9 @@ struct MakeView: View {
         .accessibilityLabel(label)
     }
 }
+
+#if DEBUG
+#Preview("つくる") { PreviewScreen { MakeView() } }
+
+#Preview("つくる・はじめて") { PreviewScreen(.preview(points: 0, owned: 1)) { MakeView() } }
+#endif

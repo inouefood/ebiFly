@@ -184,3 +184,7 @@ struct ShopView: View {
         }
     }
 }
+
+#if DEBUG
+#Preview("ショップ") { PreviewScreen { ShopView() } }
+#endif

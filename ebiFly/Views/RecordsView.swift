@@ -106,3 +106,7 @@ struct RecordsView: View {
         .overlay(RoundedRectangle(cornerRadius: 18).stroke(Palette.ink, lineWidth: 3))
     }
 }
+
+#if DEBUG
+#Preview("きろく") { PreviewScreen { RecordsView() } }
+#endif

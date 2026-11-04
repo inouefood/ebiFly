@@ -312,3 +312,7 @@ final class TitleScene: GameScene, ObservableObject {
         ]))
     }
 }
+
+#if DEBUG
+#Preview("タイトル") { PreviewScreen { TitleView() } }
+#endif

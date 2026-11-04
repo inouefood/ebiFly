@@ -696,3 +696,11 @@ final class FlyScene: GameScene, ObservableObject {
         }
     }
 }
+
+#if DEBUG
+#Preview("とばす") {
+    PreviewScreen {
+        FlyView(tail: .crown, bodyCount: 4, fry: 0.5, shakes: 22, maxDistance: 2000, coat: .sesame, sauce: .mayo)
+    }
+}
+#endif

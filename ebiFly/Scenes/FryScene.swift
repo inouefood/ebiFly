@@ -182,3 +182,7 @@ final class FryScene: GameScene, ObservableObject {
         shrimp.setSkin(SegmentSkin.fry(value))
     }
 }
+
+#if DEBUG
+#Preview("揚げる") { PreviewScreen { FryView(tail: .crown, bodyCount: 4, coat: .sesame) } }
+#endif

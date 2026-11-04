@@ -288,3 +288,7 @@ final class BatterScene: GameScene, ObservableObject {
         label.run(.sequence([.group([.moveBy(x: 0, y: 36 * u, duration: 0.5), .fadeOut(withDuration: 0.5)]), .removeFromParent()]))
     }
 }
+
+#if DEBUG
+#Preview("衣") { PreviewScreen { BatterView(tail: .crown, bodyCount: 4, coat: .sesame) } }
+#endif

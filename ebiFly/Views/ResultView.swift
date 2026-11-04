@@ -142,3 +142,7 @@ struct ResultView: View {
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Palette.ink, lineWidth: 2.5))
     }
 }
+
+#if DEBUG
+#Preview("結果") { PreviewScreen { ResultView() } }
+#endif
