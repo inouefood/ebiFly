@@ -36,8 +36,21 @@ where RawValue == String, AllCases == [Self] {
 }
 
 extension Collectible {
-    var id: String { rawValue }
+    /// Unique across kinds: some raw values are shared (a "gold" tail and a "gold" coat, a "curry" coat
+    /// and a "curry" sauce), and lists that show one kind after another must not mix them up.
+    var id: String { "\(Self.category.rawValue).\(rawValue)" }
     static var free: Self { allCases[0] }
+
+    /// Rewarded ads that get this item instead of points. One ad, but only for items the points could
+    /// already pay for (see ShopView): the ad saves the points, it doesn't skip ahead of them.
+    var adsNeeded: Int { price == 0 ? 0 : 1 }
+
+    /// For items the points can't pay for yet: one rewarded ad takes this much off the price.
+    static var adDiscount: Int { 1000 }
+    /// What it costs after the ad discount.
+    var discountedPrice: Int { max(0, price - Self.adDiscount) }
+    /// Key for this item's ad progress.
+    var adKey: String { "\(Self.category.rawValue).\(rawValue)" }
 }
 
 extension TailKind: Collectible {

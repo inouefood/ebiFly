@@ -3,9 +3,11 @@ import GoogleMobileAds
 import UIKit
 import UserMessagingPlatform
 
-/// AdMob setup and the two ads in the game:
-/// - rewarded: lets the shrimp keep flying after a crash (once per flight, the player chooses)
+/// AdMob setup and the ads in the game:
+/// - rewarded (continue): lets the shrimp keep flying after a crash (once per flight, the player chooses)
+/// - rewarded (shop): watched toward an item in the shop instead of paying points (the player chooses)
 /// - interstitial: now and then when the player taps "もう一回" on the result screen
+/// Each rewarded placement has its own ad unit (separate reporting in AdMob) and its own preloaded ad.
 ///
 /// Start-up order (Google's recommended flow):
 /// 1. consent form for EEA/UK users (UMP; shows nothing elsewhere)
@@ -17,12 +19,25 @@ final class Ads: NSObject, ObservableObject {
 
     /// Real ad units in release builds; Google's sample units while developing, so test plays never count as real traffic.
     #if DEBUG
-    private static let rewardedUnitID = "ca-app-pub-3940256099942544/1712485313"
     private static let interstitialUnitID = "ca-app-pub-3940256099942544/4411468910"
     #else
-    private static let rewardedUnitID = "ca-app-pub-8522231452310619/8139930531"
     private static let interstitialUnitID = "ca-app-pub-8522231452310619/1132116168"
     #endif
+
+    enum RewardedPlacement: CaseIterable {
+        case continueFlight, shop
+
+        var unitID: String {
+            #if DEBUG
+            return "ca-app-pub-3940256099942544/1712485313"   // Google's sample rewarded unit
+            #else
+            switch self {
+            case .continueFlight: return "ca-app-pub-8522231452310619/8139930531"
+            case .shop: return "ca-app-pub-8522231452310619/6480569784"
+            }
+            #endif
+        }
+    }
 
     /// Interstitial pacing: every `interstitialEvery`-th retry, at least `interstitialGap` seconds apart,
     /// and never right after the player has seen another ad or the review dialog.
@@ -37,12 +52,15 @@ final class Ads: NSObject, ObservableObject {
     #endif
     static let interstitialGap: TimeInterval = 120
 
+    /// The continue-flight ad is loaded (the flight screen offers "continue" only then).
     @Published private(set) var isRewardedReady = false
+    /// The shop ad is loaded.
+    @Published private(set) var isShopRewardedReady = false
 
     private var started = false
-    private var rewarded: RewardedAd?
+    private var rewarded: [RewardedPlacement: RewardedAd] = [:]
+    private var loadingRewarded: Set<RewardedPlacement> = []
     private var interstitial: InterstitialAd?
-    private var loadingRewarded = false
     private var loadingInterstitial = false
     private var onDismiss: (() -> Void)?
     private var earned = false
@@ -83,7 +101,7 @@ final class Ads: NSObject, ObservableObject {
         guard ConsentInformation.shared.canRequestAds else { return }
         MobileAds.shared.start { [weak self] _ in
             Task { @MainActor in
-                self?.loadRewarded()
+                RewardedPlacement.allCases.forEach { self?.loadRewarded($0) }
                 self?.loadInterstitial()
             }
         }
@@ -91,28 +109,34 @@ final class Ads: NSObject, ObservableObject {
 
     // MARK: rewarded
 
-    func loadRewarded() {
-        guard !loadingRewarded, rewarded == nil, ConsentInformation.shared.canRequestAds else { return }
-        loadingRewarded = true
-        RewardedAd.load(with: Self.rewardedUnitID, request: Request()) { [weak self] ad, _ in
+    func loadRewarded(_ placement: RewardedPlacement = .continueFlight) {
+        guard !loadingRewarded.contains(placement), rewarded[placement] == nil,
+              ConsentInformation.shared.canRequestAds else { return }
+        loadingRewarded.insert(placement)
+        RewardedAd.load(with: placement.unitID, request: Request()) { [weak self] ad, _ in
             Task { @MainActor in
                 guard let self else { return }
-                self.loadingRewarded = false
-                self.rewarded = ad
+                self.loadingRewarded.remove(placement)
+                self.rewarded[placement] = ad
                 ad?.fullScreenContentDelegate = self
-                self.isRewardedReady = ad != nil
+                self.updateReady()
             }
         }
     }
 
-    /// Shows the rewarded ad. `completion(true)` only if the player watched it to the reward.
-    func showRewarded(completion: @escaping (Bool) -> Void) {
-        guard let ad = rewarded, let vc = Self.topViewController() else {
+    private func updateReady() {
+        isRewardedReady = rewarded[.continueFlight] != nil
+        isShopRewardedReady = rewarded[.shop] != nil
+    }
+
+    /// Shows a rewarded ad. `completion(true)` only if the player watched it to the reward.
+    func showRewarded(_ placement: RewardedPlacement = .continueFlight, completion: @escaping (Bool) -> Void) {
+        guard let ad = rewarded[placement], let vc = Self.topViewController() else {
             completion(false)
             return
         }
-        rewarded = nil
-        isRewardedReady = false
+        rewarded[placement] = nil
+        updateReady()
         earned = false
         onDismiss = { [weak self] in completion(self?.earned ?? false) }
         lastFullScreenAd = Date()
@@ -158,7 +182,7 @@ final class Ads: NSObject, ObservableObject {
         let done = onDismiss
         onDismiss = nil
         done?()
-        loadRewarded()
+        RewardedPlacement.allCases.forEach { loadRewarded($0) }
         loadInterstitial()
     }
 

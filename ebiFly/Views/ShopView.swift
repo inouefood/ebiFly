@@ -11,6 +11,8 @@ struct ShopView: View {
     @State private var shaking: String?
     @State private var popPlate = false
     @State private var note: String?
+    @State private var watchingAd = false
+    @ObservedObject private var ads = Ads.shared
 
     /// What the plate shows: the item being tried on, otherwise what the player has on.
     private func shown<T: Collectible>(_: T.Type) -> T { trying?.item(T.self) ?? game.equipped() }
@@ -45,7 +47,10 @@ struct ShopView: View {
             }
         }
         .backdrop(.solid(Palette.cream))
-        .onAppear { tab = game.shopTab }
+        .onAppear {
+            tab = game.shopTab
+            ads.loadRewarded(.shop)
+        }
     }
 
     @ViewBuilder private var tryingLabel: some View {
@@ -70,7 +75,8 @@ struct ShopView: View {
                     .font(AppFont.black(11 * s)).foregroundStyle(Palette.muted).monospacedDigit()
             }
             ScrollView {
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6 * s), count: 5), spacing: 10 * s) {
+                // 5 chips of 40 + 4 gaps of 8 fit the panel's ~236 pt inside (46-pt chips didn't, and touched)
+                LazyVGrid(columns: Array(repeating: GridItem(.fixed(40 * s), spacing: 8 * s), count: 5), spacing: 14 * s) {
                     switch tab {
                     case .tail: chips(TailKind.self)
                     case .coat: chips(CoatKind.self)
@@ -80,6 +86,7 @@ struct ShopView: View {
                 .padding(.vertical, 8)
                 .padding(.horizontal, 4)
             }
+            .id(tab)
             .frame(height: 186 * s)   // three rows, the rest scrolls (fits an iPhone SE)
             Text("とんだきょり10mごとに1pt。こうかんしたアイテムは「つくる」画面でつけかえられます。")
                 .font(AppFont.body(11 * s))
@@ -105,7 +112,7 @@ struct ShopView: View {
     private func chips<T: Collectible>(_: T.Type) -> some View {
         ForEach(T.allCases) { item in
             let key = "\(T.category.rawValue).\(item.rawValue)"
-            ItemChip(item: item, size: 46 * s, selected: shown(T.self) == item, inShop: true, shaking: shaking == key) {
+            ItemChip(item: item, size: 40 * s, selected: shown(T.self) == item, inShop: true, shaking: shaking == key) {
                 tap(item, key: key)
             }
         }
@@ -116,6 +123,7 @@ struct ShopView: View {
     @ViewBuilder private var bottomButtons: some View {
         if let t = trying {
             let short = t.price - game.points
+            VStack(spacing: 10 * s) {
             HStack(spacing: 10 * s) {
                 Button("やめる") {
                     Haptics.light()
@@ -131,9 +139,91 @@ struct ShopView: View {
                 .buttonStyle(GameButtonStyle(wide: true, size: 16))
                 .disabled(short > 0)
             }
+            adButton(t)
+            }
         } else {
             Button("もどる") { game.go(game.shopReturn) }
                 .buttonStyle(GameButtonStyle(wide: true))
+        }
+    }
+
+    /// The other way to get it: watch rewarded ads, more of them for pricier items (Collectible.adsNeeded).
+    /// The other way to get it: one rewarded ad instead of the points. Only for items the points could
+    /// pay for (green price tag); ones still out of reach (black tag) need more flying first.
+    /// - green tag (the points could pay): one ad gets it free, the points stay
+    /// - black tag (they can't yet): one ad takes 1,000 pt off, then it's exchanged at that price
+    ///   (still out of reach even then: the button says how many points are missing)
+    private func adButton(_ t: ItemTrial) -> some View {
+        let affordable = game.points >= t.price
+        let discountShort = t.discountedPrice - game.points
+        let usable = affordable || discountShort <= 0
+        let label: String
+        if !usable {
+            label = "広告で\(ItemTrial.discountLabel)引き：あと\(discountShort.formatted())pt"
+        } else if !(ads.isShopRewardedReady || watchingAd) {
+            label = "広告をじゅんび中…"
+        } else if affordable {
+            label = "広告を見てもらう（ポイントはへらない）"
+        } else {
+            label = "広告を見て\(ItemTrial.discountLabel)引き（\(t.discountedPrice.formatted())pt）"
+        }
+        return Button { watchAd(t) } label: {
+            HStack(spacing: 6 * s) {
+                Image(systemName: "play.rectangle.fill")
+                Text(label).lineLimit(1).minimumScaleFactor(0.6)
+            }
+        }
+        .buttonStyle(GameButtonStyle(kind: .ghost, wide: true, size: 14))
+        .disabled(!usable || !ads.isShopRewardedReady || watchingAd)
+        .accessibilityHint(!usable ? "" : affordable ? "広告を1回見ると「\(t.name)」がもらえます"
+                           : "広告を1回見ると\(t.discountedPrice)ポイントで「\(t.name)」とこうかんできます")
+    }
+
+    private func watched(_ t: ItemTrial) -> Int {
+        switch t.category {
+        case .tail: return t.item(TailKind.self).map(game.adsWatched) ?? 0
+        case .coat: return t.item(CoatKind.self).map(game.adsWatched) ?? 0
+        case .sauce: return t.item(SauceKind.self).map(game.adsWatched) ?? 0
+        }
+    }
+
+    private func watchAd(_ t: ItemTrial) {
+        watchingAd = true
+        ads.showRewarded(.shop) { earned in
+            watchingAd = false
+            guard earned else { return }
+            // decide by the points now: free when they could pay, otherwise the discounted exchange
+            let discounted = game.points < t.price
+            var done = false
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.5)) {
+                done = discounted ? exchangeDiscounted(t) : countAd(t)
+                if done {
+                    trying = nil
+                    popPlate = true
+                }
+            }
+            if done {
+                celebrate(t)
+            } else {
+                show("あと\(t.adsNeeded - watched(t))回で「\(t.name)」をゲット！")
+            }
+        }
+    }
+
+    private func exchangeDiscounted(_ t: ItemTrial) -> Bool {
+        switch t.category {
+        case .tail: return t.item(TailKind.self).map { game.exchangeWithAdDiscount($0) } ?? false
+        case .coat: return t.item(CoatKind.self).map { game.exchangeWithAdDiscount($0) } ?? false
+        case .sauce: return t.item(SauceKind.self).map { game.exchangeWithAdDiscount($0) } ?? false
+        }
+    }
+
+    /// Counts a watched ad toward the item; true when that completed it.
+    private func countAd(_ t: ItemTrial) -> Bool {
+        switch t.category {
+        case .tail: return t.item(TailKind.self).map { game.watchedAd(for: $0) } ?? false
+        case .coat: return t.item(CoatKind.self).map { game.watchedAd(for: $0) } ?? false
+        case .sauce: return t.item(SauceKind.self).map { game.watchedAd(for: $0) } ?? false
         }
     }
 
@@ -169,6 +259,10 @@ struct ShopView: View {
             popPlate = true
         }
         guard done else { return }
+        celebrate(t)
+    }
+
+    private func celebrate(_ t: ItemTrial) {
         Haptics.success()
         Sound.stepClear.play()
         show("「\(t.name)」をゲット！")

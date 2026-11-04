@@ -8,15 +8,22 @@ struct ItemTrial: Equatable {
     let raw: String
     let name: String
     let price: Int
+    let adsNeeded: Int
+    let discountedPrice: Int
 
     init<T: Collectible>(_ item: T) {
         category = T.category
         raw = item.rawValue
         name = item.displayName
         price = item.price
+        adsNeeded = item.adsNeeded
+        discountedPrice = item.discountedPrice
     }
 
     func item<T: Collectible>(_: T.Type) -> T? { category == T.category ? T(rawValue: raw) : nil }
+
+    /// "1,000pt" (the ad discount, Collectible.adDiscount).
+    static var discountLabel: String { "\(TailKind.adDiscount.formatted())pt" }
 }
 
 /// The shrimp on its plate, dressed in the given items. Shrinks to fit the height it gets.

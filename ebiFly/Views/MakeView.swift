@@ -83,27 +83,30 @@ struct MakeView: View {
         let owned = T.allCases.filter { game.owns($0) }
         if showAll {
             ScrollView {
-                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6 * s), count: 5), spacing: 8 * s) {
-                    ForEach(owned) { chip($0, size: 46 * s) }
-                    shopChip(size: 46 * s)
+                // 5 chips of 40 + 4 gaps of 8 fit the panel's ~236 pt inside width
+                LazyVGrid(columns: Array(repeating: GridItem(.fixed(40 * s), spacing: 8 * s), count: 5), spacing: 10 * s) {
+                    ForEach(owned) { chip($0, size: 40 * s) }
+                    shopChip(size: 40 * s)
                 }
                 .padding(.vertical, 6)
                 .padding(.horizontal, 2)
             }
             .frame(maxHeight: 196 * s)
+            .id(T.category)
         } else {
             ScrollViewReader { proxy in
                 ScrollView(.horizontal, showsIndicators: false) {
                     LazyHStack(spacing: 8 * s) {
-                        ForEach(owned) { chip($0, size: 50 * s).id($0.rawValue) }
+                        ForEach(owned) { chip($0, size: 50 * s).id($0.id) }
                         shopChip(size: 50 * s)
                     }
                     .padding(.vertical, 6)
                     .padding(.horizontal, 2)
                 }
                 .frame(height: 50 * s + 12)
-                .onAppear { proxy.scrollTo(game.equipped(T.self).rawValue, anchor: .center) }
+                .onAppear { proxy.scrollTo(game.equipped(T.self).id, anchor: .center) }
             }
+            .id(T.category)
         }
     }
 
