@@ -25,7 +25,7 @@ struct BatterView: View {
                 }
                 Spacer()
                 if !scene.started {
-                    Toast(text: "えびを左右にうごかして\(coat.crumbLabel)をキャッチ", sub: "タップかドラッグで動かせる。金色のは3こぶん。水てきに当たると\(BatterScene.waterPenalty)こ落ちる")
+                    Toast(text: "えびを左右にうごかして\(coat.crumbLabel)をキャッチ", sub: "タップかドラッグで上下左右に動かせる。金色のは3こぶん。水てきに当たると\(BatterScene.waterPenalty)こ落ちる")
                 }
             }
             .padding(.horizontal, 18 * s)
@@ -107,9 +107,18 @@ final class BatterScene: GameScene, ObservableObject {
     private var lastExtra: TimeInterval = 0
     private var tilt: CGFloat = 0
     /// Where a tap sent the shrimp; it slides there quickly. Dragging takes over from it.
-    private var tapTarget: CGFloat?
+    private var tapTarget: CGPoint?
     private var minX: CGFloat { 30 * u }
     private var maxX: CGFloat { size.width - 30 * u }
+    // the shrimp's origin is its first body ball; the head is above it, the tail below
+    /// Lowest: the tail tip just above the bottom edge.
+    private var minY: CGFloat { shrimp.topExtent + 16 * u }
+    /// Highest: the head at about 70% of the height, leaving room above to see what's falling.
+    private var maxY: CGFloat { max(minY, size.height * 0.7 - shrimp.bottomExtent) }
+
+    private func clamped(_ p: CGPoint) -> CGPoint {
+        CGPoint(x: min(max(p.x, minX), maxX), y: min(max(p.y, minY), maxY))
+    }
 
     init(tail: TailKind, bodyCount: Int, coat: CoatKind) {
         self.tail = tail
@@ -185,18 +194,18 @@ final class BatterScene: GameScene, ObservableObject {
         guard !finished, let t = touches.first else { return }
         let p = t.location(in: self)
         lastTouch = p
-        // a tap moves the shrimp to that spot; if the finger then drags, dragging takes over
-        tapTarget = min(max(p.x, minX), maxX)
+        // a tap moves the shrimp (the middle of its body) to that spot; if the finger then drags, dragging takes over
+        tapTarget = clamped(CGPoint(x: p.x, y: p.y - shrimp.bottomExtent / 2))
         if !started { started = true }
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard !finished, let t = touches.first, let last = lastTouch else { return }
         let p = t.location(in: self)
-        let dx = p.x - last.x
+        let dx = p.x - last.x, dy = p.y - last.y
         lastTouch = p
         tapTarget = nil
-        shrimp.position.x = min(max(shrimp.position.x + dx, minX), maxX)
+        shrimp.position = clamped(CGPoint(x: shrimp.position.x + dx, y: shrimp.position.y + dy))
         tilt = min(max(tilt - dx * 0.8, -24), 24)
     }
 
@@ -210,11 +219,13 @@ final class BatterScene: GameScene, ObservableObject {
         let dt = CGFloat(min(0.05, currentTime - (lastTime ?? currentTime)))
         lastTime = currentTime
         if let target = tapTarget, !finished {
-            let gap = target - shrimp.position.x
-            let step = min(abs(gap), 1100 * u * dt) * (gap < 0 ? -1 : 1)
-            shrimp.position.x += step
-            tilt = min(max(tilt - step * 0.8, -24), 24)
-            if abs(gap) < 1 { tapTarget = nil }
+            let gx = target.x - shrimp.position.x, gy = target.y - shrimp.position.y
+            let dist = hypot(gx, gy)
+            let k = dist > 0 ? min(1, 1100 * u * dt / dist) : 1
+            shrimp.position.x += gx * k
+            shrimp.position.y += gy * k
+            tilt = min(max(tilt - gx * k * 0.8, -24), 24)
+            if dist < 1 { tapTarget = nil }
         }
         guard started, !finished else { return }
         if startTime == nil { startTime = currentTime }
