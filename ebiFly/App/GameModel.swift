@@ -174,6 +174,8 @@ final class GameModel: ObservableObject {
     /// Raw values of what the player owns / has on, per category.
     @Published private var owned: [ItemCategory: Set<String>] = [:]
     @Published private var equippedRaw: [ItemCategory: String] = [:]
+    /// Rewarded ads watched so far toward each item not owned yet (key: Collectible.adKey).
+    @Published private var adProgress: [String: Int] = [:]
     /// Set after a run when the review dialog should be shown on the result screen.
     @Published var wantsReview = false
     private var reviewPrompt: ReviewPrompt
@@ -184,6 +186,7 @@ final class GameModel: ObservableObject {
         static let history = "history"
         static let bodyCount = "bodyCount"
         static let points = "points"
+        static let adProgress = "adProgress"
     }
 
     init(defaults: UserDefaults = .standard) {
@@ -202,6 +205,7 @@ final class GameModel: ObservableObject {
         load(TailKind.self)
         load(CoatKind.self)
         load(SauceKind.self)
+        adProgress = defaults.dictionary(forKey: Key.adProgress) as? [String: Int] ?? [:]
         let n = defaults.integer(forKey: Key.bodyCount)
         if Scoring.bodyRange.contains(n) { bodyCount = n }
         #if DEBUG
@@ -288,10 +292,34 @@ final class GameModel: ObservableObject {
         guard !owns(item), points >= item.price else { return false }
         points -= item.price
         owned[T.category, default: []].insert(item.rawValue)
+        adProgress[item.adKey] = nil   // bought with points: any ads watched toward it no longer count
+        defaults.set(adProgress, forKey: Key.adProgress)
         defaults.set(points, forKey: Key.points)
         defaults.set(owned[T.category, default: []].sorted(), forKey: T.category.ownedKey)
         equip(item)
         return true
+    }
+
+    /// Ads watched so far toward an item.
+    func adsWatched<T: Collectible>(_ item: T) -> Int { adProgress[item.adKey, default: 0] }
+
+    /// Count one rewarded ad toward an item; once enough have been watched it is owned and put on.
+    /// Returns true when this ad completed it.
+    @discardableResult
+    func watchedAd<T: Collectible>(for item: T) -> Bool {
+        // only for items the points could already pay for (the ad saves the points)
+        guard !owns(item), points >= item.price else { return false }
+        let n = adsWatched(item) + 1
+        if n >= item.adsNeeded {
+            adProgress[item.adKey] = nil
+            owned[T.category, default: []].insert(item.rawValue)
+            defaults.set(owned[T.category, default: []].sorted(), forKey: T.category.ownedKey)
+            equip(item)
+        } else {
+            adProgress[item.adKey] = n
+        }
+        defaults.set(adProgress, forKey: Key.adProgress)
+        return n >= item.adsNeeded
     }
 
     private func load<T: Collectible>(_: T.Type) {

@@ -8,12 +8,14 @@ struct ItemTrial: Equatable {
     let raw: String
     let name: String
     let price: Int
+    let adsNeeded: Int
 
     init<T: Collectible>(_ item: T) {
         category = T.category
         raw = item.rawValue
         name = item.displayName
         price = item.price
+        adsNeeded = item.adsNeeded
     }
 
     func item<T: Collectible>(_: T.Type) -> T? { category == T.category ? T(rawValue: raw) : nil }

@@ -38,6 +38,12 @@ where RawValue == String, AllCases == [Self] {
 extension Collectible {
     var id: String { rawValue }
     static var free: Self { allCases[0] }
+
+    /// Rewarded ads that get this item instead of points. One ad, but only for items the points could
+    /// already pay for (see ShopView): the ad saves the points, it doesn't skip ahead of them.
+    var adsNeeded: Int { price == 0 ? 0 : 1 }
+    /// Key for this item's ad progress.
+    var adKey: String { "\(Self.category.rawValue).\(rawValue)" }
 }
 
 extension TailKind: Collectible {
