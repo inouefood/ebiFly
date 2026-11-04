@@ -9,17 +9,25 @@ struct FlyView: View {
     @State private var showingAd = false
     @ObservedObject private var ads = Ads.shared
     private let shakes: Int
+    private let sauce: SauceKind
 
-    init(tail: TailKind, bodyCount: Int, fry: Double, shakes: Int, maxDistance: Int) {
+    init(tail: TailKind, bodyCount: Int, fry: Double, shakes: Int, maxDistance: Int, coat: CoatKind, sauce: SauceKind) {
         _scene = StateObject(wrappedValue: FlyScene(tail: tail, bodyCount: bodyCount, fry: fry,
-                                                    climbSpeed: Scoring.climbSpeed(shakes: shakes), maxDistance: maxDistance))
+                                                    climbSpeed: Scoring.climbSpeed(shakes: shakes), maxDistance: maxDistance,
+                                                    coat: coat, sauce: sauce))
         self.shakes = shakes
+        self.sauce = sauce
     }
 
     var body: some View {
         ZStack {
             SpriteView(scene: scene, options: [.ignoresSiblingOrder]).ignoresSafeArea()
             VStack(spacing: 0) {
+                if scene.countdown != nil {
+                    StepsBar(current: 4)
+                        .padding(.top, 8)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                }
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
                     OutlinedText(text: scene.altitude.formatted(), font: AppFont.display(44 * s), fill: .white, width: 2.5)
                     OutlinedText(text: "m", font: AppFont.display(22 * s), fill: .white, width: 2)
@@ -27,13 +35,16 @@ struct FlyView: View {
                 .padding(.top, 12 * s)
                 FuelGauge(level: scene.fuel, refuels: scene.refuelCount)
                     .padding(.top, 4)
-                Pill(label: "ソース \(Scoring.sauceLabel(shakes: shakes))", value: "\(Int(scene.climbSpeed))", unit: "m/s")
+                Pill(label: "\(sauce.shortName) \(Scoring.sauceLabel(shakes: shakes))", value: "\(Int(scene.climbSpeed))", unit: "m/s")
                     .padding(.top, 2)
                 Spacer()
                 if showHint {
-                    Toast(text: scene.usesTilt ? "iPhoneをかたむけてよけよう" : "左右にドラッグしてよけよう",
-                          sub: "ソースのボトルで燃料ほきゅう。ぶつかったらそこまで")
-                        .transition(.opacity)
+                    VStack(spacing: 8 * s) {
+                        MotionHint(kind: scene.usesTilt ? .tilt : .drag)
+                        Toast(text: scene.usesTilt ? "iPhoneをかたむけてよけよう" : "左右にドラッグしてよけよう",
+                              sub: "\(sauce.shortName)のボトルで燃料ほきゅう。ぶつかったらそこまで")
+                    }
+                    .transition(.opacity)
                 }
                 Text(scene.zone)
                     .font(AppFont.black(13 * s))
@@ -44,6 +55,17 @@ struct FlyView: View {
             .padding(.horizontal, 18 * s)
             .padding(.bottom, 22 * s)
             .allowsHitTesting(false)
+
+            if let n = scene.countdown {
+                OutlinedText(text: n == 0 ? "発射！" : "\(n)", font: AppFont.display((n == 0 ? 56 : 84) * s),
+                             fill: n == 0 ? Palette.accent : .white, width: 3, shadow: 4)
+                    .id(n)
+                    .transition(.asymmetric(insertion: .scale(scale: 2.2).combined(with: .opacity),
+                                            removal: .scale(scale: 0.6).combined(with: .opacity)))
+                    .offset(y: -40 * s)
+                    .allowsHitTesting(false)
+                    .accessibilityLabel(n == 0 ? "発射" : "\(n)")
+            }
 
             if let hit = scene.crashedInto {
                 continueOffer(hit)
@@ -63,19 +85,22 @@ struct FlyView: View {
             }
         }
         .backdrop(.gradient(top: Color(scene.skyTop), bottom: Color(scene.skyBottom)))
+        .animation(.spring(response: 0.3, dampingFraction: 0.6), value: scene.countdown)
         .animation(.spring(response: 0.35, dampingFraction: 0.65), value: scene.outcome)
         .animation(.spring(response: 0.35, dampingFraction: 0.65), value: scene.crashedInto)
         .onReceive(ads.$isRewardedReady) { scene.continueAvailable = $0 }
         #if DEBUG
         // `-autoWatchAd YES`: open the ad as soon as the offer appears, to check it without tapping
-        .onChange(of: scene.crashedInto) { hit in
+        .onChange(of: scene.crashedInto) { _, hit in
             if hit != nil, UserDefaults.standard.bool(forKey: "autoWatchAd") { watchAd() }
         }
         #endif
-        .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.4) { withAnimation { showHint = false } }
+        .onChange(of: scene.countdown) { _, n in
+            // keep the hint up through the countdown and a moment into the flight
+            guard n == nil else { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.2) { withAnimation { showHint = false } }
         }
-        .onChange(of: scene.outcome) { outcome in
+        .onChange(of: scene.outcome) { _, outcome in
             guard let outcome else { return }
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.4) {
                 game.finishFlight(distance: outcome.distance, hitBy: outcome.hitBy, refuels: outcome.refuels)
@@ -172,13 +197,13 @@ struct FuelGauge: View {
         }
         .scaleEffect(flash ? 1.12 : 1)
         .opacity(low && blink && !flash ? 0.45 : 1)
-        .onChange(of: refuels) { _ in
+        .onChange(of: refuels) {
             withAnimation(.spring(response: 0.2, dampingFraction: 0.5)) { flash = true }
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
                 withAnimation(.easeOut(duration: 0.3)) { flash = false }
             }
         }
-        .onChange(of: low) { isLow in
+        .onChange(of: low) { _, isLow in
             if isLow {
                 withAnimation(.easeInOut(duration: 0.25).repeatForever(autoreverses: true)) { blink = true }
             } else {
@@ -197,6 +222,10 @@ final class FlyScene: GameScene, ObservableObject {
     @Published private(set) var outcome: FlightOutcome?
     /// Set when the shrimp hit something and a "continue with an ad" offer is open; the flight is frozen meanwhile.
     @Published private(set) var crashedInto: Obstacle?
+    /// 3, 2, 1, then 0 ("発射！") before the flight starts; nil once it is under way.
+    @Published private(set) var countdown: Int? = 3
+    /// The shrimp waits on the pot until the countdown reaches 0.
+    private var holding = true
     /// Whether a rewarded ad is loaded (kept in sync by the view).
     var continueAvailable = false
     private var continueUsed = false
@@ -216,6 +245,8 @@ final class FlyScene: GameScene, ObservableObject {
     private let tail: TailKind
     private let bodyCount: Int
     private let fry: Double
+    private let coat: CoatKind
+    private let sauce: SauceKind
     private let motion = MotionService()
 
     private struct Item {
@@ -273,7 +304,10 @@ final class FlyScene: GameScene, ObservableObject {
         (0, "キッチン"), (200, "鳥のエリア"), (1500, "飛行機のエリア"), (3400, "いん石のエリア"), (5500, "宇宙"),
     ]
 
-    init(tail: TailKind, bodyCount: Int, fry: Double, climbSpeed: Double, maxDistance: Int) {
+    init(tail: TailKind, bodyCount: Int, fry: Double, climbSpeed: Double, maxDistance: Int,
+         coat: CoatKind = .plain, sauce: SauceKind = .sauce) {
+        self.coat = coat
+        self.sauce = sauce
         self.climbSpeed = CGFloat(climbSpeed)
         self.tail = tail
         self.bodyCount = bodyCount
@@ -293,12 +327,13 @@ final class FlyScene: GameScene, ObservableObject {
         updateSky(0)
 
         flyerX = size.width / 2
-        flyer = ShrimpNode(tail: tail, count: bodyCount, skin: SegmentSkin.fry(fry), unit: 62 * u / ShrimpGeometry.width)
+        flyer = ShrimpNode(tail: tail, count: bodyCount, skin: SegmentSkin.fry(fry), unit: 62 * u / ShrimpGeometry.width,
+                            coat: coat.overlayName)
         flyer.zRotation = .pi  // head up, tail down
         flyer.zPosition = 10
         flyer.startWiggle()
         addChild(flyer)
-        thrust = ThrustNode(unit: u, power: climbSpeed / 460, target: self)
+        thrust = ThrustNode(unit: u, power: climbSpeed / 460, target: self, colors: sauce.jetColors)
         thrust.position = flyer.tailTip
         thrust.zPosition = -1   // behind the tail fan
         flyer.addChild(thrust)
@@ -317,6 +352,29 @@ final class FlyScene: GameScene, ObservableObject {
         buildWorld()
         motion.startTilt()
         place(at: 0)
+        startCountdown()
+    }
+
+    private func startCountdown() {
+        var steps: [SKAction] = []
+        for n in [3, 2, 1] {
+            steps.append(.run { [weak self] in
+                self?.countdown = n
+                Haptics.light()
+                // the "ready" sound builds up over the last second into the launch
+                if n == 1 { Sound.launchReady.play() }
+            })
+            steps.append(.wait(forDuration: 0.65))
+        }
+        steps.append(.run { [weak self] in
+            self?.countdown = 0
+            self?.holding = false
+            Sound.launch.play()
+        })
+        steps.append(.wait(forDuration: 0.7))
+        steps.append(.run { [weak self] in self?.countdown = nil })
+        // a beat after the screen fades in, so "3" isn't missed
+        run(.sequence([.wait(forDuration: 0.4)] + steps))
     }
 
     override func willMove(from view: SKView) {
@@ -362,7 +420,7 @@ final class FlyScene: GameScene, ObservableObject {
             nextObstacle += .random(in: 230...390)
         }
         while nextFuel < top {
-            var item = addItem("fuel", altitude: nextFuel, x: .random(in: 20...230), width: 50, z: 6)
+            var item = addItem(sauce.fuelName, altitude: nextFuel, x: .random(in: 20...230), width: 50, z: 6)
             item.isFuel = true
             item.node.run(.repeatForever(.sequence([.scale(to: 1.15, duration: 0.35), .scale(to: 1, duration: 0.35)])))
             items.append(item)
@@ -418,12 +476,23 @@ final class FlyScene: GameScene, ObservableObject {
         line.run(.sequence([.moveBy(x: 0, y: -dist, duration: TimeInterval(dist / v)), .removeFromParent()]))
     }
 
+    /// Steering is by tilting only. Debug builds on a device without motion sensors (the simulator)
+    /// steer by dragging instead so the flight can still be played.
+    private var allowsDrag: Bool {
+        #if DEBUG
+        return !usesTilt
+        #else
+        return false
+        #endif
+    }
+
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard allowsDrag else { return }
         lastTouch = touches.first?.location(in: self)
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard outcome == nil, let p = touches.first?.location(in: self), let last = lastTouch else { return }
+        guard allowsDrag, outcome == nil, !holding, let p = touches.first?.location(in: self), let last = lastTouch else { return }
         let dx = p.x - last.x
         lastTouch = p
         flyerX = min(max(flyerX + dx, 20 * u), size.width - 20 * u)
@@ -434,7 +503,7 @@ final class FlyScene: GameScene, ObservableObject {
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) { lastTouch = nil }
 
     override func update(_ currentTime: TimeInterval) {
-        guard isLaidOut, outcome == nil else { return }
+        guard isLaidOut, outcome == nil, !holding else { return }
         guard crashedInto == nil else {
             lastTime = nil   // no big time step when the flight resumes
             return
@@ -509,6 +578,7 @@ final class FlyScene: GameScene, ObservableObject {
                 crashedInto = hit
                 thrust.setIntensity(0)
                 Haptics.heavy()
+                Sound.collision.play()
             } else {
                 end(hitBy: hit)
             }
@@ -532,6 +602,7 @@ final class FlyScene: GameScene, ObservableObject {
             refuels += 1
             refuelCount = refuels
             Haptics.success()
+            Sound.fuel.play(minInterval: 0.1)
             refuelPopup(at: item.node.position)
             thrust.burst()
             item.node.removeAllActions()
@@ -605,19 +676,31 @@ final class FlyScene: GameScene, ObservableObject {
     func giveUp() {
         guard let hit = crashedInto else { return }
         crashedInto = nil
-        end(hitBy: hit)
+        end(hitBy: hit, crashSoundPlayed: true)
     }
 
-    private func end(hitBy: Obstacle?) {
+    /// `crashSoundPlayed`: the crash already made its sound when the continue offer opened.
+    private func end(hitBy: Obstacle?, crashSoundPlayed: Bool = false) {
         outcome = FlightOutcome(distance: Int(camera0), hitBy: hitBy, refuels: refuels)
         thrust.setIntensity(0)
         motion.stop()
         if hitBy != nil {
             Haptics.heavy()
+            if !crashSoundPlayed { Sound.collision.play() }
+            run(.sequence([.wait(forDuration: 0.35), .run { Sound.gameOver.play() }]))
             let s = SKAction.sequence([.moveBy(x: -6, y: 0, duration: 0.03), .moveBy(x: 12, y: 0, duration: 0.06), .moveBy(x: -6, y: 0, duration: 0.03)])
             flyer.run(.repeat(s, count: 4))
         } else {
             Haptics.success()
+            Sound.gameOver.play()
         }
     }
 }
+
+#if DEBUG
+#Preview("とばす") {
+    PreviewScreen {
+        FlyView(tail: .crown, bodyCount: 4, fry: 0.5, shakes: 22, maxDistance: 2000, coat: .sesame, sauce: .mayo)
+    }
+}
+#endif

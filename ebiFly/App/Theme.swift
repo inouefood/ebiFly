@@ -95,6 +95,9 @@ struct GameButtonStyle: ButtonStyle {
             .background(Capsule().fill(Palette.ink).offset(y: 5))
             .opacity(isEnabled ? 1 : 0.5)
             .animation(.easeOut(duration: 0.06), value: pressed)
+            .onChange(of: pressed) { _, down in
+                if down { Sound.uiTap.play() }
+            }
     }
 }
 
@@ -132,29 +135,68 @@ struct StepsBar: View {
     let current: Int
     var dark = false
     @Environment(\.uiScale) private var s
+    /// Starts one step behind and advances on appear, so moving on to the next step is visible.
+    @State private var shown: Int?
+    @State private var pop = false
+
+    private var step: Int { shown ?? max(current - 1, 0) }
 
     var body: some View {
         HStack(spacing: 4 * s) {
             ForEach(Self.names.indices, id: \.self) { i in
                 Text(Self.names[i])
                     .font(AppFont.black(10 * s))
+                    .lineLimit(1)
+                    .fixedSize()
                     .padding(.horizontal, 7 * s)
                     .padding(.vertical, 1)
                     .foregroundStyle(foreground(i))
                     .background(Capsule().fill(background(i)))
+                    .overlay(Capsule().stroke(Palette.accent, lineWidth: 2).opacity(i == step && pop ? 1 : 0))
+                    // the check is a badge on top so finished steps don't get wider and push the bar onto two lines
+                    .overlay(alignment: .topTrailing) {
+                        if i < step {
+                            Image(systemName: "checkmark")
+                                .font(.system(size: 6 * s, weight: .black))
+                                .foregroundStyle(.white)
+                                .frame(width: 11 * s, height: 11 * s)
+                                .background(Circle().fill(Palette.green))
+                                .overlay(Circle().stroke(Palette.ink, lineWidth: 1.2))
+                                .offset(x: 4 * s, y: -5 * s)
+                                .transition(.scale.combined(with: .opacity))
+                        }
+                    }
+                .scaleEffect(i == step && pop ? 1.3 : 1)
+                .zIndex(i == step ? 1 : 0)
             }
         }
+        .onAppear {
+            guard current > 0, shown == nil else { shown = current; return }
+            // wait for the screen cross-fade, then move the highlight over with a pop
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.55)) {
+                    shown = current
+                    pop = true
+                }
+                Haptics.light()
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) { pop = false }
+                }
+            }
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("ステップ \(current + 1)/\(Self.names.count) \(Self.names[current])")
     }
 
     private func background(_ i: Int) -> Color {
-        if i == current { return dark ? .white : Palette.ink }
-        if i < current { return Palette.gold }
+        if i == step { return dark ? .white : Palette.ink }
+        if i < step { return Palette.gold }
         return dark ? Color.white.opacity(0.15) : Palette.ink.opacity(0.12)
     }
 
     private func foreground(_ i: Int) -> Color {
-        if i == current { return dark ? Color(hex: 0x2F4A4F) : .white }
-        if i < current { return Palette.ink }
+        if i == step { return dark ? Color(hex: 0x2F4A4F) : .white }
+        if i < step { return Palette.ink }
         return dark ? Color.white.opacity(0.7) : Palette.ink.opacity(0.6)
     }
 }

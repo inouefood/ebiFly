@@ -6,8 +6,11 @@ struct ShakeView: View {
     @Environment(\.uiScale) private var s
     @StateObject private var scene: ShakeScene
 
-    init(tail: TailKind, bodyCount: Int, fry: Double) {
-        _scene = StateObject(wrappedValue: ShakeScene(tail: tail, bodyCount: bodyCount, fry: fry))
+    private let sauce: SauceKind
+
+    init(tail: TailKind, bodyCount: Int, fry: Double, coat: CoatKind, sauce: SauceKind) {
+        _scene = StateObject(wrappedValue: ShakeScene(tail: tail, bodyCount: bodyCount, fry: fry, coat: coat, sauce: sauce))
+        self.sauce = sauce
     }
 
     var body: some View {
@@ -15,8 +18,17 @@ struct ShakeView: View {
             SpriteView(scene: scene, options: [.ignoresSiblingOrder]).ignoresSafeArea()
             VStack(spacing: 0) {
                 StepsBar(current: 3)
-                Text("ソースをかける").font(AppFont.display(24 * s)).foregroundStyle(Palette.ink).padding(.top, 4)
+                Text("\(sauce.displayName)をかける").font(AppFont.display(24 * s)).foregroundStyle(Palette.ink).padding(.top, 4)
+                Pill(label: "のこり", value: "\(scene.timeLeft)", unit: "秒")
+                    .padding(.top, 6 * s)
+                    .opacity(scene.started ? 1 : 0.5)
                 Spacer()
+                // once shaking, a smaller hand keeps going in the free space between the shrimp and the gauge
+                if scene.started && !scene.finished {
+                    MotionHint(kind: .shake, height: 96)
+                        .padding(.bottom, 6 * s)
+                        .transition(.opacity)
+                }
                 gauge
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
                     Text("シェイク").font(AppFont.black(13 * s))
@@ -27,11 +39,11 @@ struct ShakeView: View {
                 .padding(.vertical, 8 * s)
                 Group {
                     if scene.finished {
-                        OutlinedText(text: "発射！", font: AppFont.display(30 * s), fill: Palette.accent, width: 2.5)
+                        Color.clear
                     } else if scene.started {
                         Toast(text: "もっとふって！")
                     } else {
-                        Toast(text: "iPhoneをふってソースをかけよう", sub: "ふった回数で飛ぶ高さと上昇スピードがアップ（画面タップでもOK）")
+                        Toast(text: "iPhoneをふって\(sauce.displayName)をかけよう", sub: "ふった回数で飛ぶ高さと上昇スピードがアップ")
                     }
                 }
                 .frame(minHeight: 56 * s)
@@ -40,12 +52,25 @@ struct ShakeView: View {
             .padding(.top, 8)
             .padding(.bottom, 20 * s)
             .allowsHitTesting(false)
+
+            // before the first shake: the hand shown large in the middle, as the "how to" for this step
+            if !scene.started {
+                MotionHint(kind: .shake, height: 150)
+                    .offset(y: -30 * s)
+                .allowsHitTesting(false)
+                .transition(.scale(scale: 0.6).combined(with: .opacity))
+            }
+
+            if scene.finished {
+                FinishOverlay(lead: "シェイク", big: "\(scene.shakes)回",
+                              trail: "\(sauce.shortName)「\(Scoring.sauceLabel(shakes: scene.shakes))」", button: "とばす！") {
+                    game.finishShake(scene.shakes)
+                }
+            }
         }
         .backdrop(.counter(wall: Color(hex: 0xFFE0D2), wallLow: Color(UIColor(hex: 0xFFE0D2).mixed(with: .white, 0.5)), counter: Color(hex: 0xE8C79A), edge: 0.52))
-        .onChange(of: scene.finished) { done in
-            guard done else { return }
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { game.finishShake(scene.shakes) }
-        }
+        // the big "how to" hand shrinks away on the first shake, the small one fades in
+        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: scene.started)
     }
 
     private var gauge: some View {
@@ -68,20 +93,25 @@ struct ShakeView: View {
 
 final class ShakeScene: GameScene, ObservableObject {
     @Published private(set) var shakes = 0
+    @Published private(set) var timeLeft = Int(Scoring.shakeSeconds)
     @Published private(set) var started = false
     @Published private(set) var finished = false
 
     private let tail: TailKind
     private let bodyCount: Int
     private let fry: Double
+    private let coat: CoatKind
+    private let sauce: SauceKind
     private let motion = MotionService()
     private var bottle: SKSpriteNode!
     private var shrimp: ShrimpNode!
 
-    init(tail: TailKind, bodyCount: Int, fry: Double) {
+    init(tail: TailKind, bodyCount: Int, fry: Double, coat: CoatKind, sauce: SauceKind) {
         self.tail = tail
         self.bodyCount = bodyCount
         self.fry = fry
+        self.coat = coat
+        self.sauce = sauce
         super.init()
     }
 
@@ -100,13 +130,14 @@ final class ShakeScene: GameScene, ObservableObject {
         edge.zPosition = -9
         addChild(edge)
 
-        shrimp = ShrimpNode(tail: tail, count: bodyCount, skin: SegmentSkin.fry(fry), unit: 54 * u / ShrimpGeometry.width)
+        shrimp = ShrimpNode(tail: tail, count: bodyCount, skin: SegmentSkin.fry(fry), unit: 54 * u / ShrimpGeometry.width,
+                            coat: coat.overlayName)
         shrimp.zRotation = -.pi / 2
         shrimp.position = CGPoint(x: size.width / 2 - shrimp.centerOffset, y: size.height * 0.42)
         shrimp.zPosition = 2
         addChild(shrimp)
 
-        bottle = SKSpriteNode(asset: "sauce", width: 76 * u)
+        bottle = SKSpriteNode(asset: sauce.bottleName, width: 76 * u)
         bottle.position = CGPoint(x: size.width * 0.6, y: size.height * 0.66)
         bottle.zRotation = 150 * .pi / 180
         bottle.zPosition = 5
@@ -120,18 +151,28 @@ final class ShakeScene: GameScene, ObservableObject {
         motion.stop()
     }
 
+    /// Shaking is the only way to pour. Debug builds on a device without motion sensors (the simulator)
+    /// let a tap stand in for a shake so the step can still be played through.
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        registerShake()
+        #if DEBUG
+        if !motion.isAvailable { registerShake() }
+        #endif
     }
 
     private func registerShake() {
         guard isLaidOut, !finished else { return }
         if !started {
             started = true
+            let tick = SKAction.sequence([.wait(forDuration: 1), .run { [weak self] in
+                guard let self else { return }
+                self.timeLeft = max(0, self.timeLeft - 1)
+            }])
+            run(.repeat(tick, count: Int(Scoring.shakeSeconds)))
             run(.sequence([.wait(forDuration: Scoring.shakeSeconds), .run { [weak self] in self?.finish() }]))
         }
         shakes += 1
         Haptics.light()
+        Sound.sauceShake.play(minInterval: 0.05)
 
         bottle.removeAction(forKey: "shake")
         let base = 150 * CGFloat.pi / 180
@@ -140,18 +181,24 @@ final class ShakeScene: GameScene, ObservableObject {
         // spout is the top of the bottle, rotated with it
         let h = bottle.size.height / 2
         let spout = CGPoint(x: bottle.position.x - sin(bottle.zRotation) * h * 0.9, y: bottle.position.y + cos(bottle.zRotation) * h * 0.9)
-        let drop = SKSpriteNode(asset: "sauce-drop", width: 14 * u)
+        let drop = SKSpriteNode(asset: sauce.dropName, width: 14 * u)
         drop.position = CGPoint(x: spout.x + .random(in: -8...8) * u, y: spout.y)
         drop.zPosition = 4
         addChild(drop)
         let fall = SKAction.moveTo(y: shrimp.position.y + 10 * u, duration: 0.45)
         fall.timingMode = .easeIn
-        drop.run(.sequence([fall, .group([.scaleX(to: 1.6, y: 0.4, duration: 0.15), .fadeOut(withDuration: 0.3)]), .removeFromParent()]))
+        drop.run(.sequence([fall, .run { Sound.sauceDrop.play(minInterval: 0.08) },
+                            .group([.scaleX(to: 1.6, y: 0.4, duration: 0.15), .fadeOut(withDuration: 0.3)]), .removeFromParent()]))
     }
 
     private func finish() {
+        timeLeft = 0
         finished = true
         motion.stop()
-        Haptics.heavy()
+        Haptics.success()
     }
 }
+
+#if DEBUG
+#Preview("ソース") { PreviewScreen { ShakeView(tail: .crown, bodyCount: 4, fry: 0.5, coat: .sesame, sauce: .mayo) } }
+#endif

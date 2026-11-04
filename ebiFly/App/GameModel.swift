@@ -1,23 +1,80 @@
 import SwiftUI
 
 enum Screen: Hashable {
-    case title, make, batter, fry, shake, fly, result, records
+    case title, make, batter, fry, shake, fly, result, records, shop
 }
 
+/// Tails, in the order the make screen lists them (cheapest first). Purely cosmetic.
+/// Raw values are persisted and match the `tail-<rawValue>` image assets (Design/art.py, Design/tails.py).
 enum TailKind: String, CaseIterable, Codable, Identifiable {
-    case normal, heart, crown
+    case normal, heart, blue, purple, stripe, dots, leaf, clover, sakura, ribbon
+    case fish, star, maple, ginkgo, shell, butterfly, moon, bolt, flame, snow
+    case sun, wings, peacock, rainbow, silver, rocket, crown, gold, gem, galaxy
 
     var id: String { rawValue }
+    var imageName: String { "tail-\(rawValue)" }
+
     var displayName: String {
         switch self {
         case .normal: return "ノーマル"
         case .heart: return "ハート"
+        case .blue: return "あお"
+        case .purple: return "むらさき"
+        case .stripe: return "しましま"
+        case .dots: return "みずたま"
+        case .leaf: return "はっぱ"
+        case .clover: return "よつば"
+        case .sakura: return "さくら"
+        case .ribbon: return "リボン"
+        case .fish: return "さかな"
+        case .star: return "ほし"
+        case .maple: return "もみじ"
+        case .ginkgo: return "いちょう"
+        case .shell: return "かいがら"
+        case .butterfly: return "ちょうちょ"
+        case .moon: return "みかづき"
+        case .bolt: return "いなずま"
+        case .flame: return "ほのお"
+        case .snow: return "ゆき"
+        case .sun: return "たいよう"
+        case .wings: return "つばさ"
+        case .peacock: return "くじゃく"
+        case .rainbow: return "にじいろ"
+        case .silver: return "ぎん"
+        case .rocket: return "ロケット"
         case .crown: return "おうかん"
+        case .gold: return "きん"
+        case .gem: return "ほうせき"
+        case .galaxy: return "ぎんが"
         }
     }
-    /// Best distance needed to unlock this tail.
-    var unlockDistance: Int { self == .crown ? 3000 : 0 }
-    var imageName: String { "tail-\(rawValue)" }
+
+    /// Points needed to exchange for this tail. 0 = owned from the start.
+    var price: Int {
+        switch self {
+        case .normal: return 0
+        case .heart, .blue, .purple: return 100
+        case .stripe, .dots: return 150
+        case .leaf, .clover: return 200
+        case .sakura, .ribbon: return 300
+        case .fish, .star: return 400
+        case .maple, .ginkgo: return 500
+        case .shell: return 600
+        case .butterfly: return 700
+        case .moon: return 800
+        case .bolt: return 900
+        case .flame, .snow: return 1000
+        case .sun: return 1200
+        case .wings: return 1400
+        case .peacock: return 1600
+        case .rainbow: return 1800
+        case .silver: return 2000
+        case .rocket: return 2200
+        case .crown: return 2500
+        case .gold: return 2800
+        case .gem, .galaxy: return 3000
+        }
+    }
 }
 
 enum Obstacle: String, Codable, CaseIterable {
@@ -47,6 +104,8 @@ struct FlightResult {
     let fry: Double
     let shakes: Int
     let refuels: Int
+    /// Exchange points this flight earned.
+    let points: Int
 }
 
 enum Scoring {
@@ -60,6 +119,9 @@ enum Scoring {
         let base = Double(crumbs) * 10 / 3 + Double(shakes * 40)
         return Int((base * multiplier * (1 + Double(bodyCount - 3) * 0.12)).rounded())
     }
+
+    /// Exchange points for a flight: 1 point per 10 m.
+    static func points(forDistance d: Int) -> Int { max(0, d) / 10 }
 
     /// Climb speed in m/s: the more sauce, the faster the shrimp rises.
     static func climbSpeed(shakes: Int) -> Double {
@@ -100,7 +162,6 @@ enum SegmentSkin {
 @MainActor
 final class GameModel: ObservableObject {
     @Published private(set) var screen: Screen = .title
-    @Published var tail: TailKind = .normal
     @Published var bodyCount = 4
     @Published private(set) var crumbs = 0
     @Published private(set) var fry = 0.5
@@ -108,6 +169,11 @@ final class GameModel: ObservableObject {
     @Published private(set) var lastResult: FlightResult?
     @Published private(set) var best: Int
     @Published private(set) var history: [RunRecord]
+    /// Exchange points to spend on tails, coats and sauces.
+    @Published private(set) var points: Int
+    /// Raw values of what the player owns / has on, per category.
+    @Published private var owned: [ItemCategory: Set<String>] = [:]
+    @Published private var equippedRaw: [ItemCategory: String] = [:]
     /// Set after a run when the review dialog should be shown on the result screen.
     @Published var wantsReview = false
     private var reviewPrompt: ReviewPrompt
@@ -116,23 +182,26 @@ final class GameModel: ObservableObject {
     private enum Key {
         static let best = "best"
         static let history = "history"
-        static let tail = "tail"
         static let bodyCount = "bodyCount"
+        static let points = "points"
     }
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         reviewPrompt = ReviewPrompt(defaults: defaults)
-        best = defaults.integer(forKey: Key.best)
+        let best = defaults.integer(forKey: Key.best)
+        self.best = best
         if let data = defaults.data(forKey: Key.history),
            let saved = try? JSONDecoder().decode([RunRecord].self, from: data) {
             history = saved
         } else {
             history = []
         }
-        if let raw = defaults.string(forKey: Key.tail), let t = TailKind(rawValue: raw), best >= t.unlockDistance {
-            tail = t
-        }
+        points = defaults.integer(forKey: Key.points)
+        // Everyone starts with only the free item of each kind; the rest (heart and crown included) is exchanged for points.
+        load(TailKind.self)
+        load(CoatKind.self)
+        load(SauceKind.self)
         let n = defaults.integer(forKey: Key.bodyCount)
         if Scoring.bodyRange.contains(n) { bodyCount = n }
         #if DEBUG
@@ -145,16 +214,38 @@ final class GameModel: ObservableObject {
     private func applyDebugStart() {
         guard let name = UserDefaults.standard.string(forKey: "startScreen") else { return }
         let screens: [String: Screen] = ["title": .title, "make": .make, "batter": .batter, "fry": .fry,
-                                         "shake": .shake, "fly": .fly, "result": .result, "records": .records]
+                                         "shake": .shake, "fly": .fly, "result": .result, "records": .records,
+                                         "shop": .shop]
         guard let s = screens[name] else { return }
         crumbs = 22
         fry = 0.5
         shakes = 20
         if s == .result {
             lastResult = FlightResult(distance: 2300, maxDistance: maxDistance, hitBy: .plane, isNewBest: true,
-                                      crumbs: crumbs, fry: fry, shakes: shakes, refuels: 3)
+                                      crumbs: crumbs, fry: fry, shakes: shakes, refuels: 3, points: 230)
         }
         screen = s
+    }
+
+    /// Xcode Previews only: a model with its own throwaway defaults and sample values.
+    /// - Parameters:
+    ///   - points: exchange points to start with.
+    ///   - owned: how many items of each kind are owned (cheapest first), to show the make screen and shop filled in.
+    static func preview(points: Int = 1800, owned: Int = 4) -> GameModel {
+        let defaults = UserDefaults(suiteName: "ebiFly.preview")!
+        defaults.removePersistentDomain(forName: "ebiFly.preview")
+        defaults.set(points, forKey: Key.points)
+        defaults.set(Array(TailKind.allCases.prefix(owned).map(\.rawValue)), forKey: ItemCategory.tail.ownedKey)
+        defaults.set(Array(CoatKind.allCases.prefix(owned).map(\.rawValue)), forKey: ItemCategory.coat.ownedKey)
+        defaults.set(Array(SauceKind.allCases.prefix(owned).map(\.rawValue)), forKey: ItemCategory.sauce.ownedKey)
+        defaults.set(1234, forKey: Key.best)
+        let model = GameModel(defaults: defaults)
+        model.crumbs = 120
+        model.fry = 0.5
+        model.shakes = 22
+        model.lastResult = FlightResult(distance: 2300, maxDistance: model.maxDistance, hitBy: .plane, isNewBest: true,
+                                        crumbs: model.crumbs, fry: model.fry, shakes: model.shakes, refuels: 3, points: 230)
+        return model
     }
     #endif
 
@@ -163,7 +254,65 @@ final class GameModel: ObservableObject {
         Scoring.maxDistance(crumbs: crumbs, shakes: shakes, multiplier: fryMultiplier, bodyCount: bodyCount)
     }
 
-    func isUnlocked(_ t: TailKind) -> Bool { best >= t.unlockDistance }
+    // MARK: - collection
+
+    var tail: TailKind { equipped() }
+    var coat: CoatKind { equipped() }
+    var sauce: SauceKind { equipped() }
+
+    func equipped<T: Collectible>(_: T.Type = T.self) -> T {
+        equippedRaw[T.category].flatMap(T.init(rawValue:)) ?? .free
+    }
+
+    func owns<T: Collectible>(_ item: T) -> Bool {
+        owned[T.category, default: []].contains(item.rawValue)
+    }
+
+    func ownedCount(_ category: ItemCategory) -> Int { owned[category, default: []].count }
+
+    /// Something not owned yet that the points can already pay for.
+    var hasAffordableItem: Bool {
+        func any<T: Collectible>(_: T.Type) -> Bool { T.allCases.contains { !owns($0) && points >= $0.price } }
+        return any(TailKind.self) || any(CoatKind.self) || any(SauceKind.self)
+    }
+
+    func equip<T: Collectible>(_ item: T) {
+        guard owns(item) else { return }
+        equippedRaw[T.category] = item.rawValue
+        defaults.set(item.rawValue, forKey: T.category.selectionKey)
+    }
+
+    /// Spend points on an item and put it on. Returns false if it is not affordable.
+    @discardableResult
+    func exchange<T: Collectible>(_ item: T) -> Bool {
+        guard !owns(item), points >= item.price else { return false }
+        points -= item.price
+        owned[T.category, default: []].insert(item.rawValue)
+        defaults.set(points, forKey: Key.points)
+        defaults.set(owned[T.category, default: []].sorted(), forKey: T.category.ownedKey)
+        equip(item)
+        return true
+    }
+
+    private func load<T: Collectible>(_: T.Type) {
+        let saved = defaults.stringArray(forKey: T.category.ownedKey) ?? []
+        var set = Set(saved.filter { T(rawValue: $0) != nil })
+        set.formUnion(T.allCases.filter { $0.price == 0 }.map(\.rawValue))
+        owned[T.category] = set
+        if let raw = defaults.string(forKey: T.category.selectionKey), set.contains(raw) {
+            equippedRaw[T.category] = raw
+        }
+    }
+
+    /// Where the shop's "もどる" goes, and which tab it opens on.
+    private(set) var shopReturn: Screen = .make
+    private(set) var shopTab: ItemCategory = .tail
+
+    func openShop(from screen: Screen, tab: ItemCategory = .tail) {
+        shopReturn = screen
+        shopTab = tab
+        go(.shop)
+    }
 
     func go(_ s: Screen) {
         withAnimation(.easeInOut(duration: 0.25)) { screen = s }
@@ -174,12 +323,6 @@ final class GameModel: ObservableObject {
         fry = 0.5
         shakes = 0
         go(.make)
-    }
-
-    func select(tail t: TailKind) {
-        guard isUnlocked(t) else { return }
-        tail = t
-        defaults.set(t.rawValue, forKey: Key.tail)
     }
 
     func changeBody(by delta: Int) {
@@ -206,8 +349,11 @@ final class GameModel: ObservableObject {
 
     func finishFlight(distance: Int, hitBy: Obstacle?, refuels: Int) {
         let isNew = distance > best
+        let earned = Scoring.points(forDistance: distance)
         lastResult = FlightResult(distance: distance, maxDistance: maxDistance, hitBy: hitBy, isNewBest: isNew,
-                                  crumbs: crumbs, fry: fry, shakes: shakes, refuels: refuels)
+                                  crumbs: crumbs, fry: fry, shakes: shakes, refuels: refuels, points: earned)
+        points += earned
+        defaults.set(points, forKey: Key.points)
         history.insert(RunRecord(distance: distance, date: Date()), at: 0)
         history = Array(history.prefix(20))
         if isNew { best = distance }

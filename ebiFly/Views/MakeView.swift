@@ -1,9 +1,13 @@
 import SwiftUI
 
+/// Put the shrimp together: choose from the tails, coats and sauces you own and set the body length.
+/// New items are exchanged for points in the shop (ShopView), reached from the end of the item row.
 struct MakeView: View {
     @EnvironmentObject private var game: GameModel
     @Environment(\.uiScale) private var s
-    @State private var shakeTail: TailKind?
+    @State private var tab: ItemCategory = .tail
+    /// The item row opened up into a grid.
+    @State private var showAll = false
 
     var body: some View {
         ZStack {
@@ -11,7 +15,10 @@ struct MakeView: View {
             VStack(spacing: 0) {
                 StepsBar(current: 0)
                 Text("えびをつくる").font(AppFont.display(24 * s)).foregroundStyle(Palette.ink).padding(.top, 4)
-                plate.frame(maxHeight: .infinity)
+                ItemPlate(tail: game.tail, coat: game.coat, sauce: game.sauce, bodyCount: game.bodyCount, focus: tab)
+                    // points in the free corner beside the round plate (the top-right is where the sauce bottle goes)
+                    .overlay(alignment: .topLeading) { PointsBadge().padding(.top, 6 * s) }
+                    .frame(maxHeight: .infinity)
                 panel.padding(.bottom, 14 * s)
                 Button("衣をつける") { game.go(.batter) }
                     .buttonStyle(GameButtonStyle(wide: true))
@@ -23,25 +30,30 @@ struct MakeView: View {
         .backdrop(.solid(Palette.cream))
     }
 
-    private var plate: some View {
-        ZStack {
-            Circle().fill(Color.white)
-                .overlay(Circle().inset(by: 9 * s).stroke(Color(hex: 0xEAF3FB), lineWidth: 14 * s))
-                .overlay(Circle().stroke(Palette.ink, lineWidth: 4))
-                .frame(width: 210 * s, height: 210 * s)
-            ShrimpView(tail: game.tail, count: game.bodyCount, skin: SegmentSkin.batter(0), unit: 0.62 * s)
-                .rotationEffect(.degrees(-20))
-                .animation(.spring(response: 0.3, dampingFraction: 0.6), value: game.bodyCount)
-        }
-    }
+    // MARK: - panel
 
     private var panel: some View {
-        VStack(alignment: .leading, spacing: 12 * s) {
-            HStack(spacing: 10) {
-                Text("しっぽ").font(AppFont.black(13 * s)).frame(width: 52 * s, alignment: .leading)
-                HStack(spacing: 8 * s) {
-                    ForEach(TailKind.allCases) { t in tailChip(t) }
+        VStack(alignment: .leading, spacing: 10 * s) {
+            HStack(spacing: 6 * s) {
+                CategoryTabs(selection: $tab)
+                Spacer(minLength: 4)
+                Button {
+                    Haptics.light(); Sound.uiTap.play()
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) { showAll.toggle() }
+                } label: {
+                    Image(systemName: showAll ? "chevron.up" : "square.grid.3x3.fill")
+                        .font(.system(size: 11 * s, weight: .bold))
+                        .frame(width: 26 * s, height: 22 * s)
+                        .background(Capsule().fill(Palette.cream))
+                        .overlay(Capsule().stroke(Palette.ink, lineWidth: 2))
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel(showAll ? "一覧をとじる" : "ぜんぶ見る")
+            }
+            switch tab {
+            case .tail: picker(TailKind.self)
+            case .coat: picker(CoatKind.self)
+            case .sauce: picker(SauceKind.self)
             }
             HStack(spacing: 10) {
                 Text("からだ").font(AppFont.black(13 * s)).frame(width: 52 * s, alignment: .leading)
@@ -66,43 +78,72 @@ struct MakeView: View {
         .overlay(RoundedRectangle(cornerRadius: 20).stroke(Palette.ink, lineWidth: 3))
     }
 
-    private func tailChip(_ t: TailKind) -> some View {
-        let locked = !game.isUnlocked(t)
-        let selected = game.tail == t
-        return Button {
-            if locked {
-                Haptics.light()
-                withAnimation(.default) { shakeTail = t }
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { shakeTail = nil }
-            } else {
-                Haptics.light()
-                game.select(tail: t)
+    /// The items of a kind the player owns, then the way to the shop: a sideways row, or a grid when opened up.
+    @ViewBuilder private func picker<T: Collectible>(_: T.Type) -> some View {
+        let owned = T.allCases.filter { game.owns($0) }
+        if showAll {
+            ScrollView {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6 * s), count: 5), spacing: 8 * s) {
+                    ForEach(owned) { chip($0, size: 46 * s) }
+                    shopChip(size: 46 * s)
+                }
+                .padding(.vertical, 6)
+                .padding(.horizontal, 2)
             }
+            .frame(maxHeight: 196 * s)
+        } else {
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    LazyHStack(spacing: 8 * s) {
+                        ForEach(owned) { chip($0, size: 50 * s).id($0.rawValue) }
+                        shopChip(size: 50 * s)
+                    }
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 2)
+                }
+                .frame(height: 50 * s + 12)
+                .onAppear { proxy.scrollTo(game.equipped(T.self).rawValue, anchor: .center) }
+            }
+        }
+    }
+
+    private func chip<T: Collectible>(_ item: T, size: CGFloat) -> some View {
+        ItemChip(item: item, size: size, selected: game.equipped(T.self) == item) {
+            Haptics.light(); Sound.uiTap.play()
+            withAnimation(.easeOut(duration: 0.2)) { game.equip(item) }
+        }
+    }
+
+    /// The end of the row: opens the shop, lit up when something there is affordable.
+    private func shopChip(size: CGFloat) -> some View {
+        Button {
+            Haptics.light(); Sound.uiTap.play()
+            game.openShop(from: .make, tab: tab)
         } label: {
-            ZStack(alignment: .bottom) {
-                Image(t.imageName).resizable().frame(width: 34 * s, height: 34 * s)
-                    .grayscale(locked ? 1 : 0)
-                    .opacity(locked ? 0.3 : 1)
-                    .frame(width: 50 * s, height: 50 * s)
-                if locked {
-                    Text("\(t.unlockDistance.formatted())m")
-                        .font(AppFont.black(9 * s)).foregroundStyle(.white)
-                        .padding(.horizontal, 4)
-                        .background(RoundedRectangle(cornerRadius: 6).fill(Palette.ink))
-                        .offset(y: 7)
+            VStack(spacing: 1) {
+                Image(systemName: "bag.fill").font(.system(size: size * 0.3, weight: .bold))
+                Text("ショップ").font(AppFont.black(size * 0.18)).lineLimit(1).minimumScaleFactor(0.7)
+            }
+            .foregroundStyle(.white)
+            .frame(width: size, height: size)
+            .background(RoundedRectangle(cornerRadius: 14).fill(Palette.accent))
+            .overlay(RoundedRectangle(cornerRadius: 14).stroke(Palette.ink, lineWidth: 2.5))
+            .overlay(alignment: .topTrailing) {
+                if game.hasAffordableItem {
+                    // something can be exchanged right now
+                    Circle().fill(Palette.gold).overlay(Circle().stroke(Palette.ink, lineWidth: 1.5))
+                        .frame(width: 12 * s, height: 12 * s)
+                        .offset(x: 3 * s, y: -3 * s)
                 }
             }
-            .background(RoundedRectangle(cornerRadius: 14).fill(selected ? Color(hex: 0xFFE7DF) : Palette.paper))
-            .overlay(RoundedRectangle(cornerRadius: 14).stroke(selected ? Palette.accent : Palette.line, lineWidth: selected ? 3.5 : 2.5))
-            .offset(x: shakeTail == t ? 4 : 0)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(t.displayName + (locked ? "（\(t.unlockDistance.formatted())mで解放）" : ""))
-        .accessibilityAddTraits(selected ? .isSelected : [])
+        .accessibilityLabel("ショップ")
+        .accessibilityHint("ポイントでアイテムをこうかんできます")
     }
 
     private func stepButton(_ text: String, label: String, action: @escaping () -> Void) -> some View {
-        Button(action: { Haptics.light(); action() }) {
+        Button(action: { Haptics.light(); Sound.uiTap.play(); action() }) {
             Text(text).font(AppFont.black(18 * s))
                 .frame(width: 34 * s, height: 34 * s)
                 .background(Circle().fill(Palette.cream))
@@ -112,3 +153,9 @@ struct MakeView: View {
         .accessibilityLabel(label)
     }
 }
+
+#if DEBUG
+#Preview("つくる") { PreviewScreen { MakeView() } }
+
+#Preview("つくる・はじめて") { PreviewScreen(.preview(points: 0, owned: 1)) { MakeView() } }
+#endif

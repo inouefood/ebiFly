@@ -85,7 +85,8 @@ struct ResultView: View {
         let px = w / 300   // bento artwork is 300 x 210 design units
         return ZStack(alignment: .topLeading) {
             Image("bento").resizable().frame(width: w, height: w * 210 / 300)
-            ShrimpView(tail: game.tail, count: game.bodyCount, skin: SegmentSkin.fry(r.fry), unit: 54 / ShrimpGeometry.width * px)
+            ShrimpView(tail: game.tail, count: game.bodyCount, skin: SegmentSkin.fry(r.fry), unit: 54 / ShrimpGeometry.width * px,
+                       coat: game.coat.overlayName)
                 .rotationEffect(.degrees(-62))
                 .position(x: 208 * px, y: 104 * px)
         }
@@ -110,6 +111,30 @@ struct ResultView: View {
                     Text(row.1).font(AppFont.black(12.5 * s)).monospacedDigit()
                 }
             }
+            Divider().overlay(Palette.line).padding(.vertical, 2)
+            HStack(alignment: .firstTextBaseline) {
+                Text("ポイント").font(AppFont.black(12.5 * s))
+                Spacer()
+                Text("+\(r.points.formatted())pt").font(AppFont.display(15 * s)).foregroundStyle(Palette.accent).monospacedDigit()
+                Text("（もってる \(game.points.formatted())pt）").font(AppFont.body(11 * s)).monospacedDigit()
+            }
+            if game.hasAffordableItem {
+                Button { game.openShop(from: .result) } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "bag.fill")
+                        Text("こうかんできるアイテムがあるよ！ ショップへ")
+                        Image(systemName: "chevron.right")
+                    }
+                    .font(AppFont.black(11.5 * s))
+                    .lineLimit(1).minimumScaleFactor(0.75)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 10).padding(.vertical, 3)
+                    .frame(maxWidth: .infinity)
+                    .background(Capsule().fill(Palette.green))
+                }
+                .buttonStyle(.plain)
+                .padding(.top, 4)
+            }
         }
         .foregroundStyle(Palette.ink)
         .padding(.horizontal, 14).padding(.vertical, 8)
@@ -117,3 +142,7 @@ struct ResultView: View {
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Palette.ink, lineWidth: 2.5))
     }
 }
+
+#if DEBUG
+#Preview("結果") { PreviewScreen { ResultView() } }
+#endif

@@ -40,25 +40,13 @@ struct RecordsView: View {
                             }
                         }
                     }
-                    card("しっぽコレクション") {
-                        HStack(spacing: 10 * s) {
-                            ForEach(TailKind.allCases) { t in
-                                VStack(spacing: 4) {
-                                    ZStack {
-                                        RoundedRectangle(cornerRadius: 12).fill(Palette.paper)
-                                        RoundedRectangle(cornerRadius: 12).stroke(Palette.line, lineWidth: 2.5)
-                                        if game.isUnlocked(t) {
-                                            Image(t.imageName).resizable().padding(10 * s)
-                                        } else {
-                                            Text("?").font(AppFont.display(20 * s)).foregroundStyle(Palette.line)
-                                        }
-                                    }
-                                    .frame(width: 60 * s, height: 60 * s)
-                                    Text(game.isUnlocked(t) ? t.displayName : "\(t.unlockDistance.formatted())mで解放")
-                                        .font(AppFont.black(9.5 * s)).foregroundStyle(Palette.muted)
-                                }
-                            }
-                        }
+                    card("コレクション") {
+                        collection(TailKind.self)
+                        collection(CoatKind.self)
+                        collection(SauceKind.self)
+                        Text("ショップでポイントとこうかんできます（「つくる」画面や結果画面から）。")
+                            .font(AppFont.body(11 * s)).foregroundStyle(Palette.muted)
+                            .padding(.top, 4)
                     }
                     Button("ランキングを見る") { gameCenter.showLeaderboard() }
                         .buttonStyle(GameButtonStyle(kind: .ghost, wide: true, size: 16))
@@ -80,6 +68,32 @@ struct RecordsView: View {
         .backdrop(.solid(Palette.cream))
     }
 
+    private func collection<T: Collectible>(_: T.Type) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("\(T.category.label)  \(game.ownedCount(T.category))/\(T.allCases.count)")
+                .font(AppFont.black(11 * s)).foregroundStyle(Palette.muted)
+                .padding(.top, 4)
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6 * s), count: 5), spacing: 6 * s) {
+                ForEach(T.allCases) { item in
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 10).fill(Palette.paper)
+                        RoundedRectangle(cornerRadius: 10).stroke(Palette.line, lineWidth: 2)
+                        if game.owns(item) {
+                            ZStack {
+                                ForEach(item.iconLayers, id: \.self) { Image($0).resizable().scaledToFit() }
+                            }
+                            .padding(6 * s)
+                        } else {
+                            Text("?").font(AppFont.display(16 * s)).foregroundStyle(Palette.line)
+                        }
+                    }
+                    .aspectRatio(1, contentMode: .fit)
+                    .accessibilityLabel(game.owns(item) ? item.displayName : "まだもっていない")
+                }
+            }
+        }
+    }
+
     private func card<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title).font(AppFont.black(12 * s)).tracking(1.2).foregroundStyle(Palette.muted)
@@ -92,3 +106,7 @@ struct RecordsView: View {
         .overlay(RoundedRectangle(cornerRadius: 18).stroke(Palette.ink, lineWidth: 3))
     }
 }
+
+#if DEBUG
+#Preview("きろく") { PreviewScreen { RecordsView() } }
+#endif

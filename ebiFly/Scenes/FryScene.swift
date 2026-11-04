@@ -7,8 +7,8 @@ struct FryView: View {
     @StateObject private var scene: FryScene
     @State private var verdict: String?
 
-    init(tail: TailKind, bodyCount: Int) {
-        _scene = StateObject(wrappedValue: FryScene(tail: tail, bodyCount: bodyCount))
+    init(tail: TailKind, bodyCount: Int, coat: CoatKind) {
+        _scene = StateObject(wrappedValue: FryScene(tail: tail, bodyCount: bodyCount, coat: coat))
     }
 
     var body: some View {
@@ -79,6 +79,12 @@ struct FryView: View {
     private func stop() {
         let v = scene.stop()
         let (label, mult) = Scoring.fryVerdict(v)
+        switch v {
+        case 0.42...0.58: Sound.fryPerfect.play()
+        case 0.3...0.7: Sound.fryPerfect.play(gain: 0.6)   // "いい感じ": the same sound, softer
+        case ..<0.3: Sound.fryUnder.play()
+        default: Sound.fryBurnt.play()
+        }
         withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) {
             verdict = "\(label) ×\(mult.formatted())"
         }
@@ -93,15 +99,17 @@ final class FryScene: GameScene, ObservableObject {
 
     private let tail: TailKind
     private let bodyCount: Int
+    private let coat: CoatKind
     private var shrimp: ShrimpNode!
     private var t0: TimeInterval?
     private var lastBubble: TimeInterval = 0
     private var oilSurface = CGPoint.zero
     private var oilHalfWidth: CGFloat = 0
 
-    init(tail: TailKind, bodyCount: Int) {
+    init(tail: TailKind, bodyCount: Int, coat: CoatKind) {
         self.tail = tail
         self.bodyCount = bodyCount
+        self.coat = coat
         super.init()
     }
 
@@ -127,17 +135,30 @@ final class FryScene: GameScene, ObservableObject {
         oilSurface = CGPoint(x: center.x + (170 - 170) * k, y: center.y + (90 - 40) * k)
         oilHalfWidth = 110 * k
 
-        shrimp = ShrimpNode(tail: tail, count: bodyCount, skin: SegmentSkin.fry(0), unit: 0.62 * k)
+        shrimp = ShrimpNode(tail: tail, count: bodyCount, skin: SegmentSkin.fry(0), unit: 0.62 * k, coat: coat.overlayName)
         shrimp.zRotation = -.pi / 2  // lying down, tail to the right
         shrimp.position = CGPoint(x: oilSurface.x - shrimp.centerOffset, y: oilSurface.y - 6 * k)
         shrimp.zPosition = 5
         addChild(shrimp)
+
+        // into the oil, then it keeps sizzling until the shrimp is taken out
+        Sound.fryDip.play()
+        run(.sequence([.wait(forDuration: 0.35), .run { [weak self] in
+            guard self?.stopped == false else { return }
+            Sound.frySizzle.loop()
+        }]))
+    }
+
+    override func willMove(from view: SKView) {
+        super.willMove(from: view)
+        Sound.frySizzle.stop()
     }
 
     func stop() -> Double {
         guard !stopped else { return value }
         stopped = true
         Haptics.medium()
+        Sound.frySizzle.stop(fadeOut: 0.4)
         return value
     }
 
@@ -161,3 +182,7 @@ final class FryScene: GameScene, ObservableObject {
         shrimp.setSkin(SegmentSkin.fry(value))
     }
 }
+
+#if DEBUG
+#Preview("揚げる") { PreviewScreen { FryView(tail: .crown, bodyCount: 4, coat: .sesame) } }
+#endif

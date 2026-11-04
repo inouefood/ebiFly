@@ -7,6 +7,8 @@ struct EbiFlyApp: App {
 
     init() {
         AppFont.register()
+        Sound.configure()
+        Sound.preloadAll()
     }
 
     var body: some Scene {
@@ -15,7 +17,7 @@ struct EbiFlyApp: App {
                 .environmentObject(game)
                 .onAppear { GameCenter.shared.authenticate() }
         }
-        .onChange(of: scenePhase) { phase in
+        .onChange(of: scenePhase) { _, phase in
             if phase == .active { Ads.shared.startIfNeeded() }
         }
     }
@@ -47,12 +49,14 @@ struct RootView: View {
         switch game.screen {
         case .title: TitleView()
         case .make: MakeView()
-        case .batter: BatterView(tail: game.tail, bodyCount: game.bodyCount)
-        case .fry: FryView(tail: game.tail, bodyCount: game.bodyCount)
-        case .shake: ShakeView(tail: game.tail, bodyCount: game.bodyCount, fry: game.fry)
-        case .fly: FlyView(tail: game.tail, bodyCount: game.bodyCount, fry: game.fry, shakes: game.shakes, maxDistance: game.maxDistance)
+        case .batter: BatterView(tail: game.tail, bodyCount: game.bodyCount, coat: game.coat)
+        case .fry: FryView(tail: game.tail, bodyCount: game.bodyCount, coat: game.coat)
+        case .shake: ShakeView(tail: game.tail, bodyCount: game.bodyCount, fry: game.fry, coat: game.coat, sauce: game.sauce)
+        case .fly: FlyView(tail: game.tail, bodyCount: game.bodyCount, fry: game.fry, shakes: game.shakes,
+                           maxDistance: game.maxDistance, coat: game.coat, sauce: game.sauce)
         case .result: ResultView()
         case .records: RecordsView()
+        case .shop: ShopView()
         }
     }
 }

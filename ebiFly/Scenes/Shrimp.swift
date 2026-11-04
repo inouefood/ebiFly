@@ -29,6 +29,8 @@ struct ShrimpView: View {
     let skin: String
     /// Points per design unit.
     let unit: CGFloat
+    /// Batter coat overlay drawn on each ball (CoatKind.overlayName).
+    var coat: String? = nil
 
     var body: some View {
         let g = ShrimpGeometry.self
@@ -39,9 +41,12 @@ struct ShrimpView: View {
                 .position(x: g.width / 2 * unit, y: (top - g.tailCenter) * unit)
             ForEach(0..<count, id: \.self) { i in
                 let d = 100 * g.scale(i, of: count) * unit
-                Image(skin).resizable()
-                    .frame(width: d, height: d)
-                    .position(x: g.width / 2 * unit, y: (top + CGFloat(i) * g.spacing) * unit)
+                ZStack {
+                    Image(skin).resizable()
+                    if let coat { Image(coat).resizable() }
+                }
+                .frame(width: d, height: d)
+                .position(x: g.width / 2 * unit, y: (top + CGFloat(i) * g.spacing) * unit)
             }
         }
         .frame(width: g.width * unit, height: g.length(count) * unit)
@@ -55,6 +60,7 @@ final class ShrimpNode: SKNode {
     let unit: CGFloat
     private let tailSprite: SKSpriteNode
     private var segments: [SKSpriteNode] = []
+    private var coats: [SKSpriteNode] = []
     private var skin: String
 
     private static var textures: [String: SKTexture] = [:]
@@ -66,7 +72,7 @@ final class ShrimpNode: SKNode {
     }
 
     /// Origin is the center of the first body ball (just under the tail). The tail points to +y.
-    init(tail: TailKind, count: Int, skin: String, unit: CGFloat) {
+    init(tail: TailKind, count: Int, skin: String, unit: CGFloat, coat: String? = nil) {
         self.count = count
         self.unit = unit
         self.skin = skin
@@ -83,6 +89,14 @@ final class ShrimpNode: SKNode {
             seg.zPosition = CGFloat(i + 1) * 0.01
             addChild(seg)
             segments.append(seg)
+            if let coat {
+                // child of the ball so it sways with it
+                let c = SKSpriteNode(texture: Self.texture(coat))
+                c.size = seg.size
+                c.zPosition = 0.001
+                seg.addChild(c)
+                coats.append(c)
+            }
         }
     }
 
@@ -101,6 +115,11 @@ final class ShrimpNode: SKNode {
         skin = name
         let t = Self.texture(name)
         segments.forEach { $0.texture = t }
+    }
+
+    /// 0...1: how much of the coat shows (it builds up while the batter goes on).
+    func setCoatAlpha(_ a: CGFloat) {
+        coats.forEach { $0.alpha = a }
     }
 
     /// Small sway on each ball so the shrimp looks alive.
