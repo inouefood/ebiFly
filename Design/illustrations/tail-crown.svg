@@ -252,7 +252,7 @@
 <circle cx="60" cy="60" r="40" fill="#fff6c8" stroke="#f2b632" stroke-width="5"/>
 <use href="#bottle-honey" x="44" y="22" width="32" height="70" transform="rotate(-14 60 57)"/>
 <circle cx="90" cy="32" r="17" fill="#5cbf4a" stroke="#3a2418" stroke-width="5"/>
-<path d="M90 23 V41 M81 32 H99" stroke="#fff" stroke-width="6" stroke-linecap="round"/></symbol><symbol id="hand-phone" viewBox="0 0 120 160" overflow="visible"><path d="M40 160 L40 138 Q20 128 20 104 Q20 84 34 78 L88 78 Q104 84 104 104 Q104 128 84 138 L84 160Z"
+<path d="M90 23 V41 M81 32 H99" stroke="#fff" stroke-width="6" stroke-linecap="round"/></symbol><symbol id="hand-phone" viewBox="14 3 100 157" overflow="visible"><path d="M40 160 L40 138 Q20 128 20 104 Q20 84 34 78 L88 78 Q104 84 104 104 Q104 128 84 138 L84 160Z"
  fill="#ffd2ad" stroke="#3a2418" stroke-width="5" stroke-linejoin="round"/>
 <rect x="30" y="8" width="60" height="112" rx="12" fill="#2b2f38" stroke="#3a2418" stroke-width="5"/>
 <rect x="36" y="16" width="48" height="96" rx="7" fill="#8fd8ff"/>

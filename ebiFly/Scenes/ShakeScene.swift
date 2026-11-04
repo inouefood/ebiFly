@@ -23,6 +23,12 @@ struct ShakeView: View {
                     .padding(.top, 6 * s)
                     .opacity(scene.started ? 1 : 0.5)
                 Spacer()
+                // once shaking, a smaller hand keeps going in the free space between the shrimp and the gauge
+                if scene.started && !scene.finished {
+                    MotionHint(kind: .shake, height: 96)
+                        .padding(.bottom, 6 * s)
+                        .transition(.opacity)
+                }
                 gauge
                 HStack(alignment: .firstTextBaseline, spacing: 4) {
                     Text("シェイク").font(AppFont.black(13 * s))
@@ -34,16 +40,10 @@ struct ShakeView: View {
                 Group {
                     if scene.finished {
                         Color.clear
+                    } else if scene.started {
+                        Toast(text: "もっとふって！")
                     } else {
-                        // the hand keeps shaking the phone next to the message until time is up
-                        HStack(spacing: 8 * s) {
-                            MotionHint(kind: .shake, height: 64)
-                            if scene.started {
-                                Toast(text: "もっとふって！")
-                            } else {
-                                Toast(text: "iPhoneをふって\(sauce.displayName)をかけよう", sub: "ふった回数で飛ぶ高さと上昇スピードがアップ")
-                            }
-                        }
+                        Toast(text: "iPhoneをふって\(sauce.displayName)をかけよう", sub: "ふった回数で飛ぶ高さと上昇スピードがアップ")
                     }
                 }
                 .frame(minHeight: 56 * s)
@@ -53,6 +53,14 @@ struct ShakeView: View {
             .padding(.bottom, 20 * s)
             .allowsHitTesting(false)
 
+            // before the first shake: the hand shown large in the middle, as the "how to" for this step
+            if !scene.started {
+                MotionHint(kind: .shake, height: 150)
+                    .offset(y: -30 * s)
+                .allowsHitTesting(false)
+                .transition(.scale(scale: 0.6).combined(with: .opacity))
+            }
+
             if scene.finished {
                 FinishOverlay(lead: "シェイク", big: "\(scene.shakes)回",
                               trail: "\(sauce.shortName)「\(Scoring.sauceLabel(shakes: scene.shakes))」", button: "とばす！") {
@@ -61,6 +69,8 @@ struct ShakeView: View {
             }
         }
         .backdrop(.counter(wall: Color(hex: 0xFFE0D2), wallLow: Color(UIColor(hex: 0xFFE0D2).mixed(with: .white, 0.5)), counter: Color(hex: 0xE8C79A), edge: 0.52))
+        // the big "how to" hand shrinks away on the first shake, the small one fades in
+        .animation(.spring(response: 0.35, dampingFraction: 0.8), value: scene.started)
     }
 
     private var gauge: some View {

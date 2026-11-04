@@ -132,7 +132,7 @@ S["fuel"] = ("0 0 120 120", f"""
 cloud_c = [(50, 72, 30), (88, 50, 38), (132, 58, 33), (162, 78, 24), (28, 86, 18)]
 add_fuels(S)
 # motion hint: a hand gripping an iPhone (palm behind, thumb and fingers wrapped over the edges)
-S["hand-phone"] = ("0 0 120 160", f"""
+S["hand-phone"] = ("14 3 100 157", f"""
 <path d="M40 160 L40 138 Q20 128 20 104 Q20 84 34 78 L88 78 Q104 84 104 104 Q104 128 84 138 L84 160Z"
  fill="#ffd2ad" stroke="{INK}" stroke-width="{SW}" stroke-linejoin="round"/>
 <rect x="30" y="8" width="60" height="112" rx="12" fill="#2b2f38" stroke="{INK}" stroke-width="{SW}"/>
@@ -292,7 +292,7 @@ if __name__ == "__main__":
              "water-drop": (80, 108), "fuel": (240, 240), "sauce": (300, 660), "cloud": (600, 336), "bird": (192, 132), "plane": (510, 240), "moon": (360, 360),
              "star": (120, 120), "pot-back": (680, 360), "pot-front": (680, 360), "icon": (1024, 1024),
              "bento": (600, 420)}
-    sizes["hand-phone"] = (240, 320)
+    sizes["hand-phone"] = (600, 942)
     sizes.update({f"tail-{k}": (300, 300) for k in TAIL_KEYS})
     sizes.update({f"coat-{k}": (300, 300) for k in COAT_KEYS})
     sizes.update({f"crumb-{k}": (96, 96) for k in COAT_KEYS})

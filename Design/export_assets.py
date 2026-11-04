@@ -81,7 +81,7 @@ JOBS = {  # asset name -> (symbol, px w, px h, colours)
     "bento": ("bento", 600, 420, None),
     "icon": ("icon", 1024, 1024, None),
 }
-JOBS["hand-phone"] = ("hand-phone", 240, 320, None)
+JOBS["hand-phone"] = ("hand-phone", 600, 942, None)
 for _k in TAIL_KEYS:
     JOBS[f"tail-{_k}"] = (f"tail-{_k}", 318, 318, None)
 for _k in COAT_KEYS:
