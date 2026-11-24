@@ -136,16 +136,19 @@ final class ShrimpNode: SKNode {
 
 // MARK: - Scene base
 
-/// Lays out once the SKView has a real size, then switches to aspect-fill so later size changes
-/// (iPad rotation keeps the column's aspect ratio) only scale the scene.
+/// Column scenes scale their original layout. Full-width scenes use a 300-point reference
+/// column and add playable space on each side as the viewport gets wider.
 class GameScene: SKScene {
     private(set) var isLaidOut = false
+    private let playsFullWidth: Bool
     /// Scale relative to the 300pt-wide design.
-    var u: CGFloat { size.width / 300 }
+    var u: CGFloat { playsFullWidth ? 1 : size.width / GameLayout.designWidth }
+    var widthFactor: CGFloat { size.width / GameLayout.designWidth }
 
-    override init(size: CGSize = CGSize(width: 300, height: 640)) {
-        super.init(size: size)
-        scaleMode = .resizeFill
+    init(playsFullWidth: Bool = false) {
+        self.playsFullWidth = playsFullWidth
+        super.init(size: CGSize(width: GameLayout.designWidth, height: 640))
+        scaleMode = playsFullWidth ? .aspectFill : .resizeFill
         backgroundColor = .clear
     }
 
@@ -153,13 +156,31 @@ class GameScene: SKScene {
 
     override func didMove(to view: SKView) {
         super.didMove(to: view)
-        if view.bounds.width > 10 { size = view.bounds.size }
+        if playsFullWidth {
+            updateViewport(view.bounds.size)
+            return
+        }
+        if !isLaidOut, view.bounds.width > 10 { size = view.bounds.size }
         layoutIfReady()
     }
 
     override func didChangeSize(_ oldSize: CGSize) {
         super.didChangeSize(oldSize)
-        layoutIfReady()
+        if !playsFullWidth { layoutIfReady() }
+    }
+
+    final func updateViewport(_ viewport: CGSize) {
+        guard playsFullWidth, viewport.width > 10, viewport.height > 10 else { return }
+        let unit = GameLayout.columnWidth(in: viewport) / GameLayout.designWidth
+        let newSize = CGSize(width: max(GameLayout.designWidth, viewport.width / unit), height: viewport.height / unit)
+        if !isLaidOut {
+            size = newSize
+            layoutIfReady()
+        } else if size != newSize {
+            let oldSize = size
+            size = newSize
+            resizePlayfield(from: oldSize)
+        }
     }
 
     private func layoutIfReady() {
@@ -171,6 +192,37 @@ class GameScene: SKScene {
 
     /// Build the scene for the current `size`. Called exactly once.
     func layout() {}
+
+    /// Adjust positions in a running full-width scene after rotation or folding.
+    func resizePlayfield(from oldSize: CGSize) {}
+}
+
+struct FullWidthSpriteView: UIViewRepresentable {
+    let scene: GameScene
+    var allowsTransparency = false
+
+    func makeUIView(context: Context) -> Viewport {
+        let view = Viewport()
+        view.ignoresSiblingOrder = true
+        view.allowsTransparency = allowsTransparency
+        view.presentScene(scene)
+        return view
+    }
+
+    func updateUIView(_ view: Viewport, context: Context) {
+        if view.scene !== scene { view.presentScene(scene) }
+    }
+
+    static func dismantleUIView(_ view: Viewport, coordinator: ()) {
+        view.presentScene(nil)
+    }
+
+    final class Viewport: SKView {
+        override func layoutSubviews() {
+            super.layoutSubviews()
+            (scene as? GameScene)?.updateViewport(bounds.size)
+        }
+    }
 }
 
 enum Tex {
@@ -194,24 +246,6 @@ enum Tex {
                 let colors = [top.cgColor, bottom.cgColor] as CFArray
                 let g = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: colors, locations: [0, 1])!
                 ctx.drawLinearGradient(g, start: .zero, end: CGPoint(x: 0, y: size.height), options: [])
-            }
-        })
-    }
-
-    /// Flat color with a dot grid (panko bowl).
-    static func dots(_ size: CGSize, bg: UIColor, dot: UIColor, spacing: CGFloat, radius: CGFloat) -> SKTexture {
-        SKTexture(image: image(size) { ctx in
-            ctx.setFillColor(bg.cgColor)
-            ctx.fill(CGRect(origin: .zero, size: size))
-            ctx.setFillColor(dot.cgColor)
-            var y: CGFloat = spacing / 2
-            while y < size.height {
-                var x: CGFloat = spacing / 2
-                while x < size.width {
-                    ctx.fillEllipse(in: CGRect(x: x - radius, y: y - radius, width: radius * 2, height: radius * 2))
-                    x += spacing
-                }
-                y += spacing
             }
         })
     }

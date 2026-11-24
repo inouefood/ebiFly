@@ -1,5 +1,6 @@
 import CoreMotion
 import Foundation
+import UIKit
 
 /// Device motion for the sauce shake and the tilt steering. Accelerometer access needs no permission prompt.
 final class MotionService {
@@ -29,8 +30,16 @@ final class MotionService {
         manager.startDeviceMotionUpdates()
     }
 
-    /// Left/right tilt in -1...1 (gravity x component).
-    var tiltX: Double { manager.deviceMotion?.gravity.x ?? 0 }
+    /// Left/right gravity component in the interface's coordinate system.
+    func tiltX(in orientation: UIInterfaceOrientation) -> Double {
+        guard let gravity = manager.deviceMotion?.gravity else { return 0 }
+        switch orientation {
+        case .landscapeLeft: return -gravity.y
+        case .landscapeRight: return gravity.y
+        case .portraitUpsideDown: return -gravity.x
+        default: return gravity.x
+        }
+    }
 
     func stop() {
         manager.stopDeviceMotionUpdates()

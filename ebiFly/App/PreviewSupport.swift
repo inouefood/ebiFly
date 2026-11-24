@@ -1,25 +1,27 @@
 #if DEBUG
 import SwiftUI
 
-/// Hosts a screen in an Xcode Preview the way RootView does in the app: a phone-shaped column with the
-/// screen's own `uiScale`, its backdrop behind it, and a sample GameModel.
+/// Hosts a game screen in Xcode with its in-app layout and a sample GameModel.
 @MainActor
 struct PreviewScreen<Content: View>: View {
     @StateObject private var game: GameModel
     private let content: Content
+    private let playsFullWidth: Bool
 
     /// `game`: nil uses `GameModel.preview()`.
-    init(_ game: GameModel? = nil, @ViewBuilder content: () -> Content) {
+    init(_ game: GameModel? = nil, playsFullWidth: Bool = false, @ViewBuilder content: () -> Content) {
         _game = StateObject(wrappedValue: game ?? .preview())
+        self.playsFullWidth = playsFullWidth
         self.content = content()
     }
 
     var body: some View {
         GeometryReader { geo in
-            let width = min(geo.size.width, geo.size.height * 0.56)
+            let width = GameLayout.columnWidth(in: geo.size)
             ZStack {
                 content
-                    .frame(width: width, height: geo.size.height)
+                    .frame(width: playsFullWidth ? geo.size.width : width, height: geo.size.height)
+                    .environment(\.gameColumnWidth, width)
                     .environment(\.uiScale, min(max(width / 300, 1), 1.6))
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

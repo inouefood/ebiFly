@@ -28,13 +28,15 @@ struct RootView: View {
 
     var body: some View {
         GeometryReader { geo in
-            // iPhone: full width. iPad: a phone-shaped column in the middle so the game keeps its proportions.
-            let width = min(geo.size.width, geo.size.height * 0.56)
+            // Keep the HUD readable while the action can use the whole screen.
+            let width = GameLayout.columnWidth(in: geo.size)
+            let playsFullWidth = game.screen == .batter || game.screen == .fly
             ZStack {
                 screen
                     .id(game.screen)
                     .transition(.opacity)
-                    .frame(width: width, height: geo.size.height)
+                    .frame(width: playsFullWidth ? geo.size.width : width, height: geo.size.height)
+                    .environment(\.gameColumnWidth, width)
                     .environment(\.uiScale, min(max(width / 300, 1), 1.6))
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

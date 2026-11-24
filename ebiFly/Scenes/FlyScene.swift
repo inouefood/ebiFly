@@ -4,6 +4,7 @@ import SwiftUI
 struct FlyView: View {
     @EnvironmentObject private var game: GameModel
     @Environment(\.uiScale) private var s
+    @Environment(\.gameColumnWidth) private var columnWidth
     @StateObject private var scene: FlyScene
     @State private var showHint = true
     @State private var showingAd = false
@@ -21,7 +22,7 @@ struct FlyView: View {
 
     var body: some View {
         ZStack {
-            SpriteView(scene: scene, options: [.ignoresSiblingOrder]).ignoresSafeArea()
+            FullWidthSpriteView(scene: scene).ignoresSafeArea()
             VStack(spacing: 0) {
                 if scene.countdown != nil {
                     StepsBar(current: 4)
@@ -54,6 +55,7 @@ struct FlyView: View {
             }
             .padding(.horizontal, 18 * s)
             .padding(.bottom, 22 * s)
+            .frame(maxWidth: columnWidth)
             .allowsHitTesting(false)
 
             if let n = scene.countdown {
@@ -280,6 +282,7 @@ final class FlyScene: GameScene, ObservableObject {
     private var launched = false
     private var ground: SKSpriteNode!
     private var floor: SKSpriteNode!
+    private var floorEdge: SKSpriteNode!
     private var sky: SKSpriteNode!
     private var skyKey = -1
     private var camera0: CGFloat = 0           // altitude in m
@@ -314,7 +317,7 @@ final class FlyScene: GameScene, ObservableObject {
         self.fry = fry
         self.maxDistance = max(maxDistance, 300)
         fuelMeters = CGFloat(self.maxDistance)
-        super.init()
+        super.init(playsFullWidth: true)
     }
 
     required init?(coder aDecoder: NSCoder) { fatalError("init(coder:) has not been implemented") }
@@ -345,14 +348,27 @@ final class FlyScene: GameScene, ObservableObject {
         floor.anchorPoint = CGPoint(x: 0, y: 1)
         floor.zPosition = 1
         addChild(floor)
-        let edge = SKSpriteNode(color: UIColor(hex: 0x3A2418), size: CGSize(width: size.width, height: 4))
-        edge.anchorPoint = CGPoint(x: 0, y: 1)
-        floor.addChild(edge)
+        floorEdge = SKSpriteNode(color: UIColor(hex: 0x3A2418), size: CGSize(width: size.width, height: 4))
+        floorEdge.anchorPoint = CGPoint(x: 0, y: 1)
+        floor.addChild(floorEdge)
 
         buildWorld()
-        motion.startTilt()
         place(at: 0)
         startCountdown()
+    }
+
+    override func resizePlayfield(from oldSize: CGSize) {
+        let horizontal = size.width / oldSize.width
+        flyerX = min(max(flyerX * horizontal, 20 * u), size.width - 20 * u)
+        for index in items.indices {
+            let halfWidth = items[index].width / 2
+            items[index].x = (items[index].x + halfWidth) * horizontal - halfWidth
+        }
+        sky.size = size
+        floor.size = size
+        floorEdge.size.width = size.width
+        lastTouch = nil
+        place(at: camera0)
     }
 
     private func startCountdown() {
@@ -377,6 +393,11 @@ final class FlyScene: GameScene, ObservableObject {
         run(.sequence([.wait(forDuration: 0.4)] + steps))
     }
 
+    override func didMove(to view: SKView) {
+        super.didMove(to: view)
+        if outcome == nil { motion.startTilt() }
+    }
+
     override func willMove(from view: SKView) {
         super.willMove(from: view)
         motion.stop()
@@ -390,7 +411,7 @@ final class FlyScene: GameScene, ObservableObject {
     }
 
     private func buildWorld() {
-        items.append(addItem("moon", altitude: 5600, x: 170, width: 100, z: 0.5))
+        items.append(addItem("moon", altitude: 5600, x: size.width - 130, width: 100, z: 0.5))
         extendWorld(to: 1500)
     }
 
@@ -398,33 +419,35 @@ final class FlyScene: GameScene, ObservableObject {
     /// so the world is generated a little ahead of the camera.
     private func extendWorld(to top: CGFloat) {
         guard top > worldTop else { return }
+        // Keep the number of hazards and pickups per unit of playable space consistent.
+        let density = widthFactor
         while nextCloud < min(top, 5000) {
-            items.append(addItem("cloud", altitude: nextCloud, x: .random(in: -20...200), width: .random(in: 110...160), z: 1))
-            nextCloud += .random(in: 230...350)
+            items.append(addItem("cloud", altitude: nextCloud, x: .random(in: -20...(size.width - 100)), width: .random(in: 110...160), z: 1))
+            nextCloud += CGFloat.random(in: 230...350) / density
         }
         while nextStar < top {
-            items.append(addItem("star", altitude: nextStar, x: .random(in: 0...280), width: .random(in: 10...22), z: 0))
-            nextStar += .random(in: 60...140)
+            items.append(addItem("star", altitude: nextStar, x: .random(in: 0...(size.width - 20)), width: .random(in: 10...22), z: 0))
+            nextStar += CGFloat.random(in: 60...140) / density
         }
         while nextObstacle < top {
             let a = nextObstacle
             let kind: Obstacle = a < 1500 ? .bird : a < 3400 ? (Bool.random() ? .plane : .bird) : .meteor
             let width: CGFloat = kind == .plane ? 120 : kind == .bird ? 46 : 50
-            var item = addItem(kind.rawValue, altitude: a, x: .random(in: 0...(300 - width)), width: width, z: 5)
+            var item = addItem(kind.rawValue, altitude: a, x: .random(in: 0...(size.width - width)), width: width, z: 5)
             let dir: CGFloat = Bool.random() ? 1 : -1
             item.vx = dir * (kind == .plane ? .random(in: 70...120) : .random(in: 30...80))
             item.fall = kind == .meteor ? 70 : 0
             item.obstacle = kind
             if dir < 0 { item.node.xScale = -1 }
             items.append(item)
-            nextObstacle += .random(in: 230...390)
+            nextObstacle += CGFloat.random(in: 230...390) / density
         }
         while nextFuel < top {
-            var item = addItem(sauce.fuelName, altitude: nextFuel, x: .random(in: 20...230), width: 50, z: 6)
+            var item = addItem(sauce.fuelName, altitude: nextFuel, x: .random(in: 20...(size.width - 70)), width: 50, z: 6)
             item.isFuel = true
             item.node.run(.repeatForever(.sequence([.scale(to: 1.15, duration: 0.35), .scale(to: 1, duration: 0.35)])))
             items.append(item)
-            nextFuel += .random(in: 300...460)
+            nextFuel += CGFloat.random(in: 300...460) / density
         }
         worldTop = top
     }
@@ -533,7 +556,8 @@ final class FlyScene: GameScene, ObservableObject {
         fuelMeters = max(0, fuelMeters - climb)
         extendWorld(to: camera0 + size.height / k + 400)
 
-        let gx = CGFloat(motion.tiltX)
+        let orientation = view?.window?.windowScene?.effectiveGeometry.interfaceOrientation ?? .portrait
+        let gx = CGFloat(motion.tiltX(in: orientation))
         if abs(gx) > 0.03 {
             flyerX = min(max(flyerX + gx * 900 * u * dt, 20 * u), size.width - 20 * u)
             tilt = min(max(tilt - gx * 40, -25), 25)
@@ -699,7 +723,7 @@ final class FlyScene: GameScene, ObservableObject {
 
 #if DEBUG
 #Preview("とばす") {
-    PreviewScreen {
+    PreviewScreen(playsFullWidth: true) {
         FlyView(tail: .crown, bodyCount: 4, fry: 0.5, shakes: 22, maxDistance: 2000, coat: .sesame, sauce: .mayo)
     }
 }

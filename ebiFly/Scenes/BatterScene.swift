@@ -4,6 +4,7 @@ import SwiftUI
 struct BatterView: View {
     @EnvironmentObject private var game: GameModel
     @Environment(\.uiScale) private var s
+    @Environment(\.gameColumnWidth) private var columnWidth
     @StateObject private var scene: BatterScene
 
     private let coat: CoatKind
@@ -15,7 +16,7 @@ struct BatterView: View {
 
     var body: some View {
         ZStack {
-            SpriteView(scene: scene, options: [.ignoresSiblingOrder]).ignoresSafeArea()
+            FullWidthSpriteView(scene: scene, allowsTransparency: true).ignoresSafeArea()
             VStack(spacing: 6) {
                 StepsBar(current: 1)
                 HStack {
@@ -31,6 +32,7 @@ struct BatterView: View {
             .padding(.horizontal, 18 * s)
             .padding(.top, 8)
             .padding(.bottom, 24 * s)
+            .frame(maxWidth: columnWidth)
             .allowsHitTesting(false)
 
             if scene.finished {
@@ -88,6 +90,21 @@ final class BatterScene: GameScene, ObservableObject {
         let speed: CGFloat   // px/s at u = 1
     }
 
+    private struct SpawnStream {
+        private var lastSpawn: TimeInterval = -.infinity
+        private var remainder: CGFloat = 0
+
+        mutating func count(at time: TimeInterval, interval: TimeInterval, widthFactor: CGFloat) -> Int {
+            guard time - lastSpawn > interval else { return 0 }
+            lastSpawn = time
+            // Keep the original timing and carry fractional spawns across successive waves.
+            let credit = widthFactor + remainder
+            let count = Int(credit)
+            remainder = credit - CGFloat(count)
+            return count
+        }
+    }
+
     /// Crumbs at which the batter looks fully coated.
     static let fullCoat = 180
     /// Crumbs a water drop knocks off. Ignoring the drops and standing under everything loses badly to
@@ -102,9 +119,9 @@ final class BatterScene: GameScene, ObservableObject {
     private var lastTouch: CGPoint?
     private var startTime: TimeInterval?
     private var lastTime: TimeInterval?
-    private var lastSpawn: TimeInterval = 0
-    private var lastBurst: TimeInterval = 0
-    private var lastExtra: TimeInterval = 0
+    private var mixedStream = SpawnStream()
+    private var extraCrumbStream = SpawnStream()
+    private var burstStream = SpawnStream()
     private var tilt: CGFloat = 0
     /// Where a tap sent the shrimp; it slides there quickly. Dragging takes over from it.
     private var tapTarget: CGPoint?
@@ -124,18 +141,12 @@ final class BatterScene: GameScene, ObservableObject {
         self.tail = tail
         self.bodyCount = bodyCount
         self.coat = coat
-        super.init()
+        super.init(playsFullWidth: true)
     }
 
     required init?(coder aDecoder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
     override func layout() {
-        let bg = SKSpriteNode(texture: Tex.dots(size, bg: UIColor(hex: 0xF6DC95), dot: UIColor(hex: 0xE9C06A), spacing: 14 * u, radius: 1.8 * u))
-        bg.size = size
-        bg.anchorPoint = .zero
-        bg.zPosition = -10
-        addChild(bg)
-
         shrimp = ShrimpNode(tail: tail, count: bodyCount, skin: SegmentSkin.batter(0), unit: 62 * u / ShrimpGeometry.width,
                             coat: coat.overlayName)
         shrimp.setCoatAlpha(0)
@@ -149,6 +160,20 @@ final class BatterScene: GameScene, ObservableObject {
         // `-startScreen batter` starts the timer right away so it can be checked without touching
         if UserDefaults.standard.string(forKey: "startScreen") == "batter" { started = true }
         #endif
+    }
+
+    override func resizePlayfield(from oldSize: CGSize) {
+        let horizontal = size.width / oldSize.width
+        let vertical = size.height / oldSize.height
+        for item in falling {
+            item.node.position.x *= horizontal
+            item.node.position.y *= vertical
+        }
+        shrimp.position = clamped(CGPoint(x: shrimp.position.x * horizontal, y: shrimp.position.y * vertical))
+        if let target = tapTarget {
+            tapTarget = clamped(CGPoint(x: target.x * horizontal, y: target.y * vertical))
+        }
+        lastTouch = nil
     }
 
     /// A heap of plain crumbs dumped around one spot.
@@ -191,7 +216,7 @@ final class BatterScene: GameScene, ObservableObject {
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard !finished, let t = touches.first else { return }
+        guard isLaidOut, !finished, let t = touches.first else { return }
         let p = t.location(in: self)
         lastTouch = p
         // a tap moves the shrimp (the middle of its body) to that spot; if the finger then drags, dragging takes over
@@ -235,17 +260,15 @@ final class BatterScene: GameScene, ObservableObject {
         if left != timeLeft { timeLeft = left }
 
         let interval = 0.13 - 0.06 * Double(progress)
-        if currentTime - lastSpawn > interval {
-            lastSpawn = currentTime
+        let density = widthFactor
+        for _ in 0..<mixedStream.count(at: currentTime, interval: interval, widthFactor: density) {
             spawn(progress: progress)
         }
         // extra plain crumbs: crumbs fall at 3x the rate of the mixed stream (water drops stay as they are)
-        if currentTime - lastExtra > interval / 2 {
-            lastExtra = currentTime
+        for _ in 0..<extraCrumbStream.count(at: currentTime, interval: interval / 2, widthFactor: density) {
             spawn(progress: progress, kind: .crumb)
         }
-        if currentTime - lastBurst > 1.4 / 3 {
-            lastBurst = currentTime
+        for _ in 0..<burstStream.count(at: currentTime, interval: 1.4 / 3, widthFactor: density) {
             spawnBurst(progress: progress)
         }
 
@@ -316,5 +339,5 @@ final class BatterScene: GameScene, ObservableObject {
 }
 
 #if DEBUG
-#Preview("衣") { PreviewScreen { BatterView(tail: .crown, bodyCount: 4, coat: .sesame) } }
+#Preview("衣") { PreviewScreen(playsFullWidth: true) { BatterView(tail: .crown, bodyCount: 4, coat: .sesame) } }
 #endif

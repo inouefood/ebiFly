@@ -66,10 +66,27 @@ private struct UIScaleKey: EnvironmentKey {
     static let defaultValue: CGFloat = 1
 }
 
+enum GameLayout {
+    static let designWidth: CGFloat = 300
+
+    static func columnWidth(in size: CGSize) -> CGFloat {
+        min(size.width, size.height * 0.56)
+    }
+}
+
+private struct GameColumnWidthKey: EnvironmentKey {
+    static let defaultValue: CGFloat? = nil
+}
+
 extension EnvironmentValues {
     var uiScale: CGFloat {
         get { self[UIScaleKey.self] }
         set { self[UIScaleKey.self] = newValue }
+    }
+
+    var gameColumnWidth: CGFloat? {
+        get { self[GameColumnWidthKey.self] }
+        set { self[GameColumnWidthKey.self] = newValue }
     }
 }
 
