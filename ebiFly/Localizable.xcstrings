@@ -38351,8 +38351,8 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "machine_translated",
-            "value" : "Play Again"
+            "state" : "translated",
+            "value" : "Retry"
           }
         },
         "es" : {
@@ -52247,8 +52247,8 @@
         },
         "en" : {
           "stringUnit" : {
-            "state" : "machine_translated",
-            "value" : ""
+            "state" : "translated",
+            "value" : "×"
           }
         },
         "es" : {

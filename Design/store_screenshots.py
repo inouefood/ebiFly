@@ -5,8 +5,13 @@ Inputs are raw simulator captures in Design/build/raw/<device>_<screen>.png
 (iPhone 17 Pro 1206x2622, iPad Pro 13" 2064x2752, iPhone Duo unfolded 2007x2853).
 
     python3 Design/store_screenshots.py   ->  Design/store/screenshots/<device>/NN_<screen>.jpg
+    python3 Design/store_screenshots.py --locale en
+        reads Design/build/raw/en/<device>_<screen>.png
+        writes Design/store/screenshots/en/<device>/NN_<screen>.jpg
 """
+import argparse
 import subprocess
+from html import escape
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -41,6 +46,16 @@ SLIDES = [
     ("result", "宇宙まで\n飛ばせるか！？", "ランキングで飛距離をきそおう",
      "radial-gradient(circle at 50% 25%,#fff3b0,#f6c445 70%)", "#ffffff", ["stars-ink"]),
 ]
+
+ENGLISH_COPY = {
+    "title": ("Send Ebi Fry\nSky-High!", "Shake and tilt to play"),
+    "make": ("Build Your\nOwn Shrimp", "Choose its tail and body length"),
+    "batter": ("Catch the\nPanko!", "Golden panko counts triple!"),
+    "fry": ("Fry It\nGolden!", "Stop the meter at just the right time"),
+    "shake": ("Shake On\nthe Sauce!", "Shake more to climb faster"),
+    "fly": ("Dodge and\nFly!", "Grab bottles to refuel"),
+    "result": ("Can You\nReach Space?", "See who can fly the farthest"),
+}
 
 
 def asset(name):
@@ -85,11 +100,11 @@ def decorations(kinds, d):
     return "".join(parts)
 
 
-def page(device, slide):
+def page(device, slide, raw_dir=RAW):
     d = DEVICES[device]
     screen, head, sub, bg, fill, deco = slide
     w, h = d["w"], d["h"]
-    raw = RAW / f"{device}_{screen}.png"
+    raw = raw_dir / f"{device}_{screen}.png"
     rw, rh = map(int, subprocess.run(["sips", "-g", "pixelWidth", "-g", "pixelHeight", str(raw)], capture_output=True, text=True)
                  .stdout.split()[-3::2])
     fw = round(w * d["frame"])
@@ -98,7 +113,7 @@ def page(device, slide):
     radius = round(fw * d["radius"])
     stroke = round(d["head"] * 0.085)
     shadow = round(d["head"] * 0.07)
-    lines = "<br>".join(head.split("\n"))
+    lines = "<br>".join(map(escape, head.split("\n")))
     fonts = (ROOT / "fonts").as_uri()
     return f"""<!doctype html><html><head><meta charset="utf-8"><style>
 @font-face {{ font-family: Dela; src: url('{fonts}/DelaGothicOne-Regular.ttf'); }}
@@ -118,21 +133,33 @@ body {{ position: relative; background: {bg}; font-family: ZenBlack, sans-serif;
 </style></head><body>
 {decorations(deco, d)}
 <div class="head">{lines}</div>
-<div class="sub">{sub}</div>
+<div class="sub">{escape(sub)}</div>
 <div class="device"><img src="{raw.as_uri()}"></div>
 </body></html>"""
 
 
 def main():
-    WORK.mkdir(parents=True, exist_ok=True)
-    for device, d in DEVICES.items():
-        out_dir = OUT / device
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--locale", choices=("ja", "en"), default="ja")
+    parser.add_argument("--device", choices=DEVICES, action="append", help="Render only the selected device(s)")
+    args = parser.parse_args()
+    locale = args.locale
+    locale_path = Path() if locale == "ja" else Path(locale)
+    work_dir = WORK / locale_path
+    raw_dir = RAW / locale_path
+    work_dir.mkdir(parents=True, exist_ok=True)
+    for device in args.device or DEVICES:
+        d = DEVICES[device]
+        out_dir = OUT / locale_path / device
         out_dir.mkdir(parents=True, exist_ok=True)
         for i, slide in enumerate(SLIDES, 1):
             name = f"{i:02d}_{slide[0]}"
-            html = WORK / f"{device}_{name}.html"
-            html.write_text(page(device, slide))
-            png = WORK / f"{device}_{name}.png"
+            if locale == "en":
+                screen, _, _, *design = slide
+                slide = (screen, *ENGLISH_COPY[screen], *design)
+            html = work_dir / f"{device}_{name}.html"
+            html.write_text(page(device, slide, raw_dir), encoding="utf-8")
+            png = work_dir / f"{device}_{name}.png"
             subprocess.run(["swift", str(ROOT / "tools" / "pageshot.swift"), str(html), str(png), str(d["w"]), str(d["h"])], check=True)
             # App Store Connect wants opaque images at the exact size: resample (in case of a Retina snapshot) and save as JPEG
             subprocess.run(["sips", "-z", str(d["h"]), str(d["w"]), "-s", "format", "jpeg", "-s", "formatOptions", "92", str(png),
