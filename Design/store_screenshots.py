@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """App Store screenshots: a big, easy-to-read headline over each app screen in a device frame.
 
-Inputs are raw simulator captures in Design/build/raw/<device>_<screen>.png
+Inputs are raw simulator captures in Design/build/raw/<locale>/<device>_<screen>.png
 (iPhone 17 Pro 1206x2622, iPad Pro 13" 2064x2752, iPhone Duo unfolded 2007x2853).
 
-    python3 Design/store_screenshots.py   ->  Design/store/screenshots/<device>/NN_<screen>.jpg
+    python3 Design/store_screenshots.py   ->  Design/store/screenshots/ja/<device>/NN_<screen>.jpg
     python3 Design/store_screenshots.py --locale en
         reads Design/build/raw/en/<device>_<screen>.png
         writes Design/store/screenshots/en/<device>/NN_<screen>.jpg
 """
 import argparse
+import struct
 import subprocess
 from html import escape
 from pathlib import Path
@@ -19,6 +20,7 @@ RAW = ROOT / "build" / "raw"
 ART = ROOT.parent / "ebiFly" / "Assets.xcassets"
 OUT = ROOT / "store" / "screenshots"
 WORK = ROOT / "build" / "screenshots"
+COPY = ROOT / "store_screenshot_copy.tsv"
 
 INK = "#3a2418"
 
@@ -56,6 +58,45 @@ ENGLISH_COPY = {
     "fly": ("Dodge and\nFly!", "Grab bottles to refuel"),
     "result": ("Can You\nReach Space?", "See who can fly the farthest"),
 }
+
+RTL = {"ar", "he", "ur"}
+
+FIT_COPY = """<script>
+document.fonts.ready.then(() => {
+    const headline = document.querySelector(".head");
+    const subtitle = document.querySelector(".sub");
+    const width = document.body.clientWidth;
+    function fit(element, measure, limit) {
+        const size = parseFloat(getComputedStyle(element).fontSize);
+        const fittedSize = size * Math.min(1, limit / measure());
+        element.style.fontSize = Math.floor(fittedSize) + "px";
+    }
+    fit(headline, () => Math.max(...Array.from(headline.children, line => line.getBoundingClientRect().width)), width * 0.89);
+    fit(subtitle, () => subtitle.firstElementChild.getBoundingClientRect().width, width * 0.87);
+    window.storeCaptionReady = true;
+});
+</script>"""
+
+
+def localized_copy():
+    copies = {"en": ENGLISH_COPY}
+    screens = [slide[0] for slide in SLIDES]
+    for number, line in enumerate(COPY.read_text(encoding="utf-8").splitlines(), 1):
+        if not line or line.startswith("#"):
+            continue
+        locale, *fields = line.split("\t")
+        if locale in copies or len(fields) != 2 * len(screens) or any(not field.strip() for field in fields):
+            raise ValueError(f"Invalid screenshot copy on line {number}")
+        copies[locale] = {
+            screen: (head.replace("^", "\n"), subtitle)
+            for screen, head, subtitle in zip(screens, fields[::2], fields[1::2])
+        }
+    return copies
+
+
+def localized_slide(slide, copy):
+    screen, _, _, *design = slide
+    return (screen, *copy[screen], *design) if copy else slide
 
 
 def asset(name):
@@ -100,13 +141,16 @@ def decorations(kinds, d):
     return "".join(parts)
 
 
-def page(device, slide, raw_dir=RAW):
+def page(device, slide, raw_dir=RAW, locale="ja"):
     d = DEVICES[device]
     screen, head, sub, bg, fill, deco = slide
     w, h = d["w"], d["h"]
     raw = raw_dir / f"{device}_{screen}.png"
-    rw, rh = map(int, subprocess.run(["sips", "-g", "pixelWidth", "-g", "pixelHeight", str(raw)], capture_output=True, text=True)
-                 .stdout.split()[-3::2])
+    with raw.open("rb") as capture:
+        header = capture.read(24)
+    if len(header) != 24 or header[:8] != b"\x89PNG\r\n\x1a\n":
+        raise ValueError(f"Expected a PNG capture in {raw}")
+    rw, rh = struct.unpack(">II", header[16:24])
     fw = round(w * d["frame"])
     fh = round(fw * rh / rw)
     bezel = d["bezel"]
@@ -114,8 +158,24 @@ def page(device, slide, raw_dir=RAW):
     stroke = round(d["head"] * 0.085)
     shadow = round(d["head"] * 0.07)
     lines = "<br>".join(map(escape, head.split("\n")))
+    subtitle = escape(sub)
+    script = ""
+    copy_style = ""
+    if locale not in {"ja", "en"}:
+        lines = "".join(f'<span>{escape(line)}</span>' for line in head.split("\n"))
+        subtitle = f"<span>{subtitle}</span>"
+        script = FIT_COPY
+        copy_style = """
+@font-face { font-family: Dela; font-weight: 900; src: url('FONT_PATH/DelaGothicOne-Regular.ttf'); }
+.head { font-family: Dela, system-ui, sans-serif; font-weight: 900; line-height: 1.23;
+  -webkit-text-stroke-width: .07em; text-shadow: .06em .06em 0 #3a2418; letter-spacing: normal; }
+.head span { display: table; width: max-content; margin: 0 auto; white-space: nowrap; }
+.sub { font-family: ZenBlack, system-ui, sans-serif; font-weight: 800; }
+.sub span { display: inline-block; }
+"""
     fonts = (ROOT / "fonts").as_uri()
-    return f"""<!doctype html><html><head><meta charset="utf-8"><style>
+    direction = "rtl" if locale in RTL else "ltr"
+    return f"""<!doctype html><html lang="{escape(locale)}" dir="{direction}"><head><meta charset="utf-8"><style>
 @font-face {{ font-family: Dela; src: url('{fonts}/DelaGothicOne-Regular.ttf'); }}
 @font-face {{ font-family: ZenBlack; src: url('{fonts}/ZenMaruGothic-Black.ttf'); }}
 html, body {{ margin: 0; width: {w}px; height: {h}px; overflow: hidden; }}
@@ -130,21 +190,24 @@ body {{ position: relative; background: {bg}; font-family: ZenBlack, sans-serif;
   border: {bezel}px solid #1b1210; border-radius: {radius + bezel}px; background: #1b1210;
   box-shadow: 0 0 0 {round(bezel * .35)}px {INK}, {round(bezel * .9)}px {round(bezel * .9)}px 0 {round(bezel * .35)}px {INK}; overflow: hidden; }}
 .device img {{ display: block; width: 100%; height: 100%; border-radius: {radius}px; }}
+{copy_style.replace("FONT_PATH", fonts)}
 </style></head><body>
 {decorations(deco, d)}
 <div class="head">{lines}</div>
-<div class="sub">{escape(sub)}</div>
+<div class="sub">{subtitle}</div>
 <div class="device"><img src="{raw.as_uri()}"></div>
+{script}
 </body></html>"""
 
 
 def main():
+    copies = localized_copy()
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--locale", choices=("ja", "en"), default="ja")
+    parser.add_argument("--locale", choices=["ja", *copies], default="ja")
     parser.add_argument("--device", choices=DEVICES, action="append", help="Render only the selected device(s)")
     args = parser.parse_args()
     locale = args.locale
-    locale_path = Path() if locale == "ja" else Path(locale)
+    locale_path = Path(locale)
     work_dir = WORK / locale_path
     raw_dir = RAW / locale_path
     work_dir.mkdir(parents=True, exist_ok=True)
@@ -154,11 +217,9 @@ def main():
         out_dir.mkdir(parents=True, exist_ok=True)
         for i, slide in enumerate(SLIDES, 1):
             name = f"{i:02d}_{slide[0]}"
-            if locale == "en":
-                screen, _, _, *design = slide
-                slide = (screen, *ENGLISH_COPY[screen], *design)
+            slide = localized_slide(slide, copies.get(locale))
             html = work_dir / f"{device}_{name}.html"
-            html.write_text(page(device, slide, raw_dir), encoding="utf-8")
+            html.write_text(page(device, slide, raw_dir, locale), encoding="utf-8")
             png = work_dir / f"{device}_{name}.png"
             subprocess.run(["swift", str(ROOT / "tools" / "pageshot.swift"), str(html), str(png), str(d["w"]), str(d["h"])], check=True)
             # App Store Connect wants opaque images at the exact size: resample (in case of a Retina snapshot) and save as JPEG
