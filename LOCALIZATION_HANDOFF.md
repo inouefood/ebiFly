@@ -1,6 +1,6 @@
 # ローカライズ引き継ぎメモ
 
-ブランチ: `feature/Localize`（未コミット）
+ブランチ: `feature/Localize`
 開発言語は `ja`。String Catalog を使用。
 
 ## これまでにやったこと
@@ -21,16 +21,16 @@
 
 | 状況 | 言語 |
 |---|---|
-| 完了（184/184、32 言語） | en, zh-Hans, zh-Hant, ko, es, es-419, pt-BR, pt-PT, fr, it, de, nl, ru, uk, pl, cs, sk, hu, ro, hr, sl, bg, el, tr, sv, da, nb, fi, ca, he, ar, hi |
-| 未着手（18 言語、knownRegions には追加済み） | th, vi, id, ms, fil, bn, ta, te, mr, gu, kn, ml, pa, ur, kk, lt, lv, et |
+| カタログ完了（184/184、既存 32 言語） | en, zh-Hans, zh-Hant, ko, es, es-419, pt-BR, pt-PT, fr, it, de, nl, ru, uk, pl, cs, sk, hu, ro, hr, sl, bg, el, tr, sv, da, nb, fi, ca, he, ar, hi |
+| カタログ完了（184/184、追加 18 言語） | th, vi, id, ms, fil, bn, ta, te, mr, gu, kn, ml, pa, ur, kk, lt, lv, et |
 | 対象外 | fa（主な市場のイランで AdMob の広告を配信できないため） |
 
-### 残っている修正
-- `%lldパーセント` の 12 言語（de, en, es, es-419, fr, it, ko, nl, pt-BR, pt-PT, zh-Hans, zh-Hant）が `needs_review`。
-  途中で ja ソースに plural（zero/other）が追加されたため、Xcode が自動で plural 構造に移行し、one/zero が needs_review になった。
-  値自体は正しいので、各言語に必要な plural カテゴリ（例: en は one/other）をそろえて state を `translated` にすればよい。
+### 今回の更新
+- `%lldパーセント` の 12 言語（de, en, es, es-419, fr, it, ko, nl, pt-BR, pt-PT, zh-Hans, zh-Hant）を CLDR のカテゴリにそろえ、`translated` にした。
+- 追加 18 言語の全 184 キーを日本語ソースから翻訳し、`translated` にした。JSON の読み込み、キーの網羅、書式指定子、文字種、複数形とデバイスのバリエーションをスクリプトで検証した。
+- `xcodebuild` で iOS Simulator 向けの Debug ビルドを確認した。
 
-## 未着手の言語を翻訳するとき
+## 言語を追加するとき
 
 ### String Catalog の形式
 - Xcode の MCP ツールを使えない場合は `.xcstrings`（JSON）を直接編集してよい。
@@ -41,7 +41,7 @@
   ```
 - plural がある場合は `variations.plural.<category>.stringUnit` を使う。カテゴリは CLDR に従う。
   - 例: ru は one/few/many/other、ar は zero/one/two/few/many/other。
-  - th, vi, id, ms のように数で語形が変わらない言語は other だけ（zero があれば同じ文）でよい。
+  - th, vi, id, ms は other のみ。lt は one/few/many/other、lv は zero/one/other、kk と ur は one/other。
   - 既存の ru / ar を参考にするとよい。
 - iPhone という語を含む 2 キー（`iPhoneをかたむけてよけよう`, `iPhoneをふって%@をかけよう`）は、他の言語に合わせて `variations.device`（iphone / ipad / other）を付ける。
 - **ja のソースエントリは変更しないこと。** 変更すると全言語が needs_review になる。
