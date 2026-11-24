@@ -19,13 +19,13 @@ struct BatterView: View {
             VStack(spacing: 6) {
                 StepsBar(current: 1)
                 HStack {
-                    Pill(label: "のこり", value: "\(scene.timeLeft)", unit: "秒")
+                    Pill(label: String(localized: "のこり"), value: "\(scene.timeLeft)", unit: String(localized: "秒"))
                     Spacer()
                     Pill(label: coat.crumbLabel, value: "\(scene.count)")
                 }
                 Spacer()
                 if !scene.started {
-                    Toast(text: "えびを左右にうごかして\(coat.crumbLabel)をキャッチ", sub: "タップかドラッグで上下左右に動かせる。金色のは3こぶん。水てきに当たると\(BatterScene.waterPenalty)こ落ちる")
+                    Toast(text: String(localized: "えびを左右にうごかして\(coat.crumbLabel)をキャッチ"), sub: String(localized: "タップかドラッグで上下左右に動かせる。金色のは3こぶん。水てきに当たると\(BatterScene.waterPenalty)こ落ちる"))
                 }
             }
             .padding(.horizontal, 18 * s)
@@ -34,7 +34,7 @@ struct BatterView: View {
             .allowsHitTesting(false)
 
             if scene.finished {
-                FinishOverlay(lead: coat.crumbLabel, big: "\(scene.count)こ", trail: "ゲット！", button: "揚げる") {
+                FinishOverlay(lead: coat.crumbLabel, big: String(localized: "\(scene.count)こ"), trail: String(localized: "ゲット！"), button: String(localized: "揚げる")) {
                     game.finishBatter(crumbs: scene.count)
                 }
             }
@@ -285,7 +285,7 @@ final class BatterScene: GameScene, ObservableObject {
             count -= actual
             Haptics.heavy()
             Sound.waterHit.play()
-            popup(actual > 0 ? "-\(actual)" : "びしょっ", color: UIColor(hex: 0x2F7FD0))
+            popup(actual > 0 ? "-\(actual)" : String(localized: "びしょっ"), color: UIColor(hex: 0x2F7FD0))
             shrimp.run(.sequence([.moveBy(x: -5 * u, y: 0, duration: 0.03), .moveBy(x: 10 * u, y: 0, duration: 0.06), .moveBy(x: -5 * u, y: 0, duration: 0.03)]))
         }
         if gained > 0 || lost > 0 {

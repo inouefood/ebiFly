@@ -48,7 +48,7 @@ struct MakeView: View {
                         .overlay(Capsule().stroke(Palette.ink, lineWidth: 2))
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(showAll ? "一覧をとじる" : "ぜんぶ見る")
+                .accessibilityLabel(showAll ? String(localized: "一覧をとじる") : String(localized: "ぜんぶ見る"))
             }
             switch tab {
             case .tail: picker(TailKind.self)
@@ -58,10 +58,10 @@ struct MakeView: View {
             HStack(spacing: 10) {
                 Text("からだ").font(AppFont.black(13 * s)).frame(width: 52 * s, alignment: .leading)
                 HStack(spacing: 14 * s) {
-                    stepButton("−", label: "短くする") { game.changeBody(by: -1) }
+                    stepButton("−", label: String(localized: "短くする")) { game.changeBody(by: -1) }
                         .disabled(game.bodyCount <= Scoring.bodyRange.lowerBound)
                     Text("\(game.bodyCount)").font(AppFont.display(22 * s)).frame(minWidth: 26 * s)
-                    stepButton("＋", label: "長くする") { game.changeBody(by: 1) }
+                    stepButton("＋", label: String(localized: "長くする")) { game.changeBody(by: 1) }
                         .disabled(game.bodyCount >= Scoring.bodyRange.upperBound)
                 }
             }

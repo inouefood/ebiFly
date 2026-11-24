@@ -15,36 +15,36 @@ enum TailKind: String, CaseIterable, Codable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .normal: return "ノーマル"
-        case .heart: return "ハート"
-        case .blue: return "あお"
-        case .purple: return "むらさき"
-        case .stripe: return "しましま"
-        case .dots: return "みずたま"
-        case .leaf: return "はっぱ"
-        case .clover: return "よつば"
-        case .sakura: return "さくら"
-        case .ribbon: return "リボン"
-        case .fish: return "さかな"
-        case .star: return "ほし"
-        case .maple: return "もみじ"
-        case .ginkgo: return "いちょう"
-        case .shell: return "かいがら"
-        case .butterfly: return "ちょうちょ"
-        case .moon: return "みかづき"
-        case .bolt: return "いなずま"
-        case .flame: return "ほのお"
-        case .snow: return "ゆき"
-        case .sun: return "たいよう"
-        case .wings: return "つばさ"
-        case .peacock: return "くじゃく"
-        case .rainbow: return "にじいろ"
-        case .silver: return "ぎん"
-        case .rocket: return "ロケット"
-        case .crown: return "おうかん"
-        case .gold: return "きん"
-        case .gem: return "ほうせき"
-        case .galaxy: return "ぎんが"
+        case .normal: return String(localized: "ノーマル")
+        case .heart: return String(localized: "ハート")
+        case .blue: return String(localized: "あお")
+        case .purple: return String(localized: "むらさき")
+        case .stripe: return String(localized: "しましま")
+        case .dots: return String(localized: "みずたま")
+        case .leaf: return String(localized: "はっぱ")
+        case .clover: return String(localized: "よつば")
+        case .sakura: return String(localized: "さくら")
+        case .ribbon: return String(localized: "リボン")
+        case .fish: return String(localized: "さかな")
+        case .star: return String(localized: "ほし")
+        case .maple: return String(localized: "もみじ")
+        case .ginkgo: return String(localized: "いちょう")
+        case .shell: return String(localized: "かいがら")
+        case .butterfly: return String(localized: "ちょうちょ")
+        case .moon: return String(localized: "みかづき")
+        case .bolt: return String(localized: "いなずま")
+        case .flame: return String(localized: "ほのお")
+        case .snow: return String(localized: "ゆき")
+        case .sun: return String(localized: "たいよう")
+        case .wings: return String(localized: "つばさ")
+        case .peacock: return String(localized: "くじゃく")
+        case .rainbow: return String(localized: "にじいろ")
+        case .silver: return String(localized: "ぎん")
+        case .rocket: return String(localized: "ロケット")
+        case .crown: return String(localized: "おうかん")
+        case .gold: return String(localized: "きん")
+        case .gem: return String(localized: "ほうせき")
+        case .galaxy: return String(localized: "ぎんが")
         }
     }
 
@@ -81,9 +81,9 @@ enum Obstacle: String, Codable, CaseIterable {
 
     var displayName: String {
         switch self {
-        case .bird: return "鳥"
-        case .plane: return "飛行機"
-        case .meteor: return "いん石"
+        case .bird: return String(localized: "鳥")
+        case .plane: return String(localized: "飛行機")
+        case .meteor: return String(localized: "いん石")
         }
     }
 }
@@ -129,22 +129,22 @@ enum Scoring {
 
     static func sauceLabel(shakes: Int) -> String {
         switch shakes {
-        case ..<10: return "ちょろちょろ"
-        case ..<20: return "ぐんぐん"
-        case ..<30: return "びゅーん"
-        default: return "ロケット"
+        case ..<10: return String(localized: "ちょろちょろ")
+        case ..<20: return String(localized: "ぐんぐん")
+        case ..<30: return String(localized: "びゅーん")
+        default: return String(localized: "ロケット")
         }
     }
 
     static func fryVerdict(_ v: Double) -> (label: String, multiplier: Double) {
-        if (0.42...0.58).contains(v) { return ("きつね色！", 1.5) }
-        if (0.3...0.7).contains(v) { return ("いい感じ", 1.2) }
-        return v < 0.3 ? ("ちょっと生…", 0.8) : ("こげた…", 0.7)
+        if (0.42...0.58).contains(v) { return (String(localized: "きつね色！"), 1.5) }
+        if (0.3...0.7).contains(v) { return (String(localized: "いい感じ"), 1.2) }
+        return v < 0.3 ? (String(localized: "ちょっと生…"), 0.8) : (String(localized: "こげた…"), 0.7)
     }
 
     static let ranks: [(limit: Int, name: String)] = [
-        (500, "生えび"), (1200, "見習いフライ"), (2000, "きつね色フライ"),
-        (3000, "雲ごえフライ"), (5000, "成層圏フライ"), (.max, "宇宙えびフライ"),
+        (500, String(localized: "生えび")), (1200, String(localized: "見習いフライ")), (2000, String(localized: "きつね色フライ")),
+        (3000, String(localized: "雲ごえフライ")), (5000, String(localized: "成層圏フライ")), (.max, String(localized: "宇宙えびフライ")),
     ]
 
     static func rank(for distance: Int) -> String {

@@ -1,0 +1,942 @@
+{
+  "sourceLanguage" : "ja",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "comment" : "Bundle display name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "جمبري مقلي"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Скарида пане"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "চিংড়ি ভাজা"
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Gamba Fregida"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Krevetka"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Sprød Reje"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Backgarnele"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Πανέ Γαρίδα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Ebi Fry"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Gamba Frita"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Camarón Frito"
+          }
+        },
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Praekrevett"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Rapupuikko"
+          }
+        },
+        "fil" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pritong Hipon"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Crevette frite"
+          }
+        },
+        "gu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "તળેલું ઝીંગું"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "שרימפ מטוגן"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "झींगा फ़्राई"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Pohani škamp"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Rántott rák"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Udang Goreng"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Gambero Fritto"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "えびフライ"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Асшаян фри"
+          }
+        },
+        "kn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ಸೀಗಡಿ ಫ್ರೈ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "새우튀김"
+          }
+        },
+        "lt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kepta krevetė"
+          }
+        },
+        "lv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cepta garnele"
+          }
+        },
+        "ml" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ചെമ്മീൻ ഫ്രൈ"
+          }
+        },
+        "mr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "कोळंबी फ्राय"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Udang Goreng"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Sprøreke"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Krokante garnaal"
+          }
+        },
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਝੀਂਗਾ ਫਰਾਈ"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Smażona krewetka"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Camarão Frito"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Camarão Panado"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Crevete pane"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Креветка-фри"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Krevetka"
+          }
+        },
+        "sl" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Ocvrti škamp"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Panerad räka"
+          }
+        },
+        "ta" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "இறால் வறுவல்"
+          }
+        },
+        "te" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "రొయ్య వేపుడు"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "กุ้งทอด"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Pane Karides"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Креветка-фрі"
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تلا جھینگا"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tôm chiên"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "炸虾"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "炸蝦"
+          }
+        }
+      }
+    },
+    "CFBundleName" : {
+      "comment" : "Bundle name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "جمبري مقلي"
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Скарида пане"
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "চিংড়ি ভাজা"
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Gamba Fregida"
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Krevetka"
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Sprød Reje"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Backgarnele"
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Πανέ Γαρίδα"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Ebi Fry"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Gamba Frita"
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Camarón Frito"
+          }
+        },
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Praekrevett"
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Rapupuikko"
+          }
+        },
+        "fil" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pritong Hipon"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Crevette frite"
+          }
+        },
+        "gu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "તળેલું ઝીંગું"
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "שרימפ מטוגן"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "झींगा फ़्राई"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Pohani škamp"
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Rántott rák"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Udang Goreng"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Gambero Fritto"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "ebiFly"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Асшаян фри"
+          }
+        },
+        "kn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ಸೀಗಡಿ ಫ್ರೈ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "새우튀김"
+          }
+        },
+        "lt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kepta krevetė"
+          }
+        },
+        "lv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cepta garnele"
+          }
+        },
+        "ml" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ചെമ്മീൻ ഫ്രൈ"
+          }
+        },
+        "mr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "कोळंबी फ्राय"
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Udang Goreng"
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Sprøreke"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Krokante garnaal"
+          }
+        },
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਝੀਂਗਾ ਫਰਾਈ"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Smażona krewetka"
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Camarão Frito"
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Camarão Panado"
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Crevete pane"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Креветка-фри"
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Krevetka"
+          }
+        },
+        "sl" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Ocvrti škamp"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Panerad räka"
+          }
+        },
+        "ta" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "இறால் வறுவல்"
+          }
+        },
+        "te" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "రొయ్య వేపుడు"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "กุ้งทอด"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Pane Karides"
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Креветка-фрі"
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تلا جھینگا"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tôm chiên"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "炸虾"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "炸蝦"
+          }
+        }
+      }
+    },
+    "NSUserTrackingUsageDescription" : {
+      "comment" : "Privacy - Tracking Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "تُستخدم بياناتك لعرض إعلانات تناسبك."
+          }
+        },
+        "bg" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Така можем да ти показваме реклами, които са интересни за теб."
+          }
+        },
+        "bn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "আপনার উপযোগী বিজ্ঞাপন দেখাতে এই তথ্য ব্যবহার করা হয়।"
+          }
+        },
+        "ca" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "S’utilitza per mostrar-te anuncis que t’interessin."
+          }
+        },
+        "cs" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Díky tomu ti můžeme ukazovat reklamy, které tě zajímají."
+          }
+        },
+        "da" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Bruges til at vise dig reklamer, der passer til dig."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Wird verwendet, um dir Werbung zu zeigen, die zu dir passt."
+          }
+        },
+        "el" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Χρησιμοποιείται για να σου δείχνουμε διαφημίσεις που σου ταιριάζουν."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Your data is used to show you ads that are more relevant to you."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Se usa para mostrarte anuncios que te interesen."
+          }
+        },
+        "es-419" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Se usa para mostrarte anuncios que te interesen."
+          }
+        },
+        "et" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seda teavet kasutatakse teile sobivate reklaamide näitamiseks."
+          }
+        },
+        "fi" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Tietojasi käytetään, jotta voimme näyttää sinulle sopivampia mainoksia."
+          }
+        },
+        "fil" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ginagamit ang impormasyong ito para magpakita ng mga ad na angkop sa iyo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Utilisé pour t’afficher des publicités adaptées à tes goûts."
+          }
+        },
+        "gu" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "તમને અનુરૂપ જાહેરાતો બતાવવા માટે આ માહિતી વપરાય છે."
+          }
+        },
+        "he" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "המידע משמש להצגת פרסומות שמתאימות לך."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "इसका इस्तेमाल तुम्हें तुम्हारी पसंद के विज्ञापन दिखाने के लिए किया जाता है।"
+          }
+        },
+        "hr" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Tako ti možemo prikazivati oglase koji te zanimaju."
+          }
+        },
+        "hu" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Arra használjuk, hogy hozzád illő hirdetéseket mutassunk."
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informasi ini digunakan untuk menampilkan iklan yang relevan bagi Anda."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Serve a mostrarti pubblicità più adatte a te."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "あなたに合った広告を表示するために使用します。"
+          }
+        },
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Бұл ақпарат сізге сәйкес жарнамаларды көрсету үшін пайдаланылады."
+          }
+        },
+        "kn" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ನಿಮಗೆ ಹೊಂದುವ ಜಾಹೀರಾತುಗಳನ್ನು ತೋರಿಸಲು ಈ ಮಾಹಿತಿಯನ್ನು ಬಳಸಲಾಗುತ್ತದೆ."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "사용자에게 맞는 광고를 표시하는 데 사용됩니다."
+          }
+        },
+        "lt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ši informacija naudojama, kad jums būtų rodomos tinkamos reklamos."
+          }
+        },
+        "lv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Šī informācija tiek izmantota, lai rādītu jums atbilstošas reklāmas."
+          }
+        },
+        "ml" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "നിങ്ങൾക്കു യോജിച്ച പരസ്യങ്ങൾ കാണിക്കാൻ ഈ വിവരങ്ങൾ ഉപയോഗിക്കും."
+          }
+        },
+        "mr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "तुमच्यासाठी उपयुक्त जाहिराती दाखवण्यासाठी ही माहिती वापरली जाते."
+          }
+        },
+        "ms" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maklumat ini digunakan untuk memaparkan iklan yang relevan kepada anda."
+          }
+        },
+        "nb" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Brukes til å vise deg reklame som passer for deg."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Wordt gebruikt om je advertenties te tonen die bij je passen."
+          }
+        },
+        "pa" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ਤੁਹਾਡੇ ਲਈ ਢੁਕਵੇਂ ਇਸ਼ਤਿਹਾਰ ਵਿਖਾਉਣ ਵਾਸਤੇ ਇਹ ਜਾਣਕਾਰੀ ਵਰਤੀ ਜਾਂਦੀ ਹੈ।"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Dzięki temu możemy pokazywać reklamy dopasowane do Ciebie."
+          }
+        },
+        "pt-BR" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Usamos isso para mostrar anúncios que combinam com você."
+          }
+        },
+        "pt-PT" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Serve para te mostrar anúncios mais adequados a ti."
+          }
+        },
+        "ro" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Folosim datele ca să-ți arătăm reclame potrivite pentru tine."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Это нужно, чтобы показывать рекламу, которая подходит именно тебе."
+          }
+        },
+        "sk" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Používa sa na zobrazovanie reklám, ktoré ťa môžu zaujímať."
+          }
+        },
+        "sl" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Tako ti lahko prikazujemo oglase, ki te zanimajo."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Används för att visa reklam som passar dig."
+          }
+        },
+        "ta" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "உங்களுக்குப் பொருத்தமான விளம்பரங்களைக் காட்ட இந்தத் தகவல் பயன்படுத்தப்படுகிறது."
+          }
+        },
+        "te" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "మీకు సరిపడే ప్రకటనలు చూపించడానికి ఈ సమాచారం ఉపయోగించబడుతుంది."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ใช้เพื่อแสดงโฆษณาที่ตรงกับความสนใจของคุณ"
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Verilerin sana daha uygun reklamlar göstermek için kullanılır."
+          }
+        },
+        "uk" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "Це потрібно, щоб показувати рекламу, яка цікава саме тобі."
+          }
+        },
+        "ur" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "یہ معلومات آپ کے لیے موزوں اشتہارات دکھانے کے لیے استعمال کی جاتی ہیں۔"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thông tin được dùng để hiển thị quảng cáo phù hợp với bạn."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "用于向你展示更适合你的广告。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "machine_translated",
+            "value" : "用於顯示適合你的廣告。"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.3"
+}

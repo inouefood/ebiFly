@@ -18,7 +18,7 @@ struct TitleView: View {
                         .background(RoundedRectangle(cornerRadius: 10).fill(Palette.accent))
                         .overlay(RoundedRectangle(cornerRadius: 10).stroke(Palette.ink, lineWidth: 3))
                         .rotationEffect(.degrees(-4))
-                    OutlinedText(text: "えびフライ", font: AppFont.display(52 * s), width: 3.5, shadow: 5)
+                    OutlinedText(text: String(localized: "えびフライ"), font: AppFont.display(52 * s), width: 3.5, shadow: 5)
                 }
                 .padding(.top, 40 * s)
                 Spacer()
@@ -289,7 +289,7 @@ final class TitleScene: GameScene, ObservableObject {
         node.position = CGPoint(x: min(max(p.x, 60 * u), size.width - 60 * u), y: p.y + 18 * u)
         node.zPosition = 5
         for (dx, dy) in [(-2, 0), (2, 0), (0, -2), (0, 2), (-1.5, -1.5), (1.5, 1.5), (-1.5, 1.5), (1.5, -1.5)] as [(CGFloat, CGFloat)] {
-            let o = SKLabelNode(text: "ポーン！")
+            let o = SKLabelNode(text: String(localized: "ポーン！"))
             o.fontName = AppFont.displayName
             o.fontSize = 22 * u
             o.fontColor = UIColor(hex: 0x3A2418)
@@ -297,7 +297,7 @@ final class TitleScene: GameScene, ObservableObject {
             o.zPosition = 0
             node.addChild(o)
         }
-        let label = SKLabelNode(text: "ポーン！")
+        let label = SKLabelNode(text: String(localized: "ポーン！"))
         label.fontName = AppFont.displayName
         label.fontSize = 22 * u
         label.fontColor = .white

@@ -19,7 +19,7 @@ struct ShakeView: View {
             VStack(spacing: 0) {
                 StepsBar(current: 3)
                 Text("\(sauce.displayName)をかける").font(AppFont.display(24 * s)).foregroundStyle(Palette.ink).padding(.top, 4)
-                Pill(label: "のこり", value: "\(scene.timeLeft)", unit: "秒")
+                Pill(label: String(localized: "のこり"), value: "\(scene.timeLeft)", unit: String(localized: "秒"))
                     .padding(.top, 6 * s)
                     .opacity(scene.started ? 1 : 0.5)
                 Spacer()
@@ -41,9 +41,9 @@ struct ShakeView: View {
                     if scene.finished {
                         Color.clear
                     } else if scene.started {
-                        Toast(text: "もっとふって！")
+                        Toast(text: String(localized: "もっとふって！"))
                     } else {
-                        Toast(text: "iPhoneをふって\(sauce.displayName)をかけよう", sub: "ふった回数で飛ぶ高さと上昇スピードがアップ")
+                        Toast(text: String(localized: "iPhoneをふって\(sauce.displayName)をかけよう"), sub: String(localized: "ふった回数で飛ぶ高さと上昇スピードがアップ"))
                     }
                 }
                 .frame(minHeight: 56 * s)
@@ -62,8 +62,8 @@ struct ShakeView: View {
             }
 
             if scene.finished {
-                FinishOverlay(lead: "シェイク", big: "\(scene.shakes)回",
-                              trail: "\(sauce.shortName)「\(Scoring.sauceLabel(shakes: scene.shakes))」", button: "とばす！") {
+                FinishOverlay(lead: String(localized: "シェイク"), big: String(localized: "\(scene.shakes)回"),
+                              trail: String(localized: "\(sauce.shortName)「\(Scoring.sauceLabel(shakes: scene.shakes))」"), button: String(localized: "とばす！")) {
                     game.finishShake(scene.shakes)
                 }
             }

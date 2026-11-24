@@ -7,9 +7,9 @@ enum ItemCategory: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     var label: String {
         switch self {
-        case .tail: return "しっぽ"
-        case .coat: return "ころも"
-        case .sauce: return "ソース"
+        case .tail: return String(localized: "しっぽ")
+        case .coat: return String(localized: "ころも")
+        case .sauce: return String(localized: "ソース")
         }
     }
     /// UserDefaults key of the item in use ("tail" predates the others).
@@ -66,16 +66,16 @@ enum CoatKind: String, Collectible {
 
     var displayName: String {
         switch self {
-        case .plain: return "ふつう"
-        case .sesame: return "ごま"
-        case .nori: return "あおのり"
-        case .cheese: return "チーズ"
-        case .curry: return "カレー"
-        case .matcha: return "まっちゃ"
-        case .cornflake: return "コーンフレーク"
-        case .sprinkle: return "カラフルスプレー"
-        case .charcoal: return "たけすみ"
-        case .gold: return "きんぱく"
+        case .plain: return String(localized: "ふつう")
+        case .sesame: return String(localized: "ごま")
+        case .nori: return String(localized: "あおのり")
+        case .cheese: return String(localized: "チーズ")
+        case .curry: return String(localized: "カレー")
+        case .matcha: return String(localized: "まっちゃ")
+        case .cornflake: return String(localized: "コーンフレーク")
+        case .sprinkle: return String(localized: "カラフルスプレー")
+        case .charcoal: return String(localized: "たけすみ")
+        case .gold: return String(localized: "きんぱく")
         }
     }
 
@@ -97,7 +97,7 @@ enum CoatKind: String, Collectible {
     /// What falls in the batter step (sesame seeds, nori flakes, ...); the plain coat uses the panko crumb.
     var crumbName: String { self == .plain ? "crumb" : "crumb-\(rawValue)" }
     /// What the batter step calls the falling bits ("パン粉" for the plain coat).
-    var crumbLabel: String { self == .plain ? "パン粉" : displayName }
+    var crumbLabel: String { self == .plain ? String(localized: "パン粉") : displayName }
 
     /// Image drawn over each ball; nil for the plain coat.
     var overlayName: String? { self == .plain ? nil : "coat-\(rawValue)" }
@@ -111,24 +111,24 @@ enum SauceKind: String, Collectible {
 
     var displayName: String {
         switch self {
-        case .sauce: return "ソース"
-        case .mayo: return "マヨネーズ"
-        case .ketchup: return "ケチャップ"
-        case .tartar: return "タルタル"
-        case .soy: return "しょうゆ"
-        case .salt: return "しお"
-        case .lemon: return "レモン"
-        case .curry: return "カレー"
-        case .choco: return "チョコ"
-        case .honey: return "はちみつ"
+        case .sauce: return String(localized: "ソース")
+        case .mayo: return String(localized: "マヨネーズ")
+        case .ketchup: return String(localized: "ケチャップ")
+        case .tartar: return String(localized: "タルタル")
+        case .soy: return String(localized: "しょうゆ")
+        case .salt: return String(localized: "しお")
+        case .lemon: return String(localized: "レモン")
+        case .curry: return String(localized: "カレー")
+        case .choco: return String(localized: "チョコ")
+        case .honey: return String(localized: "はちみつ")
         }
     }
 
     /// Short name for the flight HUD ("マヨ ぐんぐん").
     var shortName: String {
         switch self {
-        case .mayo: return "マヨ"
-        case .ketchup: return "ケチャ"
+        case .mayo: return String(localized: "マヨ")
+        case .ketchup: return String(localized: "ケチャ")
         default: return displayName
         }
     }
