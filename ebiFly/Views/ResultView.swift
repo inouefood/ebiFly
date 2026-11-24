@@ -56,7 +56,7 @@ struct ResultView: View {
                     .background(Capsule().fill(Palette.green))
                     .padding(.top, 6)
             }
-            Text(r.hitBy.map { "\($0.displayName)にぶつかった" } ?? "燃料をつかいきるまで とんだ！")
+            Text(r.hitBy.map { String(localized: "\($0.displayName)にぶつかった") } ?? String(localized: "燃料をつかいきるまで とんだ！"))
                 .font(AppFont.black(13 * s)).foregroundStyle(Palette.ink)
                 .padding(.top, 6)
 
@@ -97,11 +97,11 @@ struct ResultView: View {
     private func breakdown(_ r: FlightResult) -> some View {
         let (label, mult) = Scoring.fryVerdict(r.fry)
         let rows: [(String, String)] = [
-            ("パン粉", "\(r.crumbs)こ"),
-            ("揚げ加減", "\(label) ×\(mult.formatted())"),
-            ("シェイク", "\(r.shakes)回（上昇 \(Int(Scoring.climbSpeed(shakes: r.shakes)))m/s）"),
-            ("燃料", "\(r.maxDistance.formatted())m ぶん"),
-            ("ソースほきゅう", "\(r.refuels)こ"),
+            (String(localized: "パン粉"), String(localized: "\(r.crumbs)こ")),
+            (String(localized: "揚げ加減"), "\(label) ×\(mult.formatted())"),
+            (String(localized: "シェイク"), String(localized: "\(r.shakes)回（上昇 \(Int(Scoring.climbSpeed(shakes: r.shakes)))m/s）")),
+            (String(localized: "燃料"), String(localized: "\(r.maxDistance.formatted())m ぶん")),
+            (String(localized: "ソースほきゅう"), String(localized: "\(r.refuels)こ")),
         ]
         return VStack(spacing: 2) {
             ForEach(rows, id: \.0) { row in

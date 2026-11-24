@@ -11,7 +11,7 @@ struct RecordsView: View {
             ScrollView {
                 VStack(spacing: 12 * s) {
                     Text("きろく").font(AppFont.display(24 * s))
-                    card("ベスト") {
+                    card(String(localized: "ベスト")) {
                         HStack(alignment: .firstTextBaseline, spacing: 4) {
                             OutlinedText(text: game.best.formatted(), font: AppFont.display(40 * s), fill: Palette.accent, width: 2.5)
                             OutlinedText(text: "m", font: AppFont.display(20 * s), fill: Palette.accent, width: 2)
@@ -21,7 +21,7 @@ struct RecordsView: View {
                             .padding(.horizontal, 12).padding(.vertical, 1)
                             .background(RoundedRectangle(cornerRadius: 8).fill(Palette.ink))
                     }
-                    card("さいきん") {
+                    card(String(localized: "さいきん")) {
                         if game.history.isEmpty {
                             Text("まだきろくがありません。あそんでみよう。")
                                 .font(AppFont.body(13 * s)).foregroundStyle(Palette.muted)
@@ -40,7 +40,7 @@ struct RecordsView: View {
                             }
                         }
                     }
-                    card("コレクション") {
+                    card(String(localized: "コレクション")) {
                         collection(TailKind.self)
                         collection(CoatKind.self)
                         collection(SauceKind.self)
@@ -88,7 +88,7 @@ struct RecordsView: View {
                         }
                     }
                     .aspectRatio(1, contentMode: .fit)
-                    .accessibilityLabel(game.owns(item) ? item.displayName : "まだもっていない")
+                    .accessibilityLabel(game.owns(item) ? item.displayName : String(localized: "まだもっていない"))
                 }
             }
         }

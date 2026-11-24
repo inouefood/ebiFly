@@ -41,8 +41,8 @@ struct FlyView: View {
                 if showHint {
                     VStack(spacing: 8 * s) {
                         MotionHint(kind: scene.usesTilt ? .tilt : .drag)
-                        Toast(text: scene.usesTilt ? "iPhoneをかたむけてよけよう" : "左右にドラッグしてよけよう",
-                              sub: "\(sauce.shortName)のボトルで燃料ほきゅう。ぶつかったらそこまで")
+                        Toast(text: scene.usesTilt ? String(localized: "iPhoneをかたむけてよけよう") : String(localized: "左右にドラッグしてよけよう"),
+                              sub: String(localized: "\(sauce.shortName)のボトルで燃料ほきゅう。ぶつかったらそこまで"))
                     }
                     .transition(.opacity)
                 }
@@ -57,14 +57,14 @@ struct FlyView: View {
             .allowsHitTesting(false)
 
             if let n = scene.countdown {
-                OutlinedText(text: n == 0 ? "発射！" : "\(n)", font: AppFont.display((n == 0 ? 56 : 84) * s),
+                OutlinedText(text: n == 0 ? String(localized: "発射！") : "\(n)", font: AppFont.display((n == 0 ? 56 : 84) * s),
                              fill: n == 0 ? Palette.accent : .white, width: 3, shadow: 4)
                     .id(n)
                     .transition(.asymmetric(insertion: .scale(scale: 2.2).combined(with: .opacity),
                                             removal: .scale(scale: 0.6).combined(with: .opacity)))
                     .offset(y: -40 * s)
                     .allowsHitTesting(false)
-                    .accessibilityLabel(n == 0 ? "発射" : "\(n)")
+                    .accessibilityLabel(n == 0 ? String(localized: "発射") : "\(n)")
             }
 
             if let hit = scene.crashedInto {
@@ -76,7 +76,7 @@ struct FlyView: View {
                 ZStack {
                     Color(hex: 0xFFF6DC, alpha: 0.6).ignoresSafeArea()
                     VStack(spacing: 8) {
-                        OutlinedText(text: outcome.hitBy == nil ? "燃料切れ！" : "ぶつかった！",
+                        OutlinedText(text: outcome.hitBy == nil ? String(localized: "燃料切れ！") : String(localized: "ぶつかった！"),
                                      font: AppFont.display(40 * s), fill: Palette.accent, width: 2.5)
                         Text("\(outcome.distance.formatted()) m").font(AppFont.black(18 * s)).foregroundStyle(Palette.ink)
                     }
@@ -123,7 +123,7 @@ extension FlyView {
         ZStack {
             Color(hex: 0x1B1410, alpha: 0.45).ignoresSafeArea()
             VStack(spacing: 12 * s) {
-                OutlinedText(text: "\(hit.displayName)にぶつかった！", font: AppFont.display(22 * s), fill: Palette.accent, width: 2.5)
+                OutlinedText(text: String(localized: "\(hit.displayName)にぶつかった！"), font: AppFont.display(22 * s), fill: Palette.accent, width: 2.5)
                 Text("\(scene.altitude.formatted()) m").font(AppFont.display(22 * s)).foregroundStyle(Palette.ink)
                 Text("広告を見ると ここからつづきを飛べます\n（1回のフライトで1回まで）")
                     .font(AppFont.body(13 * s))
@@ -218,7 +218,7 @@ struct FuelGauge: View {
 
 final class FlyScene: GameScene, ObservableObject {
     @Published private(set) var altitude = 0
-    @Published private(set) var zone = "キッチン"
+    @Published private(set) var zone = String(localized: "キッチン")
     @Published private(set) var outcome: FlightOutcome?
     /// Set when the shrimp hit something and a "continue with an ad" offer is open; the flight is frozen meanwhile.
     @Published private(set) var crashedInto: Obstacle?
@@ -301,7 +301,7 @@ final class FlyScene: GameScene, ObservableObject {
         (4500, 0x1B2F7A, 0x2F5BB5), (6500, 0x070B26, 0x141C4A),
     ]
     private static let zones: [(Int, String)] = [
-        (0, "キッチン"), (200, "鳥のエリア"), (1500, "飛行機のエリア"), (3400, "いん石のエリア"), (5500, "宇宙"),
+        (0, String(localized: "キッチン")), (200, String(localized: "鳥のエリア")), (1500, String(localized: "飛行機のエリア")), (3400, String(localized: "いん石のエリア")), (5500, String(localized: "宇宙")),
     ]
 
     init(tail: TailKind, bodyCount: Int, fry: Double, climbSpeed: Double, maxDistance: Int,
@@ -616,7 +616,7 @@ final class FlyScene: GameScene, ObservableObject {
         let node = SKNode()
         node.position = CGPoint(x: min(max(p.x, 60 * u), size.width - 60 * u), y: p.y + 10 * u)
         node.zPosition = 30
-        let text = "+燃料"
+        let text = String(localized: "+燃料")
         for (dx, dy) in [(-2, 0), (2, 0), (0, -2), (0, 2), (-1.5, -1.5), (1.5, 1.5), (-1.5, 1.5), (1.5, -1.5)] as [(CGFloat, CGFloat)] {
             let outline = SKLabelNode(text: text)
             outline.fontName = AppFont.displayName

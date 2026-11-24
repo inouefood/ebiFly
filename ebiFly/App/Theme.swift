@@ -116,7 +116,11 @@ struct OutlinedText: View {
             outline
             Text(text).font(font).foregroundStyle(fill)
         }
-        .fixedSize()
+        // Single line that shrinks to the available width, so longer translations
+        // (e.g. the title logo) don't run off the screen. Unchanged when it fits.
+        .lineLimit(1)
+        .minimumScaleFactor(0.4)
+        .fixedSize(horizontal: false, vertical: true)
     }
 
     private var outline: some View {
@@ -131,7 +135,7 @@ struct OutlinedText: View {
 }
 
 struct StepsBar: View {
-    static let names = ["つくる", "衣", "揚げる", "ソース", "とばす"]
+    static let names = [String(localized: "つくる"), String(localized: "衣"), String(localized: "揚げる"), String(localized: "ソース"), String(localized: "とばす")]
     let current: Int
     var dark = false
     @Environment(\.uiScale) private var s

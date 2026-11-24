@@ -133,7 +133,7 @@ struct ShopView: View {
                 // same width as "やめる" on purpose: spending points can't be undone, so it isn't pushed harder
                 // than backing out (the price is on the plate, which keeps this label short enough to fit)
                 Button { exchange(t) } label: {
-                    Text(short > 0 ? "あと\(short.formatted())pt" : "こうかん")
+                    Text(short > 0 ? String(localized: "あと\(short.formatted())pt") : String(localized: "こうかん"))
                         .lineLimit(1).minimumScaleFactor(0.7)
                 }
                 .buttonStyle(GameButtonStyle(wide: true, size: 16))
@@ -159,13 +159,13 @@ struct ShopView: View {
         let usable = affordable || discountShort <= 0
         let label: String
         if !usable {
-            label = "広告で\(ItemTrial.discountLabel)引き：あと\(discountShort.formatted())pt"
+            label = String(localized: "広告で\(ItemTrial.discountLabel)引き：あと\(discountShort.formatted())pt")
         } else if !(ads.isShopRewardedReady || watchingAd) {
-            label = "広告をじゅんび中…"
+            label = String(localized: "広告をじゅんび中…")
         } else if affordable {
-            label = "広告を見てもらう（ポイントはへらない）"
+            label = String(localized: "広告を見てもらう（ポイントはへらない）")
         } else {
-            label = "広告を見て\(ItemTrial.discountLabel)引き（\(t.discountedPrice.formatted())pt）"
+            label = String(localized: "広告を見て\(ItemTrial.discountLabel)引き（\(t.discountedPrice.formatted())pt）")
         }
         return Button { watchAd(t) } label: {
             HStack(spacing: 6 * s) {
@@ -175,8 +175,8 @@ struct ShopView: View {
         }
         .buttonStyle(GameButtonStyle(kind: .ghost, wide: true, size: 14))
         .disabled(!usable || !ads.isShopRewardedReady || watchingAd)
-        .accessibilityHint(!usable ? "" : affordable ? "広告を1回見ると「\(t.name)」がもらえます"
-                           : "広告を1回見ると\(t.discountedPrice)ポイントで「\(t.name)」とこうかんできます")
+        .accessibilityHint(!usable ? "" : affordable ? String(localized: "広告を1回見ると「\(t.name)」がもらえます")
+                           : String(localized: "広告を1回見ると\(t.discountedPrice)ポイントで「\(t.name)」とこうかんできます"))
     }
 
     private func watched(_ t: ItemTrial) -> Int {
@@ -205,7 +205,7 @@ struct ShopView: View {
             if done {
                 celebrate(t)
             } else {
-                show("あと\(t.adsNeeded - watched(t))回で「\(t.name)」をゲット！")
+                show(String(localized: "あと\(t.adsNeeded - watched(t))回で「\(t.name)」をゲット！"))
             }
         }
     }
@@ -265,7 +265,7 @@ struct ShopView: View {
     private func celebrate(_ t: ItemTrial) {
         Haptics.success()
         Sound.stepClear.play()
-        show("「\(t.name)」をゲット！")
+        show(String(localized: "「\(t.name)」をゲット！"))
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
             withAnimation(.spring(response: 0.35, dampingFraction: 0.6)) { popPlate = false }
         }
