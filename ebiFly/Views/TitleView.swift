@@ -4,11 +4,12 @@ import SwiftUI
 struct TitleView: View {
     @EnvironmentObject private var game: GameModel
     @Environment(\.uiScale) private var s
+    @Environment(\.gameColumnWidth) private var columnWidth
     @StateObject private var scene = TitleScene()
 
     var body: some View {
         ZStack {
-            SpriteView(scene: scene, options: [.ignoresSiblingOrder]).ignoresSafeArea()
+            FullWidthSpriteView(scene: scene).ignoresSafeArea()
             VStack(spacing: 0) {
                 VStack(spacing: 6 * s) {
                     Text("とべ！")
@@ -41,6 +42,7 @@ struct TitleView: View {
                 .padding(.top, 14 * s)
                 .padding(.bottom, 24 * s)
             }
+            .frame(maxWidth: columnWidth)
         }
         .backdrop(.gradient(top: Color(hex: 0x7FD3FF), bottom: Color(hex: 0xFFE9A8)))
         .onDisappear { scene.muted = true }
@@ -81,29 +83,43 @@ final class TitleScene: GameScene, ObservableObject {
         var knocked = false
     }
 
+    private struct Cloud {
+        let node: SKNode
+        let anchor: CGPoint
+    }
+
+    private let sky = SKSpriteNode(texture: Tex.gradient(CGSize(width: 4, height: 64),
+        top: UIColor(hex: 0x7FD3FF), bottom: UIColor(hex: 0xFFE9A8)))
+    private var clouds: [Cloud] = []
     private var flyers: [Flyer] = []
     /// Set when leaving the title: no more collisions (so no sound or haptics) while it fades out.
     var muted = false
     private var obstacles: [SKSpriteNode] = []
     private static let maxObstacles = 5
 
+    init() {
+        super.init(playsFullWidth: true)
+    }
+
+    required init?(coder aDecoder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
     override func layout() {
-        let h = size.height
-        let bg = SKSpriteNode(texture: Tex.gradient(size, top: UIColor(hex: 0x7FD3FF), bottom: UIColor(hex: 0xFFE9A8)))
-        bg.size = size
-        bg.anchorPoint = .zero
-        bg.zPosition = -10
-        addChild(bg)
+        sky.anchorPoint = .zero
+        sky.zPosition = -10
+        addChild(sky)
 
         for (x, y, cw, dur) in [(-30.0, 120.0, 130.0, 6.0), (190, 210, 120, 7), (160, 70, 80, 9), (20, 470, 110, 8)] as [(CGFloat, CGFloat, CGFloat, Double)] {
+            let anchor = SKNode()
             let cloud = SKSpriteNode(asset: "cloud", width: cw * u)
-            cloud.position = CGPoint(x: (x + cw / 2) * u, y: h - y * h / 640)
             cloud.zPosition = -5
-            addChild(cloud)
+            anchor.addChild(cloud)
+            addChild(anchor)
+            clouds.append(Cloud(node: anchor, anchor: CGPoint(x: (x + cw / 2) / GameLayout.designWidth, y: 1 - y / 640)))
             let drift = SKAction.moveBy(x: 24 * u, y: 0, duration: dur)
             drift.timingMode = .easeInEaseOut
             cloud.run(.repeatForever(.sequence([drift, drift.reversed()])))
         }
+        placeBackdrop()
 
         for route in routes {
             let shrimp = ShrimpNode(tail: route.tail, count: route.count, skin: SegmentSkin.fry(0.5),
@@ -119,7 +135,7 @@ final class TitleScene: GameScene, ObservableObject {
         if UserDefaults.standard.bool(forKey: "titleDemo") {
             run(.repeatForever(.sequence([.wait(forDuration: 0.7), .run { [weak self] in
                 guard let self, let r = self.routes.randomElement() else { return }
-                let (p0, p1) = self.endpoints(r)
+                let (p0, p1) = self.endpoints(r, in: self.size)
                 let t = CGFloat.random(in: 0.3...0.7)
                 self.placeObstacle(at: CGPoint(x: p0.x + (p1.x - p0.x) * t, y: p0.y + (p1.y - p0.y) * t))
             }])))
@@ -127,15 +143,39 @@ final class TitleScene: GameScene, ObservableObject {
         #endif
     }
 
-    private func endpoints(_ r: Route) -> (CGPoint, CGPoint) {
-        let h = size.height, sy = h / 640
-        return (CGPoint(x: r.x0 * u + r.width * u / 2, y: h - r.y0 * sy),
-                CGPoint(x: r.x1 * u + r.width * u / 2, y: h - r.y1 * sy))
+    override func resizePlayfield(from oldSize: CGSize) {
+        placeBackdrop()
+        for obstacle in obstacles {
+            obstacle.position.x *= size.width / oldSize.width
+            obstacle.position.y *= size.height / oldSize.height
+        }
+        for flyer in flyers where !flyer.knocked {
+            // Preserve the shrimp's progress along the route when the screen changes shape.
+            let (start, end) = endpoints(flyer.route, in: oldSize)
+            let dx = end.x - start.x, dy = end.y - start.y
+            let position = flyer.node.position
+            let fraction = ((position.x - start.x) * dx + (position.y - start.y) * dy) / (dx * dx + dy * dy)
+            fly(flyer.node, along: flyer.route, from: min(max(fraction, 0), 1))
+        }
+    }
+
+    private func placeBackdrop() {
+        sky.size = size
+        for cloud in clouds {
+            cloud.node.position = CGPoint(x: cloud.anchor.x * size.width, y: cloud.anchor.y * size.height)
+        }
+    }
+
+    private func endpoints(_ r: Route, in viewport: CGSize) -> (CGPoint, CGPoint) {
+        let sx = viewport.width / GameLayout.designWidth
+        let h = viewport.height, sy = h / 640
+        return (CGPoint(x: r.x0 * sx + r.width * u / 2, y: h - r.y0 * sy),
+                CGPoint(x: r.x1 * sx + r.width * u / 2, y: h - r.y1 * sy))
     }
 
     /// Starts (or restarts) the endless flight along the route, `frac` of the way in.
     private func fly(_ shrimp: ShrimpNode, along r: Route, from frac: CGFloat) {
-        let (p0, p1) = endpoints(r)
+        let (p0, p1) = endpoints(r, in: size)
         let dx = p1.x - p0.x, dy = p1.y - p0.y
         // the head (local -y) faces the flight direction
         shrimp.zRotation = atan2(dx, -dy)
@@ -314,5 +354,5 @@ final class TitleScene: GameScene, ObservableObject {
 }
 
 #if DEBUG
-#Preview("タイトル") { PreviewScreen { TitleView() } }
+#Preview("タイトル") { PreviewScreen(playsFullWidth: true) { TitleView() } }
 #endif

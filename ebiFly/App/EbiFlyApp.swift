@@ -30,7 +30,7 @@ struct RootView: View {
         GeometryReader { geo in
             // Keep the HUD readable while the action can use the whole screen.
             let width = GameLayout.columnWidth(in: geo.size)
-            let playsFullWidth = game.screen == .batter || game.screen == .fly
+            let playsFullWidth = game.screen == .title || game.screen == .batter || game.screen == .fly
             ZStack {
                 screen
                     .id(game.screen)
